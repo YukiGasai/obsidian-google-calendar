@@ -26,7 +26,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.registerMarkdownCodeBlockProcessor("gEvent", GoogleEventProcessor);
+		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
+			GoogleEventProcessor(text, el, this)
+		);
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
