@@ -23,14 +23,12 @@ export async function googleListTodayEvents(
 	requestUrl += `&timeMin=${today}T00%3A00%3A00Z`;
 	requestUrl += `&timeMax=${today}T23%3A59%3A59Z`;
 
-	console.log(requestUrl);
 	try {
 		const response = await fetch(requestUrl, {
 			method: "GET",
 			headers: requestHeaders,
 		});
 		const eventList: GoogleEventList = await response.json();
-
 		return eventList.items;
 	} catch (error) {
 		console.log(error);

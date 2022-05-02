@@ -1,13 +1,14 @@
 import { createNotice } from "src/helper/NoticeHelper";
-import { Plugin } from "obsidian";
+import { Editor, MarkdownView, Plugin, moment } from "obsidian";
 
-import { GoogleCalendarPluginSettings } from "./helper/types";
+import { GoogleCalendarPluginSettings, GoogleEvent } from "./helper/types";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
 } from "./view/GoogleCalendarSettingTab";
-import { googleAllCalendars } from "./googleApi/GoogleListCalendars";
+import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
+import { googleListTodayEvents } from "./googleApi/GoogleListTodayEvents";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -50,18 +51,79 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleAllCalendars(this).then((calendars) => {
+				googleListCalendars(this).then((calendars) => {
 					new CalendarsListModal(this, calendars).open();
 				});
 			},
 		});
 
-		// This adds a simple command that can be triggered anywhere
+		const writeTodayEventsIntoFile = async (editor: Editor) => {
+			const calendarList = await googleListCalendars(this);
+			let eventList: GoogleEvent[] = [];
+			for (let i = 0; i < calendarList.length; i++) {
+				const events = await googleListTodayEvents(
+					this,
+					encodeURIComponent(calendarList[i].id)
+				);
+				eventList = [...eventList, ...events];
+			}
+
+			eventList = eventList.sort(
+				(a, b) => a.start.dateTime - b.start.dateTime
+			);
+
+			let eventStringList = "";
+
+			eventList.forEach((event) => {
+				let dateString = "";
+				if (event.start.dateTime) {
+					const startTime = moment(event.start.dateTime).format(
+						"HH:mm"
+					);
+					dateString = startTime;
+					if (event.end.dateTime) {
+						const endTime = moment(event.end.dateTime).format(
+							"HH:mm"
+						);
+
+						dateString += `-${endTime}`;
+					}
+				}
+
+				let nameString = `[${event.summary}](${event.htmlLink})`;
+
+				eventStringList += `\n| ${dateString} | ${nameString} | ${
+					event.description ?? ""
+				} |`;
+			});
+
+			editor.replaceRange(
+				"| Date | Name | Description |\n| ---- | ---- | ----------- |" +
+					eventStringList,
+				editor.getCursor()
+			);
+		};
+
+		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
-			id: "open-sample-modal-simple",
-			name: "Open sample modal (simple)",
-			callback: () => {
-				console.log("TEST");
+			id: "insert-todays-google-events",
+			name: "Insert todays Google events",
+			editorCheckCallback: (
+				checking: boolean,
+				editor: Editor,
+				view: MarkdownView
+			): boolean => {
+				const canRun = settingsAreCompleteAndLoggedIn(this, false);
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				writeTodayEventsIntoFile(editor);
 			},
 		});
 

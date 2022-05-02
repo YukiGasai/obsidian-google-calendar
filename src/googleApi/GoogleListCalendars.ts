@@ -4,7 +4,7 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { GoogleCalanderList } from "src/helper/types";
 import { getGoogleAuthToken } from "./GoogleAuth";
 
-export async function googleAllCalendars(
+export async function googleListCalendars(
 	plugin: GoogleCalendarPlugin
 ): Promise<GoogleCalander[]> {
 	const requestHeaders: HeadersInit = new Headers();
