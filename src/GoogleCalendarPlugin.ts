@@ -9,6 +9,7 @@ import {
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleListTodayEvents } from "./googleApi/GoogleListTodayEvents";
+import { GoogleEventProcessor } from "./helper/GoogleEventProcessor";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -24,6 +25,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		this.registerMarkdownCodeBlockProcessor("gEvent", GoogleEventProcessor);
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
@@ -58,19 +61,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		});
 
 		const writeTodayEventsIntoFile = async (editor: Editor) => {
-			const calendarList = await googleListCalendars(this);
-			let eventList: GoogleEvent[] = [];
-			for (let i = 0; i < calendarList.length; i++) {
-				const events = await googleListTodayEvents(
-					this,
-					encodeURIComponent(calendarList[i].id)
-				);
-				eventList = [...eventList, ...events];
-			}
-
-			eventList = eventList.sort(
-				(a, b) => a.start.dateTime - b.start.dateTime
-			);
+			const eventList = await googleListTodayEvents(this);
 
 			let eventStringList = "";
 
