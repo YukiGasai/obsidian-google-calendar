@@ -12,7 +12,7 @@ import {
 	setET,
 	setRT,
 } from "../helper/LocalStorage";
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
 const http = require("http");
 const open = require("open");

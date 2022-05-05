@@ -7,7 +7,7 @@ import {
 	ButtonComponent,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
 import { getRT, setAT, setET, setRT } from "../helper/LocalStorage";
 import { customSetting } from "src/helper/CustomSettingElement";

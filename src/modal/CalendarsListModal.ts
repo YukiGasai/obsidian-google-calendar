@@ -1,7 +1,7 @@
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
-import { GoogleCalander } from "../helper/types";
-import { googleListTodayEventsByCalendar } from "src/googleApi/GoogleListTodayEvents";
+import type { GoogleCalander } from "../helper/types";
+import { googleListTodayEventsByCalendar } from "../googleApi/GoogleListEvents";
 
 export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
 	plugin: GoogleCalendarPlugin;
@@ -23,10 +23,7 @@ export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
 	}
 
 	async onChooseItem(item: GoogleCalander, _: MouseEvent | KeyboardEvent) {
-		const events = await googleListTodayEventsByCalendar(
-			this.plugin,
-			item.id
-		);
+		const events = await googleListTodayEventsByCalendar(this.plugin, item);
 		console.log(events);
 	}
 }

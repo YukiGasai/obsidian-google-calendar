@@ -5,22 +5,37 @@
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"build": "node esbuild.config.mjs production"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "^5.2.0",
-		"@typescript-eslint/parser": "^5.2.0",
+		"@rollup/plugin-commonjs": "^18.0.0",
+		"@rollup/plugin-node-resolve": "^11.2.1",
+		"@rollup/plugin-typescript": "^8.2.1",
+		"@tsconfig/svelte": "^1.0.13",
+		"@types/node": "^14.14.37",
+		"@typescript-eslint/eslint-plugin": "^4.25.0",
+		"@typescript-eslint/parser": "^4.25.0",
 		"builtin-modules": "^3.2.0",
-		"esbuild": "0.13.12",
+		"esbuild": "^0.12.26",
+		"esbuild-svelte": "^0.5.4",
+		"eslint": "^7.27.0",
 		"obsidian": "latest",
-		"tslib": "2.3.1",
-		"typescript": "4.4.4"
+		"sass": "^1.39.0",
+		"scss": "^0.2.4",
+		"svelte": "^3.40.3",
+		"svelte-check": "^1.4.0",
+		"svelte-preprocess": "^4.7.0",
+		"tslib": "^2.2.0",
+		"typescript": "^4.3.2"
 	},
+	"moduleFileExtensions": [
+		"js",
+		"ts",
+		"svelte"
+	],
 	"dependencies": {
 		"@googleapis/calendar": "^1.0.2",
 		"google-auth-library": "^8.0.2",

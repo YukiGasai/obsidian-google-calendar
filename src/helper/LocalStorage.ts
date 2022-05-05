@@ -1,4 +1,4 @@
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
 //===================
 //GETTER

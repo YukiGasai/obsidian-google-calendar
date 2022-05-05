@@ -1,7 +1,7 @@
-import { GoogleCalander } from "./../helper/types";
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import type { GoogleCalander } from "./../helper/types";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
-import { GoogleCalanderList } from "src/helper/types";
+import type { GoogleCalanderList } from "src/helper/types";
 import { getGoogleAuthToken } from "./GoogleAuth";
 
 export async function googleListCalendars(

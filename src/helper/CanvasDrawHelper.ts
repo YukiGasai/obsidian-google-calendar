@@ -1,3 +1,7 @@
+import events from "events";
+import { DateToPercent } from "./DateToPercent";
+import type { GoogleEvent } from "./types";
+
 export function roundRect(
 	ctx: CanvasRenderingContext2D,
 	x: number,
@@ -16,4 +20,22 @@ export function roundRect(
 	ctx.arcTo(x, y, x + width, y, radius);
 	ctx.closePath();
 	return ctx;
+}
+
+export function getEventStartPosition(
+	event: GoogleEvent,
+	timeLineHeight: number
+): number {
+	const startPercentage = DateToPercent(new Date(event.start.dateTime));
+	return timeLineHeight * startPercentage;
+}
+
+export function getEventHeight(
+	event: GoogleEvent,
+	timeLineHeight: number
+): number {
+	const startPercentage = DateToPercent(new Date(event.start.dateTime));
+	const endPercentage = DateToPercent(new Date(event.end.dateTime));
+
+	return timeLineHeight * (endPercentage - startPercentage);
 }

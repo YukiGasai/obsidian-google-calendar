@@ -1,15 +1,19 @@
 import { createNotice } from "src/helper/NoticeHelper";
 import { Editor, MarkdownView, Plugin, moment } from "obsidian";
 
-import { GoogleCalendarPluginSettings, GoogleEvent } from "./helper/types";
+import type { GoogleCalendarPluginSettings, GoogleEvent } from "./helper/types";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
 } from "./view/GoogleCalendarSettingTab";
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
-import { googleListTodayEvents } from "./googleApi/GoogleListTodayEvents";
+import {
+	googleListEvents,
+	googleListTodayEvents,
+} from "./googleApi/GoogleListEvents";
 import { GoogleEventProcessor } from "./helper/GoogleEventProcessor";
+import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR } from "./view/TimeLineView";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -23,11 +27,32 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 export default class GoogleCalendarPlugin extends Plugin {
 	settings: GoogleCalendarPluginSettings;
 
+	initView = async () => {
+		if (
+			this.app.workspace.getLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR)
+				.length === 0
+		) {
+			await this.app.workspace.getRightLeaf(false).setViewState({
+				type: VIEW_TYPE_GOOGLE_CALENDAR,
+			});
+		}
+		this.app.workspace.revealLeaf(
+			this.app.workspace
+				.getLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR)
+				.first()
+		);
+	};
+
 	async onload() {
 		await this.loadSettings();
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
 			GoogleEventProcessor(text, el, this)
+		);
+
+		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR,
+			(leaf) => new TimeLineView(leaf, this)
 		);
 
 		// This creates an icon in the left ribbon.
@@ -37,6 +62,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			(evt: MouseEvent) => {
 				// Called when the user clicks the icon.
 				createNotice(this, "This is a notice!");
+				this.initView();
 			}
 		);
 
@@ -58,6 +84,28 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 				googleListCalendars(this).then((calendars) => {
 					new CalendarsListModal(this, calendars).open();
+				});
+			},
+		});
+
+		//List events command
+		this.addCommand({
+			id: "list-google-events",
+			name: "List Google Events",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn(this, false);
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				googleListTodayEvents(this).then((events) => {
+					console.log(events);
 				});
 			},
 		});
@@ -134,7 +182,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addSettingTab(new GoogleCalendarSettingTab(this.app, this));
 	}
 
-	onunload() {}
+	onunload() {
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR);
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(

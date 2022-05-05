@@ -216,3 +216,10 @@ export interface GoogleEventList {
 	nextSyncToken: string;
 	items: [GoogleEvent];
 }
+
+export interface TimeLineOptions {
+	type: string;
+	date: string;
+	width: number;
+	height: number;
+}

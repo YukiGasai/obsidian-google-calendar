@@ -1,5 +1,5 @@
 import { Notice } from "obsidian";
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
 export function createNotice(
 	plugin: GoogleCalendarPlugin,
