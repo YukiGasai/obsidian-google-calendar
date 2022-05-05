@@ -62,6 +62,17 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "insert-google-event-codeblock",
+			name: "Insert Google Event CodeBlock",
+			editorCallback: (editor: Editor) => {
+				editor.replaceRange(
+					"```gEvent\ndate:today\ntype:self\n```",
+					editor.getCursor()
+				);
+			},
+		});
+
 		const writeTodayEventsIntoFile = async (editor: Editor) => {
 			const eventList = await googleListTodayEvents(this);
 

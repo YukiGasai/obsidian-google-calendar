@@ -52,6 +52,7 @@ export interface GoogleCalanderList {
 }
 
 export interface GoogleEvent {
+	parent?: GoogleCalander;
 	kind: "calendar#event";
 	etag: string;
 	id: string;

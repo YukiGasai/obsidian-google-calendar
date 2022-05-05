@@ -1,20 +1,68 @@
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-import { Platform } from "obsidian";
+import { Platform, moment } from "obsidian";
 import { googleListTodayEvents } from "src/googleApi/GoogleListTodayEvents";
 import { DateToPercent } from "./DateToPercent";
+import { roundRect } from "./CanvasDrawHelper";
+import {
+	googleCalendarColors,
+	googleEventColors,
+} from "src/googleApi/GoogleColors";
+
+function getKeyValueList(codeBlock: string): Map<string, string> {
+	const options = codeBlock.split("\n");
+
+	const result = new Map<string, string>();
+
+	options.forEach((option) => {
+		const parts = option.split(":");
+
+		if (parts.length == 2) {
+			result.set(
+				parts[0].trim().toLowerCase(),
+				parts[1].trim().toLowerCase()
+			);
+		}
+	});
+
+	return result;
+}
 
 export async function GoogleEventProcessor(
 	text: string,
 	el: HTMLElement,
 	plugin: GoogleCalendarPlugin
 ) {
-	if (text.contains("today") && text.contains("page")) {
+	const options = getKeyValueList(text);
+
+	const blockType = options.has("type") ? options.get("type") : "self";
+
+	const blockWidth = options.has("width") ? options.get("width") : "300";
+
+	const blockHeight = options.has("height") ? options.get("height") : "500";
+
+	const blockDate = options.has("date") ? options.get("date") : "today";
+
+	el.style.width = blockWidth + "px";
+	el.style.height = blockHeight + "px";
+
+	if (blockType == "web") {
 		if (Platform.isDesktopApp) {
 			const frame: any = document.createElement("webview");
-			frame.setAttribute(
-				"src",
-				"https://calendar.google.com/calendar/u/0/r/day"
-			);
+
+			if (blockDate === "tomorrow") {
+				const tomorrow = moment().add(1, "days");
+				const dateString = tomorrow.format("yyyy/M/D");
+
+				frame.setAttribute(
+					"src",
+					`https://calendar.google.com/calendar/u/0/r/day/${dateString}`
+				);
+			} else {
+				frame.setAttribute(
+					"src",
+					"https://calendar.google.com/calendar/u/0/r/day"
+				);
+			}
 
 			frame.setAttribute("allowpopups", "");
 
@@ -22,26 +70,16 @@ export async function GoogleEventProcessor(
 
 			el.appendChild(frame);
 		}
-	} else if (text.contains("today")) {
-		const colors = [
-			"#a4bdfc",
-			"#7ae7bf",
-			"#dbadff",
-			"#ff887c",
-			"#fbd75b",
-			"#ffb878",
-			"#46d6db",
-			"#e1e1e1",
-			"#5484ed",
-			"#51b749",
-			"#dc2127",
-		];
-
+	} else if (blockType == "self") {
 		const events = await googleListTodayEvents(plugin);
 
 		const todayCanvas = createEl("canvas", { cls: "todayCanvas" });
-		todayCanvas.width = 300;
-		todayCanvas.height = 700;
+
+		const canvasWidth = el.clientWidth;
+		const canvasHeight = el.clientHeight;
+
+		todayCanvas.width = canvasWidth;
+		todayCanvas.height = canvasHeight;
 		el.appendChild(todayCanvas);
 
 		const dayPercentage = DateToPercent(new Date());
@@ -51,8 +89,15 @@ export async function GoogleEventProcessor(
 		for (let i = 1; i <= 24; i++) {
 			ctx.fillStyle = "#FFFFFF";
 			ctx.strokeStyle = "#FFFFFF";
-			ctx.fillRect(20, 700 * (i / 24), 260, 1);
-			ctx.strokeText("" + i, 5, 700 * (i / 24));
+			roundRect(
+				ctx,
+				20,
+				canvasHeight * (i / 24),
+				canvasWidth,
+				1,
+				10
+			).fill();
+			ctx.strokeText("" + i, 5, canvasHeight * (i / 24));
 		}
 
 		for (let i = 0; i < events.length; i++) {
@@ -64,19 +109,42 @@ export async function GoogleEventProcessor(
 				new Date(events[i].end.dateTime)
 			);
 
-			const startHeight = 700 * startPercentage;
-			const totalHeight = 700 * (endPercentage - startPercentage);
+			const startHeight = canvasHeight * startPercentage;
+			const totalHeight =
+				canvasHeight * (endPercentage - startPercentage);
 
-			console.log(events[i].htmlLink);
+			const eventColors = googleEventColors();
 
-			ctx.fillStyle = colors[parseInt(events[i].colorId)] || "#00FF00";
-			ctx.fillRect(20, startHeight, 260, totalHeight);
+			if (events[i].colorId) {
+				console.log(
+					events[i].colorId,
+					eventColors[parseInt(events[i].colorId) - 1]
+				);
+				ctx.fillStyle =
+					eventColors[parseInt(events[i].colorId) - 1] || "#00FF00";
+			} else {
+				ctx.fillStyle = events[i].parent?.backgroundColor || "#00FF00";
+			}
+
+			roundRect(
+				ctx,
+				20,
+				startHeight,
+				canvasWidth - 20,
+				totalHeight,
+				10
+			).fill();
 			ctx.strokeStyle = "#000000";
-			ctx.strokeText(events[i].summary, 20, startHeight + 10, 260);
+			ctx.strokeText(
+				events[i].summary,
+				20,
+				startHeight + 10,
+				canvasWidth - 20
+			);
 		}
 
-		let height = Math.floor(700 * dayPercentage);
+		let height = Math.floor(canvasHeight * dayPercentage);
 		ctx.fillStyle = "#FF0000";
-		ctx.fillRect(0, height - 3, 300, 6);
+		ctx.fillRect(0, height - 3, canvasWidth, 6);
 	}
 }

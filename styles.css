@@ -1,8 +1,7 @@
-webview {
-	width: 500px;
-	height: 500px;
+.block-language-gEvent > webview {
+	width: 100%;
+	height: 100%;
 }
 
 .todayCanvas {
-	border: 1px solid #d3d3d3;
 }

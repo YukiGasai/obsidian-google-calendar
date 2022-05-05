@@ -1,14 +1,18 @@
-import { GoogleEvent, GoogleEventList } from "./../helper/types";
+import {
+	GoogleCalander,
+	GoogleEvent,
+	GoogleEventList,
+} from "./../helper/types";
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 
-import { getBlobArrayBuffer, moment } from "obsidian";
+import { moment } from "obsidian";
 import { googleListCalendars } from "./GoogleListCalendars";
 
 export async function googleListTodayEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
-	calendarId: string
+	googleCalander: GoogleCalander
 ): Promise<GoogleEvent[]> {
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
@@ -19,7 +23,9 @@ export async function googleListTodayEventsByCalendar(
 
 	const today = moment().format("YYYY-MM-DD");
 
-	let requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`;
+	let requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
+		googleCalander.id
+	)}/events`;
 	requestUrl += `?key=${plugin.settings.googleApiToken}`;
 	requestUrl += `&timeMin=${today}T00%3A00%3A00Z`;
 	requestUrl += `&timeMax=${today}T23%3A59%3A59Z`;
@@ -30,6 +36,9 @@ export async function googleListTodayEventsByCalendar(
 			headers: requestHeaders,
 		});
 		const eventList: GoogleEventList = await response.json();
+		eventList.items.forEach((event) => {
+			event.parent = googleCalander;
+		});
 		return eventList.items;
 	} catch (error) {
 		console.log(error);
@@ -49,7 +58,7 @@ export async function googleListTodayEvents(
 		for (let i = 0; i < calendarList.length; i++) {
 			const events = await googleListTodayEventsByCalendar(
 				plugin,
-				encodeURIComponent(calendarList[i].id)
+				calendarList[i]
 			);
 			eventList = [...eventList, ...events];
 		}
