@@ -73,7 +73,7 @@ export async function googleListEvents(
 ): Promise<GoogleEvent[]> {
 	try {
 		const calendarList = await googleListCalendars(plugin);
-		console.log("AMOUNT OF CALENDARS ", calendarList.length);
+
 		let eventList: GoogleEvent[] = [];
 
 		for (let i = 0; i < calendarList.length; i++) {

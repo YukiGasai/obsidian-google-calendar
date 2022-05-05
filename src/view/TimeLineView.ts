@@ -18,6 +18,11 @@ export class TimeLineView extends ItemView {
 	getDisplayText() {
 		return "Timeline View";
 	}
+
+	getIcon(): string {
+		return "calendar-with-checkmark";
+	}
+
 	async onOpen() {
 		this.timeline = new TimeLineViewComp({
 			target: this.contentEl,

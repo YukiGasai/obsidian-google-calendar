@@ -1,7 +1,7 @@
 import { createNotice } from "src/helper/NoticeHelper";
-import { Editor, MarkdownView, Plugin, moment } from "obsidian";
+import { Editor, MarkdownView, Plugin, moment, WorkspaceLeaf } from "obsidian";
 
-import type { GoogleCalendarPluginSettings, GoogleEvent } from "./helper/types";
+import type { GoogleCalendarPluginSettings } from "./helper/types";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -14,6 +14,8 @@ import {
 } from "./googleApi/GoogleListEvents";
 import { GoogleEventProcessor } from "./helper/GoogleEventProcessor";
 import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR } from "./view/TimeLineView";
+import { EventListModal } from "./modal/EventListModal";
+import { compute_slots } from "svelte/internal";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -43,6 +45,51 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 	};
 
+	check4Word(word: string, editor: Editor): boolean {
+		const endPos = editor.getCursor();
+		const startPos = { ...endPos, ch: endPos.ch - word.length };
+
+		if (startPos.ch >= 0) {
+			const realWord = editor.getRange(startPos, endPos);
+			let date = "";
+			if (realWord == word) {
+				switch (word) {
+					case "@today":
+						date = moment().format("YYYY-MM-DD");
+						break;
+					case "@tomorrow":
+						date = moment().add(1, "day").format("YYYY-MM-DD");
+						break;
+					case "@yesterday":
+						date = moment().add(-1, "day").format("YYYY-MM-DD");
+						break;
+					default:
+						break;
+				}
+			} else {
+				const tmpDate = moment(realWord.substring(1));
+				if (tmpDate.isValid() && word.length == "@YYYY-MM-DD".length) {
+					date = tmpDate.format("YYYY-MM-DD");
+					console.log(realWord);
+				} else {
+					return false;
+				}
+			}
+
+			googleListEvents(this, date).then((events) => {
+				new EventListModal(
+					this,
+					events,
+					editor,
+					startPos,
+					endPos,
+					realWord
+				).open();
+			});
+		}
+		return false;
+	}
+
 	async onload() {
 		await this.loadSettings();
 
@@ -52,7 +99,19 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR,
-			(leaf) => new TimeLineView(leaf, this)
+			(leaf: WorkspaceLeaf) => new TimeLineView(leaf, this)
+		);
+
+		this.registerEvent(
+			this.app.workspace.on(
+				"editor-change",
+				(editor: Editor, markdownView: MarkdownView) => {
+					this.check4Word("@today", editor);
+					this.check4Word("@tomorrow", editor);
+					this.check4Word("@yesterday", editor);
+					this.check4Word("@YYYY-MM-DD", editor);
+				}
+			)
 		);
 
 		// This creates an icon in the left ribbon.
@@ -60,8 +119,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 			"calendar-with-checkmark",
 			"Google Calendar",
 			(evt: MouseEvent) => {
-				// Called when the user clicks the icon.
-				createNotice(this, "This is a notice!");
 				this.initView();
 			}
 		);
