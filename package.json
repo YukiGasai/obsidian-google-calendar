@@ -40,6 +40,7 @@
 		"@googleapis/calendar": "^1.0.2",
 		"google-auth-library": "^8.0.2",
 		"googleapis": "^100.0.0",
+		"obsidian-calendar-ui": "^0.3.12",
 		"open": "^8.4.0",
 		"server-destroy": "^1.0.1"
 	}

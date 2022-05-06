@@ -2,6 +2,17 @@ import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { Platform, moment } from "obsidian";
 import TimeLineComp from "../svelte/TimeLineComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
+import CalendarComp from "../svelte/CalendarComp.svelte";
+
+import {
+	Calendar as CalendarBase,
+	ICalendarSource,
+	configureGlobalMomentLocale,
+} from "obsidian-calendar-ui";
+import {
+	googleListEvents,
+	googleListEventsByMonth,
+} from "../googleApi/GoogleListEvents";
 
 function getKeyValueList(codeBlock: string): Map<string, string> {
 	const options = codeBlock.split("\n");
@@ -68,7 +79,7 @@ export async function GoogleEventProcessor(
 					},
 				});
 			}
-		} else if (blockType == "self") {
+		} else if (blockType == "day") {
 			new TimeLineComp({
 				target: el,
 				props: {
@@ -76,6 +87,43 @@ export async function GoogleEventProcessor(
 					height: blockHeight,
 					width: blockWidth,
 					date: blockDate,
+				},
+			});
+		} else if (blockType == "month") {
+			// new CalendarComp({
+			// 	target: el,
+			// 	props: {
+			// 		plugin: plugin,
+			// 		height: blockHeight,
+			// 		width: blockWidth,
+			// 		date: blockDate,
+			// 	},
+			// });
+
+			new CalendarBase({
+				target: el,
+				props: {
+					showWeekNums: false,
+					onClickDay: (d) => {
+						googleListEventsByMonth(plugin, moment().format());
+					},
+					onHoverDay: (d, eventTarget: EventTarget) => {
+						console.log(d);
+						const popUp = createEl("div", { cls: "hoverPopup" });
+						if (eventTarget instanceof HTMLElement) {
+							googleListEvents(
+								plugin,
+								d.format("YYYY-MM-DD")
+							).then((events) => {
+								document
+									.querySelectorAll(".hoverPopup")
+									.forEach((el) => el.remove());
+								eventTarget.appendChild(popUp);
+
+								console.log(events);
+							});
+						}
+					},
 				},
 			});
 		}

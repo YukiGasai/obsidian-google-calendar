@@ -16,14 +16,10 @@ export function sortEventsRecentFirst(eventList: GoogleEvent[]): GoogleEvent[] {
 	eventList = eventList.filter((event) => event.start.dateTime);
 
 	eventList = eventList.sort((a, b) => {
-		const dateA = new Date(a.start.dateTime);
-		const dateB = new Date(b.start.dateTime);
-
-		if (dateA.getHours() == dateB.getHours()) {
-			return dateA.getMinutes() - dateB.getMinutes();
-		} else {
-			return dateA.getHours() - dateB.getHours();
-		}
+		return (
+			new Date(a.start.dateTime).getTime() -
+			new Date(b.start.dateTime).getTime()
+		);
 	});
 
 	eventList = [...eventListNoDate, ...eventList];
@@ -33,7 +29,8 @@ export function sortEventsRecentFirst(eventList: GoogleEvent[]): GoogleEvent[] {
 export async function googleListEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	googleCalander: GoogleCalander,
-	date: string
+	date: string,
+	endDate?: string
 ) {
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
@@ -47,7 +44,11 @@ export async function googleListEventsByCalendar(
 	)}/events`;
 	requestUrl += `?key=${plugin.settings.googleApiToken}`;
 	requestUrl += `&timeMin=${date}T00%3A00%3A00Z`;
-	requestUrl += `&timeMax=${date}T23%3A59%3A59Z`;
+	if (endDate) {
+		requestUrl += `&timeMax=${endDate}T23%3A59%3A59Z`;
+	} else {
+		requestUrl += `&timeMax=${date}T23%3A59%3A59Z`;
+	}
 
 	try {
 		const response = await fetch(requestUrl, {
@@ -69,7 +70,8 @@ export async function googleListEventsByCalendar(
 
 export async function googleListEvents(
 	plugin: GoogleCalendarPlugin,
-	date: string
+	date: string,
+	endDate?: string
 ): Promise<GoogleEvent[]> {
 	try {
 		const calendarList = await googleListCalendars(plugin);
@@ -80,7 +82,8 @@ export async function googleListEvents(
 			const events = await googleListEventsByCalendar(
 				plugin,
 				calendarList[i],
-				date
+				date,
+				endDate
 			);
 			eventList = [...eventList, ...events];
 		}
@@ -111,5 +114,21 @@ export async function googleListTodayEvents(
 ): Promise<GoogleEvent[]> {
 	const today = moment().format("YYYY-MM-DD");
 	const list = await googleListEvents(plugin, today);
+	return list;
+}
+
+export async function googleListEventsByMonth(
+	plugin: GoogleCalendarPlugin,
+	dateInMonth: string
+): Promise<GoogleEvent[]> {
+	const monthStartDate = moment(dateInMonth)
+		.startOf("month")
+		.format("YYYY-MM-DD");
+	const monthEndDate = moment(dateInMonth)
+		.endOf("month")
+		.format("YYYY-MM-DD");
+
+	const list = await googleListEvents(plugin, monthStartDate, monthEndDate);
+	console.log(list);
 	return list;
 }

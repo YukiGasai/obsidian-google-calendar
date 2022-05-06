@@ -1,4 +1,3 @@
-import { createNotice } from "src/helper/NoticeHelper";
 import { Editor, MarkdownView, Plugin, moment, WorkspaceLeaf } from "obsidian";
 
 import type { GoogleCalendarPluginSettings } from "./helper/types";
@@ -15,7 +14,6 @@ import {
 import { GoogleEventProcessor } from "./helper/GoogleEventProcessor";
 import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR } from "./view/TimeLineView";
 import { EventListModal } from "./modal/EventListModal";
-import { compute_slots } from "svelte/internal";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
