@@ -12,8 +12,12 @@
 .hoverPopup {
 	position: absolute;
 	width: 200px;
-	height: 100px;
+	height: 500px;
 	background-color: red;
 	border-radius: 5px;
-	z-index: 100;
+}
+
+#calendar-container .today {
+	font-weight: bold;
+	color: red;
 }

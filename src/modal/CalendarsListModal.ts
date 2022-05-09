@@ -24,6 +24,5 @@ export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
 
 	async onChooseItem(item: GoogleCalander, _: MouseEvent | KeyboardEvent) {
 		const events = await googleListTodayEventsByCalendar(this.plugin, item);
-		console.log(events);
 	}
 }
