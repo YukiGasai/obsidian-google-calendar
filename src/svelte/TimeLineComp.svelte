@@ -5,6 +5,7 @@
     import { googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
     import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import type { GoogleEvent } from "../helper/types";
+    import {ViewEventEntry} from '../modal/ViewEventEntry'
 
 
     import {moment} from 'obsidian';
@@ -54,8 +55,12 @@
     let timeDisplayPosition = Math.floor(height * dayPercentage);
     
     
-    const goToEvent = (event:GoogleEvent) => {
-       window.open(event.htmlLink);
+    const goToEvent = (event:GoogleEvent, e:any) => {
+        if(e.shiftKey){
+            window.open(event.htmlLink);
+        }else{
+            new ViewEventEntry(plugin, event).open();
+        }
     }
 
     
@@ -101,7 +106,7 @@
     
         {#each events as event}
             <div 
-                on:click={() => goToEvent(event)} 
+                on:click={(e) => goToEvent(event,e)} 
                 class="event" 
                 style:top="{getEventStartPosition(event, height)}px"
                 style:height="{getEventHeight(event, height)}px"
@@ -164,7 +169,7 @@
            position:relative;
            display: flex;
            flex-direction: row;
-           border: 1px solid green;
+           /*border: 1px solid green;*/
        }
     
     

@@ -129,6 +129,5 @@ export async function googleListEventsByMonth(
 		.format("YYYY-MM-DD");
 
 	const list = await googleListEvents(plugin, monthStartDate, monthEndDate);
-	console.log(list);
 	return list;
 }
