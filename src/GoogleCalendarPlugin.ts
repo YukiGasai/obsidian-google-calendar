@@ -68,7 +68,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 				const tmpDate = moment(realWord.substring(1));
 				if (tmpDate.isValid() && word.length == "@YYYY-MM-DD".length) {
 					date = tmpDate.format("YYYY-MM-DD");
-					console.log(realWord);
 				} else {
 					return false;
 				}

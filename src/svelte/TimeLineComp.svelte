@@ -44,7 +44,7 @@
                 }
             }
             const dateString = tmpDate.format("YYYY-MM-DD");
-            console.log("JJJJJJJJJ",tmpDate)
+
             eventPromise =  googleListEvents(plugin, dateString);
         }
      
