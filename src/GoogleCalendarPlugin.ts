@@ -181,26 +181,28 @@ export default class GoogleCalendarPlugin extends Plugin {
 			let eventStringList = "";
 
 			eventList.forEach((event) => {
-				let dateString = "";
-				if (event.start.dateTime) {
-					const startTime = moment(event.start.dateTime).format(
-						"HH:mm"
-					);
-					dateString = startTime;
-					if (event.end.dateTime) {
-						const endTime = moment(event.end.dateTime).format(
+				if (event.start) {
+					let dateString = "";
+					if (event.start.dateTime) {
+						const startTime = moment(event.start.dateTime).format(
 							"HH:mm"
 						);
+						dateString = startTime;
+						if (event.end.dateTime) {
+							const endTime = moment(event.end.dateTime).format(
+								"HH:mm"
+							);
 
-						dateString += `-${endTime}`;
+							dateString += `-${endTime}`;
+						}
 					}
+
+					let nameString = `[${event.summary}](${event.htmlLink})`;
+
+					eventStringList += `\n| ${dateString} | ${nameString} | ${
+						event.description ?? ""
+					} |`;
 				}
-
-				let nameString = `[${event.summary}](${event.htmlLink})`;
-
-				eventStringList += `\n| ${dateString} | ${nameString} | ${
-					event.description ?? ""
-				} |`;
 			});
 
 			editor.replaceRange(

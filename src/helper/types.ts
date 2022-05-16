@@ -217,6 +217,25 @@ export interface GoogleEventList {
 	items: [GoogleEvent];
 }
 
+export interface GoogleInstaces {
+	kind: "calendar#events";
+	etag: string;
+	summary: string;
+	description: string;
+	updated: string;
+	timeZone: string;
+	accessRole: string;
+	defaultReminders: [
+		{
+			method: string;
+			minutes: number;
+		}
+	];
+	nextPageToken: string;
+	nextSyncToken: string;
+	items: GoogleEvent[];
+}
+
 export interface TimeLineOptions {
 	type: string;
 	date: string;

@@ -3,19 +3,24 @@ import type { GoogleCalander, GoogleEvent } from "../helper/types";
 import { customSetting } from "../helper/CustomSettingElement";
 import type GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-import TimeLineComp from "../svelte/TimeLineComp.svelte";
+import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
 
 export class ViewEventEntry extends Modal {
 	plugin: GoogleCalendarPlugin;
 	selectedEvent: GoogleEvent;
-
+	currentDate: moment.Moment;
 	calendarList: GoogleCalander[];
 
 	onSubmit: (event: GoogleEvent) => void;
-	constructor(plugin: GoogleCalendarPlugin, selectedEvent: GoogleEvent) {
+	constructor(
+		plugin: GoogleCalendarPlugin,
+		selectedEvent: GoogleEvent,
+		currentDate: moment.Moment
+	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.selectedEvent = selectedEvent;
+		this.currentDate = currentDate;
 	}
 
 	async onOpen() {
@@ -23,14 +28,15 @@ export class ViewEventEntry extends Modal {
 
 		this.calendarList = await googleListCalendars(this.plugin);
 
-		new TimeLineComp({
+		new EventDetailsComp({
 			target: contentEl,
 			props: {
 				plugin: this.plugin,
-				height: 400,
-				width: 400,
+				event: this.selectedEvent,
+				currentDate: this.currentDate,
 			},
 		});
+		/*
 		const createDateTimeSettings = () => {
 			const dateStartSelectElement = customSetting(
 				document.querySelector(".dateSettingsContainer"),
@@ -174,6 +180,7 @@ export class ViewEventEntry extends Modal {
 				//CreateGoogleTask(this.plugin, taskInput);
 			})
 		);
+		*/
 	}
 	onClose() {
 		let { contentEl } = this;

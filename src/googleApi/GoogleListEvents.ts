@@ -82,8 +82,10 @@ export async function googleListEventsByCalendar(
 			tmpRequestResult.items.forEach((event) => {
 				event.parent = googleCalander;
 			});
-			console.log("CALL");
-			totalEventList = [...totalEventList, ...tmpRequestResult.items];
+			const newList = tmpRequestResult.items.filter(
+				(event) => event.status != "cancelled"
+			);
+			totalEventList = [...totalEventList, ...newList];
 
 			if (!tmpRequestResult.nextPageToken) {
 				return sortEventsRecentFirst(totalEventList);
@@ -157,9 +159,5 @@ export async function googleListEventsByMonth(
 		.format("YYYY-MM-DD");
 
 	const list = await googleListEvents(plugin, monthStartDate, monthEndDate);
-<<<<<<< HEAD
-=======
-
->>>>>>> a7f3b61f3b08aa12215aca7520a32680e45e612c
 	return list;
 }

@@ -59,7 +59,7 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new ViewEventEntry(plugin, event).open();
+            new ViewEventEntry(plugin, event, moment(date)).open();
         }
     }
 
