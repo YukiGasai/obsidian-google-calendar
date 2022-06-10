@@ -23,8 +23,15 @@ export async function googleListCalendars(
 			}
 		);
 		const calendarList: GoogleCalanderList = await response.json();
+		console.log(calendarList.items, plugin.settings.calendarBlackList);
+		let calendars = calendarList.items.filter(
+			(calendar) =>
+				plugin.settings.calendarBlackList.findIndex(
+					(c) => c[0] == calendar.id
+				) == -1
+		);
 
-		return calendarList.items;
+		return calendars;
 	} catch (error) {
 		createNotice(plugin, "Could not load google calendars");
 		return [];

@@ -5,6 +5,7 @@ export interface GoogleCalendarPluginSettings {
 	askConfirmation: boolean;
 	refreshInterval: number;
 	showNotice: boolean;
+	calendarBlackList: [string, string][];
 }
 
 export interface GoogleCalander {
@@ -78,7 +79,7 @@ export interface GoogleEvent {
 	};
 	start: {
 		date: string;
-		dateTime: number;
+		dateTime: string;
 		timeZone: string;
 	};
 	end: {

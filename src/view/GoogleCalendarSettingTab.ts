@@ -11,6 +11,7 @@ import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
 import { getRT, setAT, setET, setRT } from "../helper/LocalStorage";
 import { customSetting } from "src/helper/CustomSettingElement";
+import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -168,6 +169,61 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			// 	});
 			await this.plugin.saveSettings();
 		});
+
+		containerEl.createEl("h3", "Calendar Blacklist");
+		let calendarBlackList = this.plugin.settings.calendarBlackList;
+
+		new Setting(containerEl)
+			.setName("Add Item to BlackList")
+			.addDropdown((dropdown) => {
+				dropdown.addOption("Default", "Select Option to add");
+				googleListCalendars(this.plugin).then((calendars) => {
+					calendars.forEach((calendar) => {
+						dropdown.addOption(
+							calendar.id + "_=_" + calendar.summary,
+							calendar.summary
+						);
+					});
+				});
+
+				dropdown.onChange(async (value) => {
+					let [id, summery] = value.split("_=_");
+					if (!calendarBlackList.contains([id, summery])) {
+						this.plugin.settings.calendarBlackList = [
+							...calendarBlackList,
+							[id, summery],
+						];
+
+						await this.plugin.saveSettings();
+					}
+					const setting = new Setting(containerEl)
+						.setName(summery)
+						.addButton((button) => {
+							button.setButtonText("Remove");
+							button.onClick(async (state) => {
+								this.plugin.settings.calendarBlackList.remove([
+									id,
+									summery,
+								]);
+								setting.settingEl.remove();
+								await this.plugin.saveSettings();
+							});
+						});
+				});
+			});
+
+		calendarBlackList.forEach((calendar) => {
+			const setting = new Setting(containerEl)
+				.setName(calendar[1])
+				.addButton((button) => {
+					button.setButtonText("Remove");
+					button.onClick(async (state) => {
+						this.plugin.settings.calendarBlackList.remove(calendar);
+						setting.settingEl.remove();
+						await this.plugin.saveSettings();
+					});
+				});
+		});
 	}
 }
 
@@ -222,4 +278,7 @@ export function settingsAreCompleteAndLoggedIn(
 		return false;
 	}
 	return true;
+}
+function asnyc(value: any): (value: string) => any {
+	throw new Error("Function not implemented.");
 }

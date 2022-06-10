@@ -14,15 +14,12 @@ export async function googleRemoveEvent(
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
-	const body = { status: "cancelled" };
-
 	try {
 		const response = await fetch(
 			`https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${event.id}?key=${plugin.settings.googleApiToken}`,
 			{
-				method: "PATCH",
+				method: "REMOVE",
 				headers: requestHeaders,
-				body: JSON.stringify(body),
 			}
 		);
 	} catch (error) {

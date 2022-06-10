@@ -2,8 +2,10 @@
     import type { GoogleCalander, GoogleEvent } from "../helper/types";
     import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
-import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRemoveEvent";
+    import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+    import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRemoveEvent";
+    import {googleUpdateEvent} from '../googleApi/GoogleUpdateEvent'
+
 
     export let plugin: GoogleCalendarPlugin;
     export let event: GoogleEvent;
@@ -15,6 +17,10 @@ import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRem
     let fullDay;
    
 
+    $: {
+	    console.log(event);
+    }
+
     onMount(async () => {
         calendars = await googleListCalendars(plugin);
         loading = false;
@@ -23,10 +29,14 @@ import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRem
 	});
 
     const getDescription = () => {
-        if(event.description){
-		    return this.event.description.replace(/<\/?[^>]+(>|$)/g, "");
+        if(!loading){
+            if(event.description){
+		        return this.event.description.replace(/<\/?[^>]+(>|$)/g, "");
+            }
+            return ""
+        }else{
+            return ""
         }
-        return ""
     }
 
 
@@ -52,13 +62,26 @@ import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRem
     }
 
 
+    const changeStartDate = (e:Event) => {
+        if(e.target instanceof HTMLInputElement){
+           event.start.dateTime = window.moment(e.target.value).format()
+        } 
+    }
+
+
+    const changeEndDate = (e:Event) => {
+        if(e.target instanceof HTMLInputElement){
+            event.end.dateTime = window.moment(e.target.value).format()
+        } 
+    }
+
     const deleteEvent = () => {
         //googleRemoveEvent(plugin, event);
         googleRemoveEventOnce(plugin, event, currentDate)
     }
 
     const updateEvent = () => {
-
+        googleUpdateEvent(plugin, event);
     }
 
 
@@ -106,10 +129,10 @@ import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRem
         <input type="date" name="eventDate" bind:value="{event.start.date}" >
     {:else}
         <label for="eventStartDate">Start Date</label>
-        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(event.start.dateTime)}" >
+        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(event.start.dateTime)}" on:change="{changeStartDate}">
 
         <label for="eventEndDate">End Date</label>
-        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(event.end.dateTime)}" >
+        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(event.end.dateTime)}"  on:change="{changeEndDate}" >
     {/if}
 
     <div class="googleEventButtonContainer">

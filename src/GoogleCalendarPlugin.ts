@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	askConfirmation: true,
 	refreshInterval: 60,
 	showNotice: true,
+	calendarBlackList: [],
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
@@ -64,13 +65,15 @@ export default class GoogleCalendarPlugin extends Plugin {
 					default:
 						break;
 				}
-			} else {
+			} else if (realWord.startsWith("@")) {
 				const tmpDate = moment(realWord.substring(1));
 				if (tmpDate.isValid() && word.length == "@YYYY-MM-DD".length) {
 					date = tmpDate.format("YYYY-MM-DD");
 				} else {
 					return false;
 				}
+			} else {
+				return false;
 			}
 
 			googleListEvents(this, date).then((events) => {
