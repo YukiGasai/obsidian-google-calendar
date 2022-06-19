@@ -51,6 +51,7 @@ export async function googleListEventsByCalendar(
 	requestHeaders.append("Content-Type", "application/json");
 
 	try {
+		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			let requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
 				googleCalander.id
