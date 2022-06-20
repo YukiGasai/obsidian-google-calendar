@@ -1,8 +1,6 @@
-import { DropdownComponent, Modal, Setting } from "obsidian";
+import { Modal } from "obsidian";
 import type { GoogleCalander, GoogleEvent } from "../helper/types";
-import { customSetting } from "../helper/CustomSettingElement";
 import type GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
-import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
 
 export class ViewEventEntry extends Modal {
@@ -26,7 +24,7 @@ export class ViewEventEntry extends Modal {
 	async onOpen() {
 		const { contentEl } = this;
 
-		this.calendarList = await googleListCalendars(this.plugin);
+		//	this.calendarList = await googleListCalendars(this.plugin);
 
 		new EventDetailsComp({
 			target: contentEl,
@@ -183,7 +181,7 @@ export class ViewEventEntry extends Modal {
 		*/
 	}
 	onClose() {
-		let { contentEl } = this;
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }

@@ -54,149 +54,149 @@ export interface GoogleCalanderList {
 
 export interface GoogleEvent {
 	parent?: GoogleCalander;
-	kind: "calendar#event";
-	etag: string;
-	id: string;
-	status: string;
-	htmlLink: string;
-	created: string;
-	updated: string;
-	summary: string;
-	description: string;
-	location: string;
-	colorId: string;
-	creator: {
-		id: string;
-		email: string;
-		displayName: string;
-		self: boolean;
+	kind?: "calendar#event";
+	etag?: string;
+	id?: string;
+	status?: string;
+	htmlLink?: string;
+	created?: string;
+	updated?: string;
+	summary?: string;
+	description?: string;
+	location?: string;
+	colorId?: string;
+	creator?: {
+		id?: string;
+		email?: string;
+		displayName?: string;
+		self?: boolean;
 	};
-	organizer: {
-		id: string;
-		email: string;
-		displayName: string;
-		self: boolean;
+	organizer?: {
+		id?: string;
+		email?: string;
+		displayName?: string;
+		self?: boolean;
 	};
 	start: {
-		date: string;
-		dateTime: string;
-		timeZone: string;
+		date?: string;
+		dateTime?: string;
+		timeZone?: string;
 	};
 	end: {
-		date: string;
-		dateTime: string;
-		timeZone: string;
+		date?: string;
+		dateTime?: string;
+		timeZone?: string;
 	};
-	endTimeUnspecified: boolean;
-	recurrence: [string];
-	recurringEventId: string;
-	originalStartTime: {
-		date: string;
-		dateTime: string;
-		timeZone: string;
+	endTimeUnspecified?: boolean;
+	recurrence?: [string];
+	recurringEventId?: string;
+	originalStartTime?: {
+		date?: string;
+		dateTime?: string;
+		timeZone?: string;
 	};
-	transparency: string;
-	visibility: string;
-	iCalUID: string;
-	sequence: number;
-	attendees: [
+	transparency?: string;
+	visibility?: string;
+	iCalUID?: string;
+	sequence?: number;
+	attendees?: [
 		{
-			id: string;
-			email: string;
-			displayName: string;
-			organizer: boolean;
-			self: boolean;
-			resource: boolean;
-			optional: boolean;
-			responseStatus: string;
-			comment: string;
-			additionalGuests: number;
+			id?: string;
+			email?: string;
+			displayName?: string;
+			organizer?: boolean;
+			self?: boolean;
+			resource?: boolean;
+			optional?: boolean;
+			responseStatus?: string;
+			comment?: string;
+			additionalGuests?: number;
 		}
 	];
-	attendeesOmitted: boolean;
-	extendedProperties: {
-		private: {
-			string: string;
+	attendeesOmitted?: boolean;
+	extendedProperties?: {
+		private?: {
+			string?: string;
 		};
-		shared: {
-			string: string;
+		shared?: {
+			string?: string;
 		};
 	};
-	hangoutLink: string;
-	conferenceData: {
-		createRequest: {
-			requestId: string;
-			conferenceSolutionKey: {
-				type: string;
+	hangoutLink?: string;
+	conferenceData?: {
+		createRequest?: {
+			requestId?: string;
+			conferenceSolutionKey?: {
+				type?: string;
 			};
-			status: {
-				statusCode: string;
+			status?: {
+				statusCode?: string;
 			};
 		};
-		entryPoints: [
+		entryPoints?: [
 			{
-				entryPointType: string;
-				uri: string;
-				label: string;
-				pin: string;
-				accessCode: string;
-				meetingCode: string;
-				passcode: string;
-				password: string;
+				entryPointType?: string;
+				uri?: string;
+				label?: string;
+				pin?: string;
+				accessCode?: string;
+				meetingCode?: string;
+				passcode?: string;
+				password?: string;
 			}
 		];
-		conferenceSolution: {
-			key: {
-				type: string;
+		conferenceSolution?: {
+			key?: {
+				type?: string;
 			};
-			name: string;
-			iconUri: string;
+			name?: string;
+			iconUri?: string;
 		};
-		conferenceId: string;
-		signature: string;
-		notes: string;
+		conferenceId?: string;
+		signature?: string;
+		notes?: string;
 	};
-	gadget: {
-		type: string;
-		title: string;
-		link: string;
-		iconLink: string;
-		width: number;
-		height: number;
-		display: string;
-		preferences: {
-			string: string;
+	gadget?: {
+		type?: string;
+		title?: string;
+		link?: string;
+		iconLink?: string;
+		width?: number;
+		height?: number;
+		display?: string;
+		preferences?: {
+			string?: string;
 		};
 	};
-	anyoneCanAddSelf: boolean;
-	guestsCanInviteOthers: boolean;
-	guestsCanModify: boolean;
-	guestsCanSeeOtherGuests: boolean;
-	privateCopy: boolean;
-	locked: boolean;
-	reminders: {
-		useDefault: boolean;
-		overrides: [
+	anyoneCanAddSelf?: boolean;
+	guestsCanInviteOthers?: boolean;
+	guestsCanModify?: boolean;
+	guestsCanSeeOtherGuests?: boolean;
+	privateCopy?: boolean;
+	locked?: boolean;
+	reminders?: {
+		useDefault?: boolean;
+		overrides?: [
 			{
-				method: string;
-				minutes: number;
+				method?: string;
+				minutes?: number;
 			}
 		];
 	};
-	source: {
-		url: string;
-		title: string;
+	source?: {
+		url?: string;
+		title?: string;
 	};
-	attachments: [
+	attachments?: [
 		{
-			fileUrl: string;
-			title: string;
-			mimeType: string;
-			iconLink: string;
-			fileId: string;
+			fileUrl?: string;
+			title?: string;
+			mimeType?: string;
+			iconLink?: string;
+			fileId?: string;
 		}
 	];
-	eventType: string;
+	eventType?: string;
 }
 
 export interface GoogleEventList {

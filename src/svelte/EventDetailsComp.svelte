@@ -6,37 +6,40 @@
     import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRemoveEvent";
     import {googleUpdateEvent} from '../googleApi/GoogleUpdateEvent'
 
+    import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
+
 
     export let plugin: GoogleCalendarPlugin;
     export let event: GoogleEvent;
     export let currentDate: moment.Moment;
     export let isBaseEvent: boolean = false;
+    export let createNewEvent: boolean = false;
 
     let calendars: GoogleCalander[];
     let loading = true;
     let fullDay;
-   
-
-    $: {
-	    console.log(event);
-    }
 
     onMount(async () => {
         calendars = await googleListCalendars(plugin);
         loading = false;
-        fullDay = event.start.dateTime == undefined
-        console.log(event);
+        console.log(event)
+        fullDay = event?.start?.dateTime == undefined
+
+        if(!event.id){
+            event.summary = ""
+            event.description = ""
+            event.start.date = currentDate.format("YYYY-MM-DD")
+            event.parent = calendars[calendars.length - 1];
+            fullDay = false
+        }
+
 	});
 
     const getDescription = () => {
-        if(!loading){
-            if(event.description){
-		        return this.event.description.replace(/<\/?[^>]+(>|$)/g, "");
-            }
-            return ""
-        }else{
-            return ""
+        if(!loading && event.description){
+		    return this.event.description.replace(/<\/?[^>]+(>|$)/g, "");
         }
+        return ""
     }
 
 
@@ -62,17 +65,31 @@
     }
 
 
-    const changeStartDate = (e:Event) => {
+    const changeStartDateTime = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
            event.start.dateTime = window.moment(e.target.value).format()
+           delete event.start.date
         } 
     }
 
 
-    const changeEndDate = (e:Event) => {
+    const changeEndDateTime = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
             event.end.dateTime = window.moment(e.target.value).format()
+            delete event.end.date
         } 
+    }
+
+    const changeDate = (e:Event) => {
+        if(e.target instanceof HTMLInputElement){
+            const date = window.moment(e.target.value).format("YYYY-MM-DD")
+            event.start.date = date
+            event.end.date = date
+        } 
+    }
+
+    const createEvent = () => {
+        googleCreateEvent(plugin, event);
     }
 
     const deleteEvent = () => {
@@ -126,19 +143,23 @@
 
     {#if fullDay}
         <label for="eventDate">Date</label>
-        <input type="date" name="eventDate" bind:value="{event.start.date}" >
+        <input type="date" name="eventDate" on:change="{changeDate}">
     {:else}
         <label for="eventStartDate">Start Date</label>
-        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(event.start.dateTime)}" on:change="{changeStartDate}">
+        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(event.start.dateTime)}" on:change="{changeStartDateTime}">
 
         <label for="eventEndDate">End Date</label>
-        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(event.end.dateTime)}"  on:change="{changeEndDate}" >
+        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(event.end.dateTime)}"  on:change="{changeEndDateTime}" >
     {/if}
 
     <div class="googleEventButtonContainer">
-        <button on:click="{updateEvent}" class="danger">{event.id ? "Update" : "Create"}</button>
-        {#if event.id != ""}
-            <button class="danger" on:click="{deleteEvent}">Delete</button>
+        {#if event.id}
+            <button on:click="{updateEvent}" class="danger">{event.id ? "Update" : "Create"}</button>
+            {#if event.id != ""}
+                <button class="danger" on:click="{deleteEvent}">Delete</button>
+            {/if}
+        {:else}
+            <button on:click="{createEvent}">Create</button>
         {/if}
     </div>
 </div>
