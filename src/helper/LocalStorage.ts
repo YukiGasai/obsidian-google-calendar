@@ -39,7 +39,7 @@ export const getET = (plugin: GoogleCalendarPlugin): number => {
  * @param googleAccessToken googleAccessToken
  * @returns googleAccessToken
  */
-export const setAT = (googleAccessToken: string) => {
+export const setAT = (googleAccessToken: string): void => {
 	window.localStorage.setItem("googleAccessToken", googleAccessToken);
 };
 
@@ -48,7 +48,7 @@ export const setAT = (googleAccessToken: string) => {
  * @param googleRefreshToken googleRefreshToken
  * @returns googleRefreshToken
  */
-export const setRT = (googleRefreshToken: string) => {
+export const setRT = (googleRefreshToken: string): void => {
 	window.localStorage.setItem("googleRefreshToken", googleRefreshToken);
 };
 
@@ -57,7 +57,7 @@ export const setRT = (googleRefreshToken: string) => {
  * @param googleExpirationTime googleExpirationTime
  * @returns googleExpirationTime
  */
-export const setET = (googleExpirationTime: number) => {
+export const setET = (googleExpirationTime: number): void => {
 	window.localStorage.setItem(
 		"googleExpirationTime",
 		googleExpirationTime + ""

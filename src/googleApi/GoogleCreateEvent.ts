@@ -30,11 +30,11 @@ export async function googleCreateEvent(
 			}
 		);
 
-		const updatedEvent = await updateResponse.json();
+		const createdEvent = await updateResponse.json();
 
-		return updatedEvent;
+		return createdEvent;
 	} catch (error) {
 		createNotice(plugin, "Could not create google event");
-		return;
+		return null;
 	}
 }

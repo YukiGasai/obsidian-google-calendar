@@ -9,12 +9,12 @@ export function customSetting(
 		cls: "setting-item-info",
 	});
 
-	const settingItemName = settingIitemInfo.createDiv({
+	settingIitemInfo.createDiv({
 		cls: "setting-item-name",
 		text: title,
 	});
 
-	const settingItemDescription = settingIitemInfo.createDiv({
+	settingIitemInfo.createDiv({
 		cls: "setting-item-description",
 		text: description,
 	});

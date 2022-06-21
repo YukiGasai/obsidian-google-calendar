@@ -1,3 +1,8 @@
+/**
+ * The editor checker is scanning the currently opened document and checks if a date is written
+ * if there is a date with @ an dropdown will apear to select a event that is due to this date
+ */
+
 import type { Editor } from "obsidian";
 import { EventListModal } from "../modal/EventListModal";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
@@ -5,9 +10,8 @@ import type GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
 
 export function editorCheckForDate(
 	editor: Editor,
-	markdownView: MarkdownView,
 	plugin: GoogleCalendarPlugin
-) {
+): void {
 	// Run functions until one of the functions returns true to stop the chain.
 	check4Word("@today", editor, plugin) ||
 		check4Word("@tomorrow", editor, plugin) ||

@@ -1,4 +1,7 @@
-import events from "events";
+/**
+ * Depricated because I am using real HTML Elements now
+ */
+
 import { DateToPercent } from "./DateToPercent";
 import type { GoogleEvent } from "./types";
 
@@ -9,7 +12,7 @@ export function roundRect(
 	width: number,
 	height: number,
 	radius: number
-) {
+): CanvasRenderingContext2D {
 	if (width < 2 * radius) radius = width / 2;
 	if (height < 2 * radius) radius = height / 2;
 	ctx.beginPath();

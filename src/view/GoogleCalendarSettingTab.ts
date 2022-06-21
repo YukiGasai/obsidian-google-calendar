@@ -66,7 +66,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					})
 			);
-		let AuthSetting = new Setting(containerEl);
+		const AuthSetting = new Setting(containerEl);
 
 		const createLogOutButton = (button: ButtonComponent) => {
 			button.setButtonText("Logout");
@@ -103,7 +103,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						LoginGoogle(this.plugin);
 
 						let count = 0;
-						let intId = setInterval(() => {
+						const intId = setInterval(() => {
 							count++;
 
 							if (count > 900) {
@@ -171,7 +171,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		});
 
 		containerEl.createEl("h3", "Calendar Blacklist");
-		let calendarBlackList = this.plugin.settings.calendarBlackList;
+		const calendarBlackList = this.plugin.settings.calendarBlackList;
 
 		new Setting(containerEl)
 			.setName("Add Item to BlackList")
@@ -187,7 +187,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				});
 
 				dropdown.onChange(async (value) => {
-					let [id, summery] = value.split("_=_");
+					const [id, summery] = value.split("_=_");
 					if (!calendarBlackList.contains([id, summery])) {
 						this.plugin.settings.calendarBlackList = [
 							...calendarBlackList,
@@ -229,7 +229,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 export function settingsAreComplete(
 	plugin: GoogleCalendarPlugin,
-	showNotice: boolean = true
+	showNotice = true
 ): boolean {
 	if (
 		plugin.settings.googleApiToken == "" ||
@@ -249,14 +249,14 @@ export function settingsAreCorret(plugin: GoogleCalendarPlugin): boolean {
 		new Notice("API Token is not the correct format");
 		return false;
 	} else if (
-		/^[0-9a-zA-z\-]*\.apps\.googleusercontent\.com$/.test(
+		/^[0-9a-zA-z-]*\.apps\.googleusercontent\.com$/.test(
 			plugin.settings.googleClientId
 		) == false
 	) {
 		new Notice("Client ID Token is not the correct format");
 		return false;
 	} else if (
-		/^[0-9a-zA-z\-]*$/.test(plugin.settings.googleClientSecret) == false
+		/^[0-9a-zA-z-]*$/.test(plugin.settings.googleClientSecret) == false
 	) {
 		new Notice("Client Secret is not the correct format");
 		return false;
@@ -266,7 +266,7 @@ export function settingsAreCorret(plugin: GoogleCalendarPlugin): boolean {
 
 export function settingsAreCompleteAndLoggedIn(
 	plugin: GoogleCalendarPlugin,
-	showNotice: boolean = true
+	showNotice = true
 ): boolean {
 	if (!settingsAreComplete(plugin, false) || getRT() == "") {
 		createNotice(
@@ -278,7 +278,4 @@ export function settingsAreCompleteAndLoggedIn(
 		return false;
 	}
 	return true;
-}
-function asnyc(value: any): (value: string) => any {
-	throw new Error("Function not implemented.");
 }

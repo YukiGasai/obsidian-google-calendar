@@ -36,7 +36,10 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		return `${item.summary}\t`;
 	}
 
-	async onChooseItem(item: GoogleEvent, _: MouseEvent | KeyboardEvent) {
+	async onChooseItem(
+		item: GoogleEvent,
+		_: MouseEvent | KeyboardEvent
+	): Promise<void> {
 		const replacementString = `[${item.summary}](${item.htmlLink})`;
 
 		this.editor.replaceRange(

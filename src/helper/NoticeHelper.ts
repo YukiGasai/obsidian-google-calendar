@@ -4,8 +4,8 @@ import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 export function createNotice(
 	plugin: GoogleCalendarPlugin,
 	text: string,
-	showNotice: boolean = true
-) {
+	showNotice = true
+): void {
 	if (plugin.settings.showNotice && showNotice) {
 		new Notice(text);
 	}

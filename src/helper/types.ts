@@ -88,7 +88,7 @@ export interface GoogleEvent {
 		timeZone?: string;
 	};
 	endTimeUnspecified?: boolean;
-	recurrence?: [string];
+	recurrence?: string[];
 	recurringEventId?: string;
 	originalStartTime?: {
 		date?: string;
@@ -215,7 +215,7 @@ export interface GoogleEventList {
 	];
 	nextPageToken: string;
 	nextSyncToken: string;
-	items: [GoogleEvent];
+	items: GoogleEvent[];
 }
 
 export interface GoogleInstaces {

@@ -1,5 +1,4 @@
 import { Editor, MarkdownView, Plugin, moment, WorkspaceLeaf } from "obsidian";
-
 import type { GoogleCalendarPluginSettings } from "./helper/types";
 import {
 	GoogleCalendarSettingTab,
@@ -25,7 +24,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 export default class GoogleCalendarPlugin extends Plugin {
 	settings: GoogleCalendarPluginSettings;
 
-	initView = async () => {
+	initView = async (): Promise<void> => {
 		if (
 			this.app.workspace.getLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR)
 				.length === 0
@@ -41,7 +40,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 	};
 
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings();
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
@@ -57,12 +56,12 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.workspace.on(
 				"editor-change",
 				(editor: Editor, markdownView: MarkdownView) =>
-					editorCheckForDate(editor, markdownView, this)
+					editorCheckForDate(editor, this)
 			)
 		);
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon(
+		this.addRibbonIcon(
 			"calendar-with-checkmark",
 			"Google Calendar",
 			(evt: MouseEvent) => {
@@ -147,7 +146,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 						}
 					}
 
-					let nameString = `[${event.summary}](${event.htmlLink})`;
+					const nameString = `[${event.summary}](${event.htmlLink})`;
 
 					eventStringList += `\n| ${dateString} | ${nameString} | ${
 						event.description ?? ""
@@ -188,11 +187,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addSettingTab(new GoogleCalendarSettingTab(this.app, this));
 	}
 
-	onunload() {
+	onunload(): void {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR);
 	}
 
-	async loadSettings() {
+	async loadSettings(): Promise<void> {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
@@ -200,7 +199,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
 }

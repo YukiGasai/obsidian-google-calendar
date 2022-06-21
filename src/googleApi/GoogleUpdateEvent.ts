@@ -5,7 +5,8 @@ import type { GoogleEvent } from "../helper/types";
 
 export async function googleUpdateEvent(
 	plugin: GoogleCalendarPlugin,
-	event: GoogleEvent
+	event: GoogleEvent,
+	updateSingle = false
 ): Promise<GoogleEvent> {
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
@@ -14,13 +15,20 @@ export async function googleUpdateEvent(
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
+	// Use the reacurance id to delete all events from a reacuring task
+	let id = event.recurringEventId ?? event.id;
+
+	if (updateSingle && event.recurringEventId) {
+		id = event.id;
+	}
+
 	const calenderId = event.parent.id;
 
 	delete event.parent;
 
 	try {
 		const updateResponse = await fetch(
-			`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${event.id}?key=${plugin.settings.googleApiToken}`,
+			`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}?key=${plugin.settings.googleApiToken}`,
 			{
 				method: "PUT",
 				headers: requestHeaders,

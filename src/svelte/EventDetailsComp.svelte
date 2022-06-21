@@ -3,7 +3,7 @@
     import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
     import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-    import { googleRemoveEvent, googleRemoveEventOnce } from "../googleApi/GoogleRemoveEvent";
+    import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import {googleUpdateEvent} from '../googleApi/GoogleUpdateEvent'
 
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
@@ -12,8 +12,9 @@
     export let plugin: GoogleCalendarPlugin;
     export let event: GoogleEvent;
     export let currentDate: moment.Moment;
-    export let isBaseEvent: boolean = false;
-    export let createNewEvent: boolean = false;
+    export let isBaseEvent = false;
+    export let createNewEvent = false;
+    export let closeFunction :() => void;
 
     let calendars: GoogleCalander[];
     let loading = true;
@@ -22,13 +23,16 @@
     onMount(async () => {
         calendars = await googleListCalendars(plugin);
         loading = false;
-        console.log(event)
+
         fullDay = event?.start?.dateTime == undefined
 
-        if(!event.id){
+        if(event.id == undefined){
             event.summary = ""
             event.description = ""
             event.start.date = currentDate.format("YYYY-MM-DD")
+            event.end.date   = currentDate.format("YYYY-MM-DD")
+            event.start.dateTime = currentDate.format()
+            event.end.dateTime   = currentDate.add(1, "hour").format()
             event.parent = calendars[calendars.length - 1];
             fullDay = false
         }
@@ -64,11 +68,14 @@
         return window.moment(date).local().format("YYYY-MM-DDTHH:mm")
     }
 
+    const dateToInput = (date:any) => {
+        return window.moment(date).local().format("YYYY-MM-DD")
+    }
+
 
     const changeStartDateTime = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
            event.start.dateTime = window.moment(e.target.value).format()
-           delete event.start.date
         } 
     }
 
@@ -76,7 +83,6 @@
     const changeEndDateTime = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
             event.end.dateTime = window.moment(e.target.value).format()
-            delete event.end.date
         } 
     }
 
@@ -89,28 +95,98 @@
     }
 
     const createEvent = () => {
-        googleCreateEvent(plugin, event);
+
+        if(fullDay){
+            delete event.start.dateTime;
+            delete event.end.dateTime;
+
+        }else{
+            delete event.start.date;
+            delete event.end.date;
+        }
+
+        const newEvent = googleCreateEvent(plugin, event);
+    
+        if(newEvent){
+            closeFunction();
+        }
+    
     }
 
-    const deleteEvent = () => {
-        //googleRemoveEvent(plugin, event);
-        googleRemoveEventOnce(plugin, event, currentDate)
+    const deleteEvent = async(e) => {
+        let wasSucessfull = false;
+        if(event.recurringEventId){
+            wasSucessfull = await googleRemoveEvent(plugin, event , true)
+        }else{
+            wasSucessfull = await googleRemoveEvent(plugin, event)
+        }
+        if(wasSucessfull){
+            closeFunction();
+        }
     }
 
-    const updateEvent = () => {
-        googleUpdateEvent(plugin, event);
+    const deleteAllEvents = async() => {
+        
+        const wasSucessfull = await googleRemoveEvent(plugin, event)
+        if(wasSucessfull){
+            closeFunction();
+        }
+        
     }
 
+
+    const updateEvent = async () => {
+        if(fullDay){
+            delete event.start.dateTime;
+            delete event.end.dateTime;
+
+        }else{
+            delete event.start.date;
+            delete event.end.date;
+        }
+
+        let updatedEvent;
+        if(event.recurringEventId){
+            updatedEvent = await googleUpdateEvent(plugin, event , true)
+        }else{
+            updatedEvent = await googleUpdateEvent(plugin, event)
+        }
+        if(updatedEvent.id){
+            closeFunction();
+        }
+    }
+
+    const updateAllEvents = async () => {
+
+        if(fullDay){
+            delete event.start.dateTime;
+            delete event.end.dateTime;
+
+        }else{
+            delete event.start.date;
+            delete event.end.date;
+        }
+  
+        const updatedEvent = await googleUpdateEvent(plugin, event)
+        if(updatedEvent.id){
+            closeFunction();
+        }
+    }
+
+
+    $:{
+        console.log(event)
+    }
 
 </script>
 
 
 <div class="googleEventDetails">
 
-    {#if isBaseEvent}
-    <h1>Google Calendar Event</h1>  
+    {#if event.recurringEventId }
+    <h1>Google Calendar Recurring Event</h1>  
     {:else}
-    <h1>Google Calendar Event Instace</h1>  
+    <h1>Google Calendar Event</h1>  
     {/if}
    
 
@@ -143,7 +219,7 @@
 
     {#if fullDay}
         <label for="eventDate">Date</label>
-        <input type="date" name="eventDate" on:change="{changeDate}">
+        <input type="date" name="eventDate" value="{dateToInput(event.start.date)}" on:change="{changeDate}">
     {:else}
         <label for="eventStartDate">Start Date</label>
         <input type="datetime-local" name="eventStartDate" value="{dateToLocal(event.start.dateTime)}" on:change="{changeStartDateTime}">
@@ -154,10 +230,16 @@
 
     <div class="googleEventButtonContainer">
         {#if event.id}
-            <button on:click="{updateEvent}" class="danger">{event.id ? "Update" : "Create"}</button>
-            {#if event.id != ""}
-                <button class="danger" on:click="{deleteEvent}">Delete</button>
+            <button class="danger" on:click="{updateEvent}">Update</button>
+    
+            <button class="danger" on:click="{deleteEvent}">Delete</button>
+         
+            {#if event.recurringEventId }
+                <button class="danger" on:click="{updateAllEvents}">Update All</button>
+    
+                <button class="danger" on:click="{deleteAllEvents}">Delete All</button>
             {/if}
+         
         {:else}
             <button on:click="{createEvent}">Create</button>
         {/if}

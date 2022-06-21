@@ -1,3 +1,7 @@
+/**
+ * The Event Processor is checking the edior for plugin specific codeblocks noted with gEvent and replaces them with custom views
+ */
+
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { Platform, moment } from "obsidian";
 import TimeLineComp from "../svelte/TimeLineComp.svelte";
@@ -27,7 +31,7 @@ export async function GoogleEventProcessor(
 	text: string,
 	el: HTMLElement,
 	plugin: GoogleCalendarPlugin
-) {
+): Promise<void> {
 	const options = getKeyValueList(text);
 
 	const blockType = options.has("type") ? options.get("type") : "self";
@@ -40,7 +44,9 @@ export async function GoogleEventProcessor(
 		? parseInt(options.get("height"))
 		: 500;
 
-	const blockDate = options.has("date") ? options.get("date") : "today";
+	const blockDate = options.has("date")
+		? options.get("date")
+		: window.moment().format("YYYY-MM-DD");
 
 	el.style.width = blockWidth + "px";
 	el.style.height = blockHeight + "px";

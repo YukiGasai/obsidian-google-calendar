@@ -21,7 +21,10 @@ export class SimpleEventListModal extends FuzzySuggestModal<GoogleEvent> {
 		return `${item.summary}\t`;
 	}
 
-	async onChooseItem(item: GoogleEvent, _: MouseEvent | KeyboardEvent) {
+	async onChooseItem(
+		item: GoogleEvent,
+		_: MouseEvent | KeyboardEvent
+	): Promise<void> {
 		console.log(item.summary);
 	}
 }

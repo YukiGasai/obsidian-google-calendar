@@ -1,7 +1,7 @@
-import type { GoogleCalander } from "./../helper/types";
+import type { GoogleCalander, GoogleCalanderList } from "./../helper/types";
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+
 import { createNotice } from "src/helper/NoticeHelper";
-import type { GoogleCalanderList } from "src/helper/types";
 import { getGoogleAuthToken } from "./GoogleAuth";
 
 export async function googleListCalendars(
@@ -23,13 +23,14 @@ export async function googleListCalendars(
 			}
 		);
 		const calendarList: GoogleCalanderList = await response.json();
-		console.log(calendarList.items, plugin.settings.calendarBlackList);
-		let calendars = calendarList.items.filter(
-			(calendar) =>
-				plugin.settings.calendarBlackList.findIndex(
-					(c) => c[0] == calendar.id
-				) == -1
-		);
+
+		const calendars = calendarList.items.filter((calendar) => {
+			const foundIndex = plugin.settings.calendarBlackList.findIndex(
+				(c) => c[0] == calendar.id
+			);
+
+			return foundIndex == -1;
+		});
 
 		return calendars;
 	} catch (error) {

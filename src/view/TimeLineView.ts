@@ -12,10 +12,10 @@ export class TimeLineView extends ItemView {
 		super(leaf);
 		this.plugin = plugin;
 	}
-	getViewType() {
+	getViewType(): string {
 		return VIEW_TYPE_GOOGLE_CALENDAR;
 	}
-	getDisplayText() {
+	getDisplayText(): string {
 		return "Timeline View";
 	}
 
@@ -23,13 +23,13 @@ export class TimeLineView extends ItemView {
 		return "calendar-with-checkmark";
 	}
 
-	async onOpen() {
+	async onOpen(): Promise<void> {
 		this.timeline = new TimeLineViewComp({
 			target: this.contentEl,
 			props: { plugin: this.plugin },
 		});
 	}
-	async onClose() {
+	async onClose(): Promise<void> {
 		this.timeline.$destroy();
 	}
 }

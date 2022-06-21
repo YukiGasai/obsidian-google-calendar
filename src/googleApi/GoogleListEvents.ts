@@ -10,38 +10,15 @@ import { getGoogleAuthToken } from "./GoogleAuth";
 import { moment } from "obsidian";
 import { googleListCalendars } from "./GoogleListCalendars";
 
-export function sortEventsRecentFirst(eventList: GoogleEvent[]): GoogleEvent[] {
-	const eventListNoDate = eventList.filter(
-		(event) =>
-			event == undefined ||
-			event.start == undefined ||
-			event.start.dateTime == undefined
-	);
-
-	eventList = eventList.filter(
-		(event) => event && event.start && event.start.dateTime
-	);
-
-	eventList = eventList.sort((a, b) => {
-		return (
-			new Date(a.start.dateTime).getTime() -
-			new Date(b.start.dateTime).getTime()
-		);
-	});
-
-	eventList = [...eventListNoDate, ...eventList];
-	return eventList;
-}
-
 export async function googleListEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	googleCalander: GoogleCalander,
 	date: string,
 	endDate?: string
-) {
+): Promise<GoogleEvent[]> {
 	let totalEventList: GoogleEvent[] = [];
 	let tmpRequestResult: GoogleEventList;
-	let oldPageToken = "";
+	const resultSizes = 2500;
 
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
@@ -51,47 +28,45 @@ export async function googleListEventsByCalendar(
 	requestHeaders.append("Content-Type", "application/json");
 
 	try {
-		// eslint-disable-next-line no-constant-condition
-		while (true) {
+		do {
 			let requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
 				googleCalander.id
 			)}/events`;
 			requestUrl += `?key=${plugin.settings.googleApiToken}`;
-			requestUrl += `&maxResults=2500`;
+			requestUrl += `&maxResults=${resultSizes}`;
+			requestUrl += `&singleEvents=True`;
+			requestUrl += `&orderBy=startTime`;
 			requestUrl += `&timeMin=${date}T00%3A00%3A00Z`;
+
+			// TODO This could lead to problems displaying events at the wrong dates
 			if (endDate) {
 				requestUrl += `&timeMax=${endDate}T23%3A59%3A59Z`;
 			} else {
 				requestUrl += `&timeMax=${date}T23%3A59%3A59Z`;
 			}
-			if (tmpRequestResult && tmpRequestResult.nextPageToken) {
-				if (tmpRequestResult.nextPageToken == oldPageToken) {
-					return sortEventsRecentFirst(totalEventList);
-				}
 
+			if (tmpRequestResult && tmpRequestResult.nextPageToken) {
 				requestUrl += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
-				oldPageToken = tmpRequestResult.nextPageToken;
-			} else if (tmpRequestResult && !tmpRequestResult.nextPageToken) {
-				return sortEventsRecentFirst(totalEventList);
 			}
 
 			const response = await fetch(requestUrl, {
 				method: "GET",
 				headers: requestHeaders,
 			});
+
 			tmpRequestResult = await response.json();
 			tmpRequestResult.items.forEach((event) => {
 				event.parent = googleCalander;
 			});
+
 			const newList = tmpRequestResult.items.filter(
 				(event) => event.status != "cancelled"
 			);
-			totalEventList = [...totalEventList, ...newList];
 
-			if (!tmpRequestResult.nextPageToken) {
-				return sortEventsRecentFirst(totalEventList);
-			}
-		}
+			totalEventList = [...totalEventList, ...newList];
+		} while (tmpRequestResult.items.length == 2500);
+
+		return totalEventList;
 	} catch (error) {
 		console.log(error);
 		createNotice(plugin, "Could not load google events");
@@ -119,7 +94,7 @@ export async function googleListEvents(
 			eventList = [...eventList, ...events];
 		}
 
-		return sortEventsRecentFirst(eventList);
+		return eventList;
 	} catch (error) {
 		console.log(error);
 		createNotice(plugin, "Could not load google events");

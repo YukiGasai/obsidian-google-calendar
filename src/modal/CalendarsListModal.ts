@@ -23,7 +23,10 @@ export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
 		return `${item.summary}\t`;
 	}
 
-	async onChooseItem(item: GoogleCalander, _: MouseEvent | KeyboardEvent) {
+	async onChooseItem(
+		item: GoogleCalander,
+		_: MouseEvent | KeyboardEvent
+	): Promise<void> {
 		const events = await googleListTodayEventsByCalendar(this.plugin, item);
 		new SimpleEventListModal(this.plugin, events).open();
 	}
