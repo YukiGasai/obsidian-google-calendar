@@ -1,50 +1,62 @@
 <script lang="ts">
+    import type { ICalendarSource, IDayMetadata, IDot} from "obsidian-calendar-ui"
     import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
-    import type { GoogleEvent, ICalendarSource, IDayMetadata, IDot } from '../helper/types';
+    import type { GoogleEvent } from '../helper/types';
     import { onMount } from 'svelte';
-    import {
-    	Calendar as CalendarBase
-    } from "obsidian-calendar-ui";
-    import {
-    	googleListEvents
-    } from "../googleApi/GoogleListEvents";
-
- 
+    import { Calendar as CalendarBase } from "obsidian-calendar-ui";
+    import { googleListEvents } from "../googleApi/GoogleListEvents";
+    import { ViewEventEntry } from "../modal/ViewEventEntry";
 
     export let date:string = window.moment().format();
     export let width:number = 400;
     export let height:number = 400;
     export let plugin:GoogleCalendarPlugin;
 
-    let events:GoogleEvent[] = [];
+    let events: GoogleEvent[];
     let loading: boolean = true;
-    let sources;
-    let momentDate;
-
-    async function getEventsInMonth(date:moment.Moment):Promise<GoogleEvent[]>{
-        let start = date.startOf("month").format("YYYY-MM-DD");
-        let end   = date.endOf("month").format("YYYY-MM-DD");
-
-  
-
+    let sources:ICalendarSource[];
+    let displayedMonth: moment.Moment = window.moment();
+    let popUpSelectedDate: moment.Moment
+    
+    async function getEventsInMonth(month: moment.Moment):Promise<GoogleEvent[]>{
+ 
+        let start = month.startOf("month").format("YYYY-MM-DD");
+        let end   = month.endOf("month").format("YYYY-MM-DD");
         const googleList = await googleListEvents(plugin, start, end);
-
-        return googleList;
+        events = googleList;
+        return googleList;   
     }
 
 
     onMount(async () => {
-        momentDate = window.moment(date)
-        events = await getEventsInMonth(momentDate);
-
-        loading = false;
-        
+        getSource(displayedMonth)
 	});
   
 
 
-    const getEventsOfDay = (date: moment.Moment):GoogleEvent[] => {
-        return events.filter(event => {
+    async function getSource(month:moment.Moment) {
+          const veranstaltung = await getEventsInMonth(month);    
+          const customTagsSource: ICalendarSource = {
+            getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
+              
+                const eventsOfTheDay = getEventsOfDay(veranstaltung, day);
+                const dots:IDot[] = eventsOfTheDay.map(event => {
+                    return {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
+                })
+                return {
+                    dataAttributes: {"amount": eventsOfTheDay.length + ""},
+                    dots: dots,
+                };
+            }
+        }
+        loading = false;
+        sources = null
+        sources = [customTagsSource]
+    }
+
+
+    const getEventsOfDay = (eventList: GoogleEvent[], date: moment.Moment):GoogleEvent[] => {
+        return eventList.filter(event => {
             if(event.start.date){
                 return window.moment(event.start.date).isSame(date, 'day');
             }else{
@@ -55,50 +67,32 @@
 
 
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
-        const eventsOfTheDay = getEventsOfDay(date);
-   
-
-
-        getEventsInMonth(momentDate).then(events => {
-            const customTagsSource: ICalendarSource = {
-                getDailyMetadata: async (_date: moment.Moment): Promise<IDayMetadata> => {
-                    const eventsOfTheDay = getEventsOfDay(_date);
-                    const dots:IDot[] = eventsOfTheDay.map(event => {
-                        return {isFilled: true}
-                    })
-                    return {
-                        dataAttributes: {"amount": eventsOfTheDay.length + ""},
-                        dots: dots,
-                    };
-                }
-            }
-            sources = customTagsSource
-            console.log(sources);
-        })
  
+        popUpSelectedDate = date      
+    
+    }
 
-  
+    const onHoverDay = (date: moment.Moment, container: HTMLElement) => {
+       
+    }
+
+    const closePopup = (e: MouseEvent)=>{
+        
+        if(e.target instanceof HTMLDivElement){
+            popUpSelectedDate = null;
+        }
+    }
+
+    const getEventTime = (event: GoogleEvent):string => {
+        if (event.start.date){
+            return "All day"
+        }else {
+            return window.moment(event.start.dateTime).format("HH:mm")
+        }
     }
 
     $: {
-        console.log(momentDate)
-        getEventsInMonth(momentDate).then(events => {
-            const customTagsSource: ICalendarSource = {
-                getDailyMetadata: async (date: moment.Moment): Promise<IDayMetadata> => {
-                    const eventsOfTheDay = getEventsOfDay(date);
-                    const dots:IDot[] = eventsOfTheDay.map(event => {
-                        return {isFilled: true}
-                    })
-                    return {
-                        dataAttributes: {"amount": eventsOfTheDay.length + ""},
-                        dots: dots,
-                    };
-                }
-            }
-
-            sources = [customTagsSource]
-            console.log(events);
-        })
+        getSource(displayedMonth);
     }
 
 </script>
@@ -112,25 +106,77 @@
     {#if loading}
         <p>Loading...</p>
     {:else} 
-
-
-
-
+   
+    <div class={popUpSelectedDate&&"blured"}>
         <CalendarBase
+           
             showWeekNums={false}
-            onClickDay={onClickDay}
-            bind:sources={sources}
-            bind:displayedMonth={momentDate}
+            {onClickDay}
+            {onHoverDay}
+            {sources}
+            bind:displayedMonth
         />
+    </div>
+    {/if}
+
+    {#if popUpSelectedDate}
+        <div class="popUpContainer" on:click={closePopup}>
+            <span class="popUpTitle">{(window.moment(popUpSelectedDate).calendar().split(" at"))[0]}</span>
+         
+            {#each getEventsOfDay(events,popUpSelectedDate) as event}
+                <div class="popUpEventContainer" on:click={() => new ViewEventEntry(plugin,event, popUpSelectedDate).open()}>
+                    <span class="EventTime">{getEventTime(event)}</span>
+                    <span class="EventTitle">{event.summary}</span>
+                </div>
+            {/each}
+        </div>
     {/if}
 </div>
 
 
 <style>
-    .calendarContainer{
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .blured{
+        filter: blur(5px);
     }
+
+
+
+    .popUpContainer {
+	    position: absolute;
+        top: 0;
+        left: 0;
+	    display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+	    padding: 10px;
+	    width: 100%;
+        height: 100%;
+	    background-color: rgba(16, 16, 16, 0.5);
+        border-radius: 10px;
+  
+    }
+.popUpEventContainer{
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+
+    padding: 5px 0px
+
+}
+
+.popUpTitle{
+    align-self: center;
+    justify-self: center;
+    border-bottom: 2px solid white;
+    margin-bottom: 5px;
+}
+
+.EventTime {
+    text-align: center;
+    width:100px;
+    min-width: 100px;
+}
+
 </style>
 

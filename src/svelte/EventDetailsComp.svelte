@@ -12,8 +12,6 @@
     export let plugin: GoogleCalendarPlugin;
     export let event: GoogleEvent;
     export let currentDate: moment.Moment;
-    export let isBaseEvent = false;
-    export let createNewEvent = false;
     export let closeFunction :() => void;
 
     let calendars: GoogleCalander[];
@@ -152,7 +150,7 @@
             updatedEvent = await googleUpdateEvent(plugin, event)
         }
         if(updatedEvent.id){
-            closeFunction();
+            closeFunction(); 
         }
     }
 
@@ -167,7 +165,7 @@
             delete event.end.date;
         }
   
-        const updatedEvent = await googleUpdateEvent(plugin, event)
+         const updatedEvent = await googleUpdateEvent(plugin, event)
         if(updatedEvent.id){
             closeFunction();
         }
