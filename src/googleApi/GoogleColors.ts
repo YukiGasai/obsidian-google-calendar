@@ -1,3 +1,5 @@
+import type { GoogleEvent } from "../helper/types";
+
 export function googleCalendarColors(): string[] {
 	return [
 		"#ac725e",
@@ -74,4 +76,17 @@ export function googleEventColors(): string[] {
 
 		"#dc2127",
 	];
+}
+
+
+
+export function getColorFromEvent(event: GoogleEvent): string {
+	if(event.colorId) {
+		return googleEventColors()[event.colorId]
+	}else if( event.parent.colorId ){
+		return googleCalendarColors()[event.parent.colorId]
+	} else {
+		return "#a4bdfc"
+	}
+
 }

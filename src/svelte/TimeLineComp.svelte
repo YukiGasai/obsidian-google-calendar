@@ -1,4 +1,5 @@
 <script lang="ts" >
+    import TreeMap from 'ts-treemap'
     import { DateToPercent } from "../helper/DateToPercent";
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
@@ -6,55 +7,134 @@
     import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import type { GoogleEvent } from "../helper/types";
     import {ViewEventEntry} from '../modal/ViewEventEntry'
+    import {getColorFromEvent} from '../googleApi/GoogleColors'
 
 
     import {moment} from 'obsidian';
+    import { onMount } from "svelte";
+
+
     
+    interface Location {
+        event:GoogleEvent;
+        x:number;
+        y:number;
+        width:number;
+        height:number;
+        fullDay:boolean;
+    }
+
     export let plugin: GoogleCalendarPlugin;
     export let height = 700;
     export let width = 300;
     export let date = 'today';
 
-
-
+    let loading = true;
+    let timeDisplayPosition = 0;
     let events:GoogleEvent[] = [];
-    let eventPromise: Promise<GoogleEvent[]>;
+    let eventLocations:Location[] = [];
 
-    $: (() => {
+    onMount(async () => {
+        await getEvents()
+
+        const dayPercentage = DateToPercent(new Date());
+    
+        timeDisplayPosition = Math.floor(height * dayPercentage);
+	});
+
+    $: {
+        // This log is needed to tell svelte to redraw if date changes
+        console.log(date)
+        loading = true;
+        eventLocations = [];
+        getEvents()
+
+        const dayPercentage = DateToPercent(new Date());
+
+        timeDisplayPosition = Math.floor(height * dayPercentage);
+    }
+
+    const getLocationArray = () => {
+
+
+        const startMap = new TreeMap<string, GoogleEvent[]>();
+        events.forEach((event) => {
+            const start = event.start.date || event.start.dateTime;
+            if(startMap.has(start)){
+                startMap.get(start).push(event)
+            }else{
+                startMap.set(start, [event])
+            }
+        });
+        console.log(startMap)
+
+
+        let indentAmount = 0;
+        let latestEndDate = null; 
+        for (let events of startMap.values()) {
+    
+            if(events[0].start.dateTime){
+                const startDate = window.moment(events[0].start.dateTime)
+                
+                if(latestEndDate && startDate.isBefore(latestEndDate, "minutes")){
+                    indentAmount++;
+                }else{
+                    indentAmount = 0;
+                }
+
+                latestEndDate = window.moment(events[0].end.dateTime)
+            }
+
+            events.forEach((event, i) => {
+                                
+                const indent = 30 + indentAmount * 10;
+
+                const elementWidth = (width-indent) / events.length;
+
+                eventLocations.push({
+                    event: event,
+                    x: indent + elementWidth*i,
+                    y: getEventStartPosition(event, height),
+                    width: elementWidth,
+                    height: getEventHeight(event, height),
+                    fullDay: event.start.date != undefined
+                })      
+            })
+        }
+    }
+
+    const getEvents = async() => {
  
-
         if(date == 'today'){
-            eventPromise =  googleListTodayEvents(plugin);
-        }else if(date == 'tomorrow'){
-            const tomorrow = moment().add(1, "days");
-            const dateString = tomorrow.format("YYYY-MM-DD");
-            eventPromise =  googleListEvents(plugin, dateString);
-        }else{
-            let tmpDate = moment(date);
+            events = await googleListTodayEvents(plugin);
+            return;
+        }
+        
+        if(date == 'tomorrow'){
+            const tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+            events =  await googleListEvents(plugin, tomorrow);
+            return;
+        }
+        
+        let tmpDate = moment(date);
+        if(!tmpDate.isValid()){
+            tmpDate = moment(date, 'DD.MM.YYYY');
             if(!tmpDate.isValid()){
-                tmpDate = moment(date, 'DD.MM.YYYY');
-                if(!tmpDate.isValid()){
-                    tmpDate = moment(date, 'DD-MM-YYYY');
-                     if(!tmpDate.isValid()){
-                        tmpDate = moment(date, 'DD/MM/YYYY');
-                        if(!tmpDate.isValid()){
-                            return;
-                         }
-                     }
+                tmpDate = moment(date, 'DD-MM-YYYY');
+                 if(!tmpDate.isValid()){
+                    tmpDate = moment(date, 'DD/MM/YYYY');
+                    if(!tmpDate.isValid()){
+                        return;
+                    }
                 }
             }
-            const dateString = tmpDate.format("YYYY-MM-DD");
-
-            eventPromise =  googleListEvents(plugin, dateString);
         }
-     
-    })();
+        const dateString = tmpDate.format("YYYY-MM-DD");
+        events = await googleListEvents(plugin, dateString);
+        getLocationArray()
+        loading = false;
+    }
 
-    const dayPercentage = DateToPercent(new Date());
-    
-    let timeDisplayPosition = Math.floor(height * dayPercentage);
-    
-    
     const goToEvent = (event:GoogleEvent, e:any) => {
         if(e.shiftKey){
             window.open(event.htmlLink);
@@ -66,21 +146,15 @@
     
     </script>
 
-    {#await eventPromise}
+    {#if loading}
         <p>Loading</p>
-    {:then events} 
-        
-
-
+    {:else} 
+    
     <div 
         style:height="{height}px"
         style:width="{width}px"
         class="timeline">
-    
- 
-    
-        
-    
+
         <div class="hourLineContainer">
         {#each {length: 24} as _, i }
             <div class=hourLine style:height="{height/24}px" />
@@ -104,19 +178,23 @@
 
 
     
-        {#each events as event}
+        {#each eventLocations as location, i}
             <div 
-                on:click={(e) => goToEvent(event,e)} 
+                on:click={(e) => goToEvent(location.event,e)} 
                 class="event" 
-                style:top="{getEventStartPosition(event, height)}px"
-                style:height="{getEventHeight(event, height)}px"
-                style:background="{event.parent.backgroundColor}"
-            >{event.summary}</div>
+                style:top="{location.y}px"
+                style:left="{location.x}px"
+                style:width="{location.width}px"
+                style:height="{location.height}px"
+                style:background={getColorFromEvent(location.event)}
+            >{location.event.summary}</div>
         {/each}
       
 
+        
+
     </div>
-    {/await}
+    {/if}
 
 
 
@@ -126,6 +204,7 @@
         .event{
             display: flex;
             padding:10px;
+            padding-top: 0;
             position: absolute;
          
             width:150px;
@@ -133,12 +212,13 @@
             border-radius: 5px;
             color:black;
             font-size: 0.5em;
+            box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
         }
     
         .hourLine::after{
             content: "";
             position: absolute;
-            width:200px;
+            width:250px;
             left:50px;
         
         

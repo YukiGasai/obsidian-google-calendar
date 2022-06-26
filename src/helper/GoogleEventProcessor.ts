@@ -34,7 +34,9 @@ export async function GoogleEventProcessor(
 ): Promise<void> {
 	const options = getKeyValueList(text);
 
-	const blockType = options.has("type") ? options.get("type") : "self";
+	const blockType = options.has("type")
+		? options.get("type") 
+		: "day";
 
 	const blockWidth = options.has("width")
 		? parseInt(options.get("width"))
@@ -92,7 +94,7 @@ export async function GoogleEventProcessor(
 					plugin: plugin,
 					height: blockHeight,
 					width: blockWidth,
-					date: blockDate,
+					displayedMonth: window.moment(blockDate),
 				},
 			});
 		}

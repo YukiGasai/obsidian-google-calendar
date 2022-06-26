@@ -51,7 +51,6 @@ function check4Word(
 				.format("YYYY-MM-DD");
 		}
 
-		console.log("REGEX");
 	} else if (word === "@YYYY-MM-DD") {
 		startPos = { ...endPos, ch: endPos.ch - word.length };
 		realWord = editor.getRange(startPos, endPos);
@@ -65,7 +64,6 @@ function check4Word(
 			return false;
 		}
 
-		console.log("@YYYY-MM-DD");
 	} else {
 		startPos = { ...endPos, ch: endPos.ch - word.length };
 
@@ -88,7 +86,6 @@ function check4Word(
 				return false;
 		}
 
-		console.log("OTHER");
 	}
 
 	googleListEvents(plugin, date).then((events) => {

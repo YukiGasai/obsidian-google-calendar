@@ -6,8 +6,9 @@
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { googleListEvents } from "../googleApi/GoogleListEvents";
     import { ViewEventEntry } from "../modal/ViewEventEntry";
+    import { getColorFromEvent } from "../googleApi/GoogleColors";
 
-    export let date:string = window.moment().format();
+    export let displayedMonth = window.moment();
     export let width:number = 400;
     export let height:number = 400;
     export let plugin:GoogleCalendarPlugin;
@@ -15,7 +16,7 @@
     let events: GoogleEvent[];
     let loading: boolean = true;
     let sources:ICalendarSource[];
-    let displayedMonth: moment.Moment = window.moment();
+
     let popUpSelectedDate: moment.Moment
     
     async function getEventsInMonth(month: moment.Moment):Promise<GoogleEvent[]>{
@@ -126,7 +127,7 @@
             {#each getEventsOfDay(events,popUpSelectedDate) as event}
                 <div class="popUpEventContainer" on:click={() => new ViewEventEntry(plugin,event, popUpSelectedDate).open()}>
                     <span class="EventTime">{getEventTime(event)}</span>
-                    <span class="EventTitle">{event.summary}</span>
+                    <span class="EventTitle" style:color={getColorFromEvent(event)}>{event.summary}</span>
                 </div>
             {/each}
         </div>
@@ -150,9 +151,10 @@
         align-items: flex-start;
         justify-content: flex-start;
 	    padding: 10px;
-	    width: 100%;
-        height: 100%;
-	    background-color: rgba(16, 16, 16, 0.5);
+	    width: 80%;
+        height: 80%;
+	    background-color: rgba(16, 16, 16, 0.2);
+        box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
         border-radius: 10px;
   
     }

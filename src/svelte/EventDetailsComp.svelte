@@ -4,8 +4,7 @@
     import { onMount } from 'svelte';
     import { googleListCalendars } from "../googleApi/GoogleListCalendars";
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
-    import {googleUpdateEvent} from '../googleApi/GoogleUpdateEvent'
-
+    import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
 
 
@@ -172,8 +171,9 @@
     }
 
 
+
     $:{
-        console.log(event)
+        // console.log(event)
     }
 
 </script>
@@ -182,9 +182,9 @@
 <div class="googleEventDetails">
 
     {#if event.recurringEventId }
-    <h1>Google Calendar Recurring Event</h1>  
+    <a href={event.htmlLink}><h1>Google Calendar Recurring Event</h1></a>  
     {:else}
-    <h1>Google Calendar Event</h1>  
+    <a href={event.htmlLink}><h1>Google Calendar Event</h1></a>  
     {/if}
    
 
@@ -272,14 +272,6 @@
 
     .googleEventButtonContainer button {
         width: 40%;
-    }
-
-    .googleEventDetailsHeader{
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding-right: 30px;
     }
 
 </style>

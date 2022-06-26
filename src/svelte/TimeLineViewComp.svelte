@@ -5,7 +5,6 @@ import {moment} from "obsidian";
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import TimeLine from "./TimeLineComp.svelte";
 import {ViewEventEntry} from "../modal/ViewEventEntry"
-import type { GoogleEvent } from "../helper/types";
 
 
 export let plugin: GoogleCalendarPlugin;

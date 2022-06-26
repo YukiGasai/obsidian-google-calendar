@@ -29,6 +29,10 @@ export function getEventStartPosition(
 	event: GoogleEvent,
 	timeLineHeight: number
 ): number {
+	if(event.start.date){
+		return 0;
+	}
+	
 	const startPercentage = DateToPercent(new Date(event.start.dateTime));
 	return timeLineHeight * startPercentage;
 }
@@ -37,8 +41,11 @@ export function getEventHeight(
 	event: GoogleEvent,
 	timeLineHeight: number
 ): number {
+	if(event.start.date){
+		return 25;
+	}
+
 	const startPercentage = DateToPercent(new Date(event.start.dateTime));
 	const endPercentage = DateToPercent(new Date(event.end.dateTime));
-
 	return timeLineHeight * (endPercentage - startPercentage);
 }

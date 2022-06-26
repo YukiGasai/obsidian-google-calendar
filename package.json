@@ -43,6 +43,7 @@
 		"obsidian-calendar-ui": "^0.3.12",
 		"open": "^8.4.0",
 		"rrule": "^2.7.0",
-		"server-destroy": "^1.0.1"
+		"server-destroy": "^1.0.1",
+		"ts-treemap": "^1.1.0"
 	}
 }

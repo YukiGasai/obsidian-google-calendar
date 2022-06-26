@@ -16,8 +16,6 @@ export async function googleCreateEvent(
 
 	const calenderId = event.parent.id;
 
-	console.log(event);
-
 	delete event.parent;
 
 	try {

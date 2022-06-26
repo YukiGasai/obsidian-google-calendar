@@ -66,6 +66,13 @@ export async function googleListEventsByCalendar(
 			totalEventList = [...totalEventList, ...newList];
 		} while (tmpRequestResult.items.length == 2500);
 
+		totalEventList = totalEventList.sort((a:GoogleEvent, b:GoogleEvent) : number => {
+            const startA = window.moment((a.start.date || a.start.dateTime))
+            const startB = window.moment((b.start.date || b.start.dateTime))
+
+            return startA.isBefore(startB, "minute") ? -1 : 1;
+        })
+
 		return totalEventList;
 	} catch (error) {
 		console.log(error);
@@ -93,6 +100,13 @@ export async function googleListEvents(
 
 			eventList = [...eventList, ...events];
 		}
+
+		eventList = eventList.sort((a:GoogleEvent, b:GoogleEvent) : number => {
+            const startA = window.moment((a.start.date || a.start.dateTime))
+            const startB = window.moment((b.start.date || b.start.dateTime))
+
+            return startA.isBefore(startB, "minute") ? -1 : 1;
+        })
 
 		return eventList;
 	} catch (error) {
