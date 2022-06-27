@@ -1,5 +1,5 @@
 import type { GoogleCalendarPluginSettings } from "./helper/types";
-import { Editor, MarkdownView, Plugin, WorkspaceLeaf } from "obsidian";
+import { Editor, MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -7,18 +7,20 @@ import {
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleListTodayEvents } from "./googleApi/GoogleListEvents";
-import { GoogleEventProcessor } from "./helper/GoogleEventProcessor";
+import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/TimeLineView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
+import { getRT } from "./helper/LocalStorage";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
 	googleClientSecret: "",
 	googleApiToken: "",
+	googleRefreshToken: "",
 	askConfirmation: true,
 	refreshInterval: 60,
 	showNotice: true,
@@ -48,7 +50,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		await this.loadSettings();
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
-			GoogleEventProcessor(text, el, this)
+			checkEditorForCodeBlocks(text, el, this)
 		);
 
 		this.registerView(
@@ -177,6 +179,29 @@ export default class GoogleCalendarPlugin extends Plugin {
 				insertTodayEventsIntoFile(this, editor);
 			},
 		});
+
+
+		//Copy Refresh token to clipboard
+		this.addCommand({
+			id: "copy-google-calendar-refresh-token",
+			name: "Copy Google Calendar Refresh Token to Clipboard",
+
+			callback: () => {
+				const token = getRT();
+				if(token == undefined || token == ''){
+					new Notice("No Refresh Token. Please Login.")
+					return;
+				}
+
+				navigator.clipboard.writeText(token).then(function() {
+					new Notice("Token copied")
+				}, function(err) {
+					new Notice("Could not copy token")
+				});
+
+			},
+		});
+
 
 		this.addSettingTab(new GoogleCalendarSettingTab(this.app, this));
 	}

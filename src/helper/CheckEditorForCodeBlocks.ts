@@ -49,7 +49,7 @@ function getKeyValueList(codeBlock: string): Map<string, string> {
  * @param el the container element for the codeblock widget
  * @param plugin Refrence to the main plugin to acess the settings 
  */
-export async function GoogleEventProcessor(
+export async function checkEditorForCodeBlocks(
 	text: string,
 	el: HTMLElement,
 	plugin: GoogleCalendarPlugin

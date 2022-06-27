@@ -5,9 +5,9 @@
 
 import type { Editor } from "obsidian";
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+
 import { EventListModal } from "../modal/EventListModal";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
-
 
 export function checkEditorForAtDates(
 	editor: Editor,
@@ -37,7 +37,7 @@ function check4Word(
 
 		if (match.length != 3) return false;
 
-		startPos = { ...endPos, ch: endPos.ch - match[0].length };
+		startPos = { ...endPos, ch: endPos.ch - match[1].length - match[2].length - 1 };
 
 		if (startPos.ch < 0) return;
 

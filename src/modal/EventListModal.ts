@@ -21,7 +21,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.eventList = eventList;
-		this.setPlaceholder("Select an event to insert it");
+		this.setPlaceholder("Select an event to insert");
 		this.editor = editor;
 		this.start = start;
 		this.end = end;

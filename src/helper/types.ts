@@ -8,6 +8,7 @@ export interface GoogleCalendarPluginSettings {
 	googleClientId: string;
 	googleClientSecret: string;
 	googleApiToken: string;
+	googleRefreshToken: string;
 	askConfirmation: boolean;
 	refreshInterval: number;
 	showNotice: boolean;

@@ -7,6 +7,7 @@ import {
 	Setting,
 	Notice,
 	ButtonComponent,
+	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
 import { getRT, setAT, setET, setRT } from "../helper/LocalStorage";
@@ -89,38 +90,54 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 		};
 
-		if (getRT()) {
-			AuthSetting.setName("Logout");
-			AuthSetting.setDesc("Logout off your Google Account");
-			AuthSetting.addButton(createLogOutButton);
-		} else {
-			AuthSetting.setName("Login");
-			AuthSetting.setDesc("Login to your Google Account");
-			AuthSetting.addButton((button: ButtonComponent) => {
-				button.setButtonText("Login");
-				button.onClick(async (event) => {
-					if (settingsAreCorret(this.plugin)) {
-						LoginGoogle(this.plugin);
+		if (Platform.isDesktop) {
+			if (getRT()) {
+				AuthSetting.setName("Logout");
+				AuthSetting.setDesc("Logout off your Google Account");
+				AuthSetting.addButton(createLogOutButton);
+			} else {
+				AuthSetting.setName("Login");
+				AuthSetting.setDesc("Login to your Google Account");
+				AuthSetting.addButton((button: ButtonComponent) => {
+					button.setButtonText("Login");
+					button.onClick(async (event) => {
+						if (settingsAreCorret(this.plugin)) {
+							LoginGoogle(this.plugin);
 
-						let count = 0;
-						const intId = setInterval(() => {
-							count++;
+							let count = 0;
+							const intId = setInterval(() => {
+								count++;
 
-							if (count > 900) {
-								clearInterval(intId);
-							} else if (getRT()) {
-								clearInterval(intId);
-								button.buttonEl.remove();
-								AuthSetting.setName("Logout");
-								AuthSetting.setDesc(
-									"Logout off your Google Account"
-								);
-								AuthSetting.addButton(createLogOutButton);
-							}
-						}, 200);
-					}
+								if (count > 900) {
+									clearInterval(intId);
+								} else if (getRT()) {
+									clearInterval(intId);
+									button.buttonEl.remove();
+									AuthSetting.setName("Logout");
+									AuthSetting.setDesc(
+										"Logout off your Google Account"
+									);
+									AuthSetting.addButton(createLogOutButton);
+								}
+							}, 200);
+						}
+					});
 				});
-			});
+		
+			}
+		} else {
+			new Setting(containerEl)
+				.setName("Refresh Token")
+				.setDesc("Google Refresh Token from OAuth")
+				.addText((text) =>
+					text
+						.setPlaceholder("Enter refresh token")
+						.setValue(this.plugin.settings.googleRefreshToken)
+						.onChange(async (value) => {
+							this.plugin.settings.googleRefreshToken = value;
+							setRT(value);
+						})
+				);
 		}
 
 		new Setting(containerEl)
