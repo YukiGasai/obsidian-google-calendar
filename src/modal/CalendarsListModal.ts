@@ -1,6 +1,6 @@
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-import { FuzzySuggestModal } from "obsidian";
 import type { GoogleCalander } from "../helper/types";
+import { FuzzySuggestModal } from "obsidian";
 import { googleListTodayEventsByCalendar } from "../googleApi/GoogleListEvents";
 import { SimpleEventListModal } from "./SimpleEventListModal";
 

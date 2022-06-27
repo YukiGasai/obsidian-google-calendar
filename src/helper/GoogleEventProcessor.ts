@@ -1,5 +1,7 @@
 /**
- * The Event Processor is checking the edior for plugin specific codeblocks noted with gEvent and replaces them with custom views
+ * The Event Processor is checking the edior for plugin specific codeblocks
+ * marked with gEvent and replaces them with custom widgets 
+ * from svelte components
  */
 
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
@@ -8,6 +10,11 @@ import TimeLineComp from "../svelte/TimeLineComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
 
+/**
+ * This functions turns the string of the codeblock into a settings object
+ * @param codeBlock inpup string containing settings
+ * @returns a Settingsobject
+ */
 function getKeyValueList(codeBlock: string): Map<string, string> {
 	const options = codeBlock.split("\n");
 
@@ -27,6 +34,21 @@ function getKeyValueList(codeBlock: string): Map<string, string> {
 	return result;
 }
 
+/**
+ * This function converts the codeblock into a svelte widget
+ * There are multiple settings a user can set:
+ * 
+ * 	necessary:
+ * 		   type: {day, month, web} selects which widget is displayed
+ * 	 optional:
+ * 		  date : The day that the widget should display / start at
+ * 		  width: The width of the widget
+ * 		  height The height of the widget
+ *  
+ * @param text the text of the codeblock
+ * @param el the container element for the codeblock widget
+ * @param plugin Refrence to the main plugin to acess the settings 
+ */
 export async function GoogleEventProcessor(
 	text: string,
 	el: HTMLElement,

@@ -4,11 +4,12 @@
  */
 
 import type { Editor } from "obsidian";
+import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { EventListModal } from "../modal/EventListModal";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
-import type GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
 
-export function editorCheckForDate(
+
+export function checkEditorForAtDates(
 	editor: Editor,
 	plugin: GoogleCalendarPlugin
 ): void {

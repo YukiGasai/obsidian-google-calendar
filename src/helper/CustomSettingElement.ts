@@ -1,11 +1,19 @@
+
+/**
+ * A helper function to easily create settings with custom html elements 
+ * @param root the container element 
+ * @param title the title of the setting displayed on the left side top
+ * @param description the description of the setting displayed on the left side bottom
+ * @returns the setting
+ */
 export function customSetting(
 	root: HTMLElement,
 	title: string,
 	description: string
 ): HTMLElement {
-	const settingTtem = root.createDiv({ cls: "setting-item" });
+	const settingItem = root.createDiv({ cls: "setting-item" });
 
-	const settingIitemInfo = settingTtem.createDiv({
+	const settingIitemInfo = settingItem.createDiv({
 		cls: "setting-item-info",
 	});
 
@@ -19,7 +27,7 @@ export function customSetting(
 		text: description,
 	});
 
-	const settingItemControl = settingTtem.createDiv({
+	const settingItemControl = settingItem.createDiv({
 		cls: "setting-item-control",
 	});
 

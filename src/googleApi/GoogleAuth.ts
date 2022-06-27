@@ -1,5 +1,6 @@
-import { OAuth2Client } from "google-auth-library";
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
+import { OAuth2Client } from "google-auth-library";
 import {
 	settingsAreComplete,
 	settingsAreCompleteAndLoggedIn,
@@ -12,7 +13,7 @@ import {
 	setET,
 	setRT,
 } from "../helper/LocalStorage";
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+
 
 const http = require("http");
 const open = require("open");
@@ -91,7 +92,9 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin) {
 
 					console.info("Tokens acquired.");
 				}
-			} catch (e) {}
+			} catch (e) {
+				console.log("Auth failed")
+			}
 		})
 		.listen(42813, () => {
 			// open the browser to the authorize url to start the workflow

@@ -1,7 +1,16 @@
 import type { GoogleEvent } from "../helper/types";
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 
+/**
+ * This function will remove the event from the google api
+ * If the event is recurrent is will delete all it's instanced except if deleteSingle is set
+ * @param plugin  Refrence to the main plugin to acess the settings
+ * @param event The event to delete
+ * @param deleteSingle If set to true and if the event is recurrent only one instance is deleted
+ * @returns a boolean if the deletion was successfull
+ */
 export async function googleRemoveEvent(
 	plugin: GoogleCalendarPlugin,
 	event: GoogleEvent,

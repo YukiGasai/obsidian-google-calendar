@@ -1,11 +1,11 @@
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 import { ItemView, WorkspaceLeaf } from "obsidian";
-import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
+import WebFrameComp from "../svelte/WebFrameComp.svelte";
 
-export const VIEW_TYPE_GOOGLE_CALENDAR_DAY = "google-calendar-view-day";
-export class TimeLineView extends ItemView {
-	timeline: TimeLineViewComp;
+export const VIEW_TYPE_GOOGLE_CALENDAR_WEB = "google-calendar-view-web";
+export class WebCalendarView extends ItemView {
+	calendar: WebFrameComp;
 	plugin: GoogleCalendarPlugin;
 
 	constructor(leaf: WorkspaceLeaf, plugin: GoogleCalendarPlugin) {
@@ -13,10 +13,10 @@ export class TimeLineView extends ItemView {
 		this.plugin = plugin;
 	}
 	getViewType(): string {
-		return VIEW_TYPE_GOOGLE_CALENDAR_DAY;
+		return VIEW_TYPE_GOOGLE_CALENDAR_WEB;
 	}
 	getDisplayText(): string {
-		return "Timeline View";
+		return "Calendar Web View";
 	}
 
 	getIcon(): string {
@@ -24,12 +24,12 @@ export class TimeLineView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
-		this.timeline = new TimeLineViewComp({
+		this.calendar = new WebFrameComp({
 			target: this.contentEl,
-			props: { plugin: this.plugin },
+			props: { },
 		});
 	}
 	async onClose(): Promise<void> {
-		this.timeline.$destroy();
+		this.calendar.$destroy();
 	}
 }

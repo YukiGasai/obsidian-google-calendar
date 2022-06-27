@@ -1,6 +1,6 @@
 <script lang="ts" >
     import TreeMap from 'ts-treemap'
-    import { DateToPercent } from "../helper/DateToPercent";
+    import { DateToPercent } from "../helper/CanvasDrawHelper";
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
     import { googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";

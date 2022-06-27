@@ -4,12 +4,20 @@ import type {
 	GoogleEventList,
 } from "../helper/types";
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
-
 import { moment } from "obsidian";
 import { googleListCalendars } from "./GoogleListCalendars";
 
+/**
+ * 
+ * @param plugin  Refrence to the main plugin to acess the settings
+ * @param googleCalander 
+ * @param date 
+ * @param endDate 
+ * @returns 
+ */
 export async function googleListEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	googleCalander: GoogleCalander,

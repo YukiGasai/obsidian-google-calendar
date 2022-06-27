@@ -1,3 +1,5 @@
+import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+
 import { createNotice } from "src/helper/NoticeHelper";
 import {
 	PluginSettingTab,
@@ -7,8 +9,6 @@ import {
 	ButtonComponent,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-
 import { getRT, setAT, setET, setRT } from "../helper/LocalStorage";
 import { customSetting } from "src/helper/CustomSettingElement";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";

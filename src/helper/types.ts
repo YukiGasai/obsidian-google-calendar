@@ -1,3 +1,9 @@
+/**
+ * This file contains all custom types defined to work with typescript
+ * Most types come from the Calendar API 
+ */
+
+
 export interface GoogleCalendarPluginSettings {
 	googleClientId: string;
 	googleClientSecret: string;
@@ -244,17 +250,3 @@ export interface TimeLineOptions {
 	height: number;
 }
 
-export interface ICalendarSource {
-	getDailyMetadata?: (date: moment.Moment) => Promise<IDayMetadata>;
-	getWeeklyMetadata?: (date: moment.Moment) => Promise<IDayMetadata>;
-}
-
-export interface IDayMetadata {
-	classes?: string[];
-	dataAttributes?: Record<string, string>;
-	dots?: IDot[];
-}
-
-export interface IDot {
-	isFilled: boolean;
-}

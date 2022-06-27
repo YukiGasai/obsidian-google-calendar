@@ -1,5 +1,5 @@
-import { Editor, MarkdownView, Plugin, moment, WorkspaceLeaf } from "obsidian";
 import type { GoogleCalendarPluginSettings } from "./helper/types";
+import { Editor, MarkdownView, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -8,8 +8,12 @@ import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleListTodayEvents } from "./googleApi/GoogleListEvents";
 import { GoogleEventProcessor } from "./helper/GoogleEventProcessor";
-import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR } from "./view/TimeLineView";
-import { editorCheckForDate } from "./helper/EditorChecker";
+import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/TimeLineView";
+import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
+import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
+import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
+import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
+
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -24,18 +28,18 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 export default class GoogleCalendarPlugin extends Plugin {
 	settings: GoogleCalendarPluginSettings;
 
-	initView = async (): Promise<void> => {
+	initView = async (viewId:string): Promise<void> => {
 		if (
-			this.app.workspace.getLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR)
+			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
 		) {
 			await this.app.workspace.getRightLeaf(false).setViewState({
-				type: VIEW_TYPE_GOOGLE_CALENDAR,
+				type: viewId,
 			});
 		}
 		this.app.workspace.revealLeaf(
 			this.app.workspace
-				.getLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR)
+				.getLeavesOfType(viewId)
 				.first()
 		);
 	};
@@ -48,26 +52,51 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 
 		this.registerView(
-			VIEW_TYPE_GOOGLE_CALENDAR,
+			VIEW_TYPE_GOOGLE_CALENDAR_DAY,
 			(leaf: WorkspaceLeaf) => new TimeLineView(leaf, this)
 		);
+		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR_MONTH,
+			(leaf: WorkspaceLeaf) => new MonthCalendarView(leaf, this)
+		);
+		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR_WEB,
+			(leaf: WorkspaceLeaf) => new WebCalendarView(leaf, this)
+		);
+
 
 		this.registerEvent(
 			this.app.workspace.on(
 				"editor-change",
 				(editor: Editor, markdownView: MarkdownView) =>
-					editorCheckForDate(editor, this)
+					checkEditorForAtDates(editor, this)
 			)
 		);
 
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon(
-			"calendar-with-checkmark",
-			"Google Calendar",
-			(evt: MouseEvent) => {
-				this.initView();
-			}
-		);
+		//Open Timeline view
+		this.addCommand({
+			id: "open-google-calendar-timline-view",
+			name: "Open Google Calendar timeline view",
+			callback: () => 
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_DAY)
+		});
+
+		//Open Month view
+		this.addCommand({
+			id: "open-google-calendar-month-view",
+			name: "Open Google Calendar month view",
+			callback: () => 
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_MONTH)
+		});
+
+		//Open web view
+		this.addCommand({
+			id: "open-google-calendar-web-view",
+			name: "Open Google Calendar web view",
+			callback: () => 
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEB)
+		});
+
 
 		//List events command
 		this.addCommand({
@@ -124,42 +153,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
-		const writeTodayEventsIntoFile = async (editor: Editor) => {
-			const eventList = await googleListTodayEvents(this);
-
-			let eventStringList = "";
-
-			eventList.forEach((event) => {
-				if (event.start) {
-					let dateString = "";
-					if (event.start.dateTime) {
-						const startTime = moment(event.start.dateTime).format(
-							"HH:mm"
-						);
-						dateString = startTime;
-						if (event.end.dateTime) {
-							const endTime = moment(event.end.dateTime).format(
-								"HH:mm"
-							);
-
-							dateString += `-${endTime}`;
-						}
-					}
-
-					const nameString = `[${event.summary}](${event.htmlLink})`;
-
-					eventStringList += `\n| ${dateString} | ${nameString} | ${
-						event.description ?? ""
-					} |`;
-				}
-			});
-
-			editor.replaceRange(
-				"| Date | Name | Description |\n| ---- | ---- | ----------- |" +
-					eventStringList,
-				editor.getCursor()
-			);
-		};
+		
 
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
@@ -180,7 +174,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				writeTodayEventsIntoFile(editor);
+				insertTodayEventsIntoFile(this, editor);
 			},
 		});
 
@@ -188,7 +182,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
 	}
 
 	async loadSettings(): Promise<void> {

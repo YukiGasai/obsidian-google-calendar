@@ -1,30 +1,25 @@
-/**
- * Depricated because I am using real HTML Elements now
- */
 
-import { DateToPercent } from "./DateToPercent";
 import type { GoogleEvent } from "./types";
 
-export function roundRect(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number,
-	width: number,
-	height: number,
-	radius: number
-): CanvasRenderingContext2D {
-	if (width < 2 * radius) radius = width / 2;
-	if (height < 2 * radius) radius = height / 2;
-	ctx.beginPath();
-	ctx.moveTo(x + radius, y);
-	ctx.arcTo(x + width, y, x + width, y + height, radius);
-	ctx.arcTo(x + width, y + height, x, y + height, radius);
-	ctx.arcTo(x, y + height, x, y, radius);
-	ctx.arcTo(x, y, x + width, y, radius);
-	ctx.closePath();
-	return ctx;
+/**
+ * @param date to convert
+ * @returns time of day as a number between 0 and 1
+ */
+ export function DateToPercent(date: Date): number {
+	return date.getHours() / 24 + date.getMinutes() / (60 * 24);
 }
 
+/**
+ * This function calcultes the y position of a event in a timlineview
+ * The height is the percentage the day has gone when the event starts
+ * The start of the day is 0% the end is 100% this is maped to the height of th view 
+ * 
+ * If the event is full day the height is 0
+ * 
+ * @param event to calulate the poition from
+ * @param timeLineHeight the max height of the timline 
+ * @returns height where the events starts
+ */
 export function getEventStartPosition(
 	event: GoogleEvent,
 	timeLineHeight: number
@@ -37,6 +32,15 @@ export function getEventStartPosition(
 	return timeLineHeight * startPercentage;
 }
 
+/**
+ * This function calulated the height of a event inside a timeline view
+ * The height is determined by the start and end time of the event
+ * 
+ * TODO Error when stretches over more than a day
+ * @param event to get the height of
+ * @param timeLineHeight the max height of the timline  
+ * @returns the height of the event
+ */
 export function getEventHeight(
 	event: GoogleEvent,
 	timeLineHeight: number
