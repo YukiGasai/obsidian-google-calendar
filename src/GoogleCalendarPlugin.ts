@@ -15,6 +15,7 @@ import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
 import { getRT } from "./helper/LocalStorage";
 
+import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -24,11 +25,16 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	askConfirmation: true,
 	refreshInterval: 60,
 	showNotice: true,
+	autoCreateEventNotes: true,
+	importStartOffset: -1,
+	importEndOffset: 1,
 	calendarBlackList: [],
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
 	settings: GoogleCalendarPluginSettings;
+
+	templatePlugin:any;
 
 	initView = async (viewId:string): Promise<void> => {
 		if (
@@ -46,8 +52,21 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 	};
 
+	onLayoutReady = ():void => {
+		//Get the template plugin to run their commands
+		const templatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
+		if(templatePlugin && templatePlugin.enabled){
+			this.templatePlugin = templatePlugin;
+		}
+
+		checkForEventNotes(this);
+	}
+
 	async onload(): Promise<void> {
 		await this.loadSettings();
+
+		this.app.workspace.onLayoutReady(this.onLayoutReady);
+
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
 			checkEditorForCodeBlocks(text, el, this)
@@ -98,7 +117,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 			callback: () => 
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEB)
 		});
-
 
 		//List events command
 		this.addCommand({
@@ -202,7 +220,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
-
 		this.addSettingTab(new GoogleCalendarSettingTab(this.app, this));
 	}
 
@@ -223,4 +240,5 @@ export default class GoogleCalendarPlugin extends Plugin {
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
+
 }

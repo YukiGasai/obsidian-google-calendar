@@ -12,6 +12,9 @@ export interface GoogleCalendarPluginSettings {
 	askConfirmation: boolean;
 	refreshInterval: number;
 	showNotice: boolean;
+	autoCreateEventNotes: boolean,
+	importStartOffset: number,
+	importEndOffset: number,
 	calendarBlackList: [string, string][];
 }
 

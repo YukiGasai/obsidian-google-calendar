@@ -162,6 +162,52 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				});
 			});
 
+		new Setting(containerEl)
+		.setName("Auto create Event Notes")
+		.setDesc("Will create new notes from a event if the description contains :obsidian:")
+		.addToggle((toggle) => {
+			toggle.setValue(this.plugin.settings.autoCreateEventNotes);
+			toggle.onChange(async (state) => {
+				this.plugin.settings.autoCreateEventNotes = state;
+				await this.plugin.saveSettings();
+			});
+		});
+
+		const ImportStartSetting = customSetting(
+			containerEl,
+			"Import Start Offset",
+			"Days in the past from events to import"
+		).createEl("input", {
+			type: "number",
+		});
+		ImportStartSetting.value = this.plugin.settings.importStartOffset + "";
+		ImportStartSetting.min = "0";
+		ImportStartSetting.step = "1";
+		ImportStartSetting.addEventListener("input", async () => {
+			this.plugin.settings.importStartOffset = parseInt(
+				ImportStartSetting.value
+			);
+			await this.plugin.saveSettings();
+		});
+
+
+		const ImportEndSetting = customSetting(
+			containerEl,
+			"Import End Offset",
+			"Days in the future from events to import"
+		).createEl("input", {
+			type: "number",
+		});
+		ImportEndSetting.value = this.plugin.settings.importEndOffset + "";
+		ImportEndSetting.min = "0";
+		ImportEndSetting.step = "1";
+		ImportEndSetting.addEventListener("input", async () => {
+			this.plugin.settings.importEndOffset = parseInt(
+				ImportEndSetting.value
+			);
+			await this.plugin.saveSettings();
+		});
+
 		const RefreshIntervalInput = customSetting(
 			containerEl,
 			"Refresh Interval",
