@@ -248,6 +248,7 @@
 <style>
     .danger{
         background-color: rgb(255, 114, 114) !important;
+        color: black !important;
     }
 
     label{

@@ -98,11 +98,10 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 					console.log("Auth failed")
 				}
 			})
-			.listen(42813, () => {
+			.listen(42813, async () => {
 				// open the browser to the authorize url to start the workflow
-				open(authorizeUrl, { wait: false }).then((cp: any) =>
-					cp.unref()
-				);
+				const cp = await open(authorizeUrl, { wait: false })
+				cp.unref()		
 			});
 
 		destroyer(server);

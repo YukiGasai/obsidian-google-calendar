@@ -33,25 +33,25 @@
     let timeDisplayPosition = 0;
     let events:GoogleEvent[] = [];
     let eventLocations:Location[] = [];
-
-    onMount(async () => {
+    let interval;
+    const refeshData =async () => {
+        eventLocations = [];
         await getEvents()
 
         const dayPercentage = DateToPercent(new Date());
-    
+
         timeDisplayPosition = Math.floor(height * dayPercentage);
-	});
+    } 
 
     $: {
-        // This log is needed to tell svelte to redraw if date changes
-        console.log(date)
+        if(interval){
+            clearInterval(interval);
+        }
         loading = true;
-        eventLocations = [];
-        getEvents()
-
-        const dayPercentage = DateToPercent(new Date());
-
-        timeDisplayPosition = Math.floor(height * dayPercentage);
+        console.log(date)
+        interval = setInterval(refeshData, plugin.settings.refreshInterval * 1000);
+        refeshData();
+        
     }
 
     const getLocationArray = () => {
@@ -66,11 +66,10 @@
                 startMap.set(start, [event])
             }
         });
-        console.log(startMap)
-
 
         let indentAmount = 0;
         let latestEndDate = null; 
+
         for (let events of startMap.values()) {
     
             if(events[0].start.dateTime){
@@ -84,21 +83,20 @@
 
                 latestEndDate = window.moment(events[0].end.dateTime)
             }
-
             events.forEach((event, i) => {
                                 
                 const indent = 30 + indentAmount * 10;
 
                 const elementWidth = (width-indent) / events.length;
 
-                eventLocations.push({
+                eventLocations = [...eventLocations, {
                     event: event,
                     x: indent + elementWidth*i,
                     y: getEventStartPosition(event, height),
                     width: elementWidth,
                     height: getEventHeight(event, height),
                     fullDay: event.start.date != undefined
-                })      
+                }]     
             })
         }
     }
@@ -112,7 +110,7 @@
         
         if(date == 'tomorrow'){
             const tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
-            events =  await googleListEvents(plugin, tomorrow);
+            events = await googleListEvents(plugin, tomorrow);
             return;
         }
         
@@ -130,7 +128,9 @@
             }
         }
         const dateString = tmpDate.format("YYYY-MM-DD");
-        events = await googleListEvents(plugin, dateString);
+        console.log(dateString)
+        events = await googleListEvents(plugin, dateString); 
+
         getLocationArray()
         loading = false;
     }
@@ -146,6 +146,8 @@
     
     </script>
 
+ 
+
     {#if loading}
         <p>Loading</p>
     {:else} 
@@ -153,7 +155,8 @@
     <div 
         style:height="{height}px"
         style:width="{width}px"
-        class="timeline">
+        class="timeline"
+        >
 
         <div class="hourLineContainer">
         {#each {length: 24} as _, i }
@@ -177,7 +180,7 @@
     {/if}
 
 
-    
+        {eventLocations.length}
         {#each eventLocations as location, i}
             <div 
                 on:click={(e) => goToEvent(location.event,e)} 

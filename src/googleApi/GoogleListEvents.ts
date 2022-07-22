@@ -9,6 +9,13 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { moment } from "obsidian";
 import { googleListCalendars } from "./GoogleListCalendars";
+import ct from 'countries-and-timezones'
+
+
+const dateToTimeParam = (date:string, tz:string) :string => {
+	return encodeURIComponent(`${date}T00:00:00${tz}`);
+}
+
 
 /**
  * 
@@ -35,6 +42,9 @@ export async function googleListEventsByCalendar(
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
+
+	const timezone = ct.getTimezone(googleCalander.timeZone);
+	console.log(timezone)
 	try {
 		do {
 			let requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
@@ -44,19 +54,21 @@ export async function googleListEventsByCalendar(
 			requestUrl += `&maxResults=${resultSizes}`;
 			requestUrl += `&singleEvents=True`;
 			requestUrl += `&orderBy=startTime`;
-			requestUrl += `&timeMin=${date}T00%3A00%3A00Z`;
+			requestUrl += `&timeMin=${dateToTimeParam(date, timezone.dstOffsetStr)}`
 
 			// TODO This could lead to problems displaying events at the wrong dates
-			if (endDate) {
-				requestUrl += `&timeMax=${endDate}T23%3A59%3A59Z`;
-			} else {
-				requestUrl += `&timeMax=${date}T23%3A59%3A59Z`;
-			}
+		
+
+
+			const tomorrow = moment(endDate ?? date).add(1, "day").format('YYYY-MM-DD');
+			requestUrl += `&timeMax=${dateToTimeParam(tomorrow, timezone.dstOffsetStr)}`;
+			
 
 			if (tmpRequestResult && tmpRequestResult.nextPageToken) {
 				requestUrl += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
 			}
 
+			console.log(requestUrl)
 			const response = await fetch(requestUrl, {
 				method: "GET",
 				headers: requestHeaders,

@@ -222,14 +222,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			this.plugin.settings.refreshInterval = parseInt(
 				RefreshIntervalInput.value
 			);
-			//TODO
-			// this.app.workspace
-			// 	.getLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR)
-			// 	.forEach((leaf) => {
-			// 		if (leaf.view instanceof GoogleTaskView) {
-			// 			leaf.view.setRefreshInterval();
-			// 		}
-			// 	});
 			await this.plugin.saveSettings();
 		});
 
@@ -238,15 +230,16 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Add Item to BlackList")
-			.addDropdown((dropdown) => {
+			.addDropdown(async (dropdown) => {
 				dropdown.addOption("Default", "Select Option to add");
-				googleListCalendars(this.plugin).then((calendars) => {
-					calendars.forEach((calendar) => {
-						dropdown.addOption(
-							calendar.id + "_=_" + calendar.summary,
-							calendar.summary
-						);
-					});
+				const calendars = await googleListCalendars(this.plugin);
+								
+				calendars.forEach((calendar) => {
+					dropdown.addOption(
+						calendar.id + "_=_" + calendar.summary,
+						calendar.summary
+					);
+			
 				});
 
 				dropdown.onChange(async (value) => {

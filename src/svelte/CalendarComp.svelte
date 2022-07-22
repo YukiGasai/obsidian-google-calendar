@@ -12,7 +12,7 @@
     export let width:number = 400;
     export let height:number = 400;
     export let plugin:GoogleCalendarPlugin;
-
+    let interval;
     let events: GoogleEvent[];
     let loading: boolean = true;
     let sources:ICalendarSource[];
@@ -27,13 +27,6 @@
         events = googleList;
         return googleList;   
     }
-
-
-    onMount(async () => {
-        getSource(displayedMonth)
-	});
-  
-
 
     async function getSource(month:moment.Moment) {
           const veranstaltung = await getEventsInMonth(month);    
@@ -93,7 +86,12 @@
     }
 
     $: {
-        getSource(displayedMonth);
+        if(interval){
+            clearInterval(interval);
+        }
+        interval = setInterval(() => getSource(displayedMonth), plugin.settings.refreshInterval * 1000)
+        getSource(displayedMonth)
+
     }
 
 </script>
@@ -114,7 +112,7 @@
             showWeekNums={false}
             {onClickDay}
             {onHoverDay}
-            {sources}
+            bind:sources
             bind:displayedMonth
         />
     </div>

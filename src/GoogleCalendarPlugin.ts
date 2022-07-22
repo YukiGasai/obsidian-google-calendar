@@ -23,12 +23,12 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleApiToken: "",
 	googleRefreshToken: "",
 	askConfirmation: true,
-	refreshInterval: 60,
+	refreshInterval: 10,
 	showNotice: true,
 	autoCreateEventNotes: true,
-	importStartOffset: -1,
+	importStartOffset: 1,
 	importEndOffset: 1,
-	calendarBlackList: [],
+calendarBlackList: [],
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
@@ -157,7 +157,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 				}
 
 				googleListTodayEvents(this).then((events) => {
-					console.log(events);
+					// new EventListModal(this, events)
 				});
 			},
 		});
@@ -211,12 +211,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				navigator.clipboard.writeText(token).then(function() {
-					new Notice("Token copied")
-				}, function(err) {
-					new Notice("Could not copy token")
-				});
-
+				navigator.clipboard.writeText(token);
+				new Notice("Token copied")
 			},
 		});
 

@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@googleapis/calendar": "^1.0.2",
 		"clipboardy": "^3.0.0",
+		"countries-and-timezones": "^3.3.0",
 		"google-auth-library": "^8.0.2",
 		"googleapis": "^100.0.0",
 		"obsidian-calendar-ui": "^0.3.12",
