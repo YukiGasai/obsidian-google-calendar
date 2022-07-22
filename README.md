@@ -6,8 +6,8 @@ Manage your Google Calendar from inside Obsidian
 
 -   List Events ✔
 -   Create Events
--   Edit Events (Will create a new task and delete the old one)
--   Delete Events
+-   Edit Events ✔
+-   Delete Events ✔
 
 ## Installation
 
