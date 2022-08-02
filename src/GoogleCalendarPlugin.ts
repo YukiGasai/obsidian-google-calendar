@@ -8,13 +8,13 @@ import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleListTodayEvents } from "./googleApi/GoogleListEvents";
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
-import { TimeLineView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/TimeLineView";
+import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
 import { getRT } from "./helper/LocalStorage";
-
+import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -28,12 +28,13 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	autoCreateEventNotes: true,
 	importStartOffset: 1,
 	importEndOffset: 1,
-calendarBlackList: [],
+	calendarBlackList: [],
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
 	settings: GoogleCalendarPluginSettings;
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	templatePlugin:any;
 
 	initView = async (viewId:string): Promise<void> => {
@@ -54,6 +55,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 	onLayoutReady = ():void => {
 		//Get the template plugin to run their commands
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const templatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
 		if(templatePlugin && templatePlugin.enabled){
 			this.templatePlugin = templatePlugin;
@@ -74,7 +76,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_DAY,
-			(leaf: WorkspaceLeaf) => new TimeLineView(leaf, this)
+			(leaf: WorkspaceLeaf) => new DayCalendarView(leaf, this)
 		);
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_MONTH,
@@ -157,7 +159,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 				}
 
 				googleListTodayEvents(this).then((events) => {
-					// new EventListModal(this, events)
+					new EventListModal(this, events).open()
 				});
 			},
 		});

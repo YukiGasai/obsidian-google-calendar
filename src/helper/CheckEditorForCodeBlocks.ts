@@ -68,7 +68,7 @@ export async function checkEditorForCodeBlocks(
 		? parseInt(options.get("height"))
 		: 500;
 
-	const blockDate = options.has("date")
+	let blockDate = options.has("date")
 		? options.get("date")
 		: window.moment().format("YYYY-MM-DD");
 
@@ -78,6 +78,7 @@ export async function checkEditorForCodeBlocks(
 	if (
 		blockDate == "today" ||
 		blockDate == "tomorrow" ||
+		blockDate == "yesterday" ||
 		moment(blockDate, "YYYY-MM-DD", true).isValid() ||
 		moment(blockDate, "YYYY.MM.DD", true).isValid() ||
 		moment(blockDate, "YYYY/MM/DD", true).isValid() ||
@@ -88,6 +89,15 @@ export async function checkEditorForCodeBlocks(
 		moment(blockDate, "DD.MM.YYYY", true).isValid() ||
 		moment(blockDate, "DD/MM/YYYY", true).isValid()
 	) {
+
+		if(blockDate == "today"){
+			blockDate = moment().format("YYYY-MM-DD");
+		}else if (blockDate == "tomorrow"){
+			blockDate = moment().add(1, "day").format("YYYY-MM-DD");
+		}else if (blockDate == "yesterday"){
+			blockDate = moment().subtract(1, "day").format("YYYY-MM-DD");
+		}
+
 		if (blockType == "web") {
 			if (Platform.isDesktopApp) {
 				new WebFrameComp({

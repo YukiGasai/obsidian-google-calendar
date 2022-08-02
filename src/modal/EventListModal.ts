@@ -1,31 +1,18 @@
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-import { Editor, EditorPosition, FuzzySuggestModal } from "obsidian";
 import type { GoogleEvent } from "../helper/types";
+
+import { FuzzySuggestModal } from "obsidian";
+import { ViewEventEntry } from './ViewEventEntry';
 
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	plugin: GoogleCalendarPlugin;
 	eventList: GoogleEvent[];
-	editor: Editor;
-	start: EditorPosition;
-	end: EditorPosition;
-	word: string;
 
-	constructor(
-		plugin: GoogleCalendarPlugin,
-		eventList: GoogleEvent[],
-		editor: Editor,
-		start: EditorPosition,
-		end: EditorPosition,
-		word: string
-	) {
+	constructor(plugin: GoogleCalendarPlugin, eventList: GoogleEvent[]) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.eventList = eventList;
-		this.setPlaceholder("Select an event to insert");
-		this.editor = editor;
-		this.start = start;
-		this.end = end;
-		this.word = word;
+		this.setPlaceholder("Select a event to view it");
 	}
 
 	getItems(): GoogleEvent[] {
@@ -33,20 +20,22 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	getItemText(item: GoogleEvent): string {
-		return `${item.summary}\t`;
+
+		if(item.start.date) {
+			return `${item.start.date}\t\t | ${item.summary}\t`;
+		}else{
+
+			const dateTime = window.moment(item.start.dateTime).format("YYYY-MM-DD HH:mm");
+
+			return `${dateTime}\t | ${item.summary}\t`;
+		}
 	}
 
 	async onChooseItem(
 		item: GoogleEvent,
 		_: MouseEvent | KeyboardEvent
 	): Promise<void> {
-		const replacementString = `[${item.summary}](${item.htmlLink})`;
-
-		this.editor.replaceRange(
-			replacementString,
-			this.start,
-			this.end,
-			this.word
-		);
+		this.open();
+		new ViewEventEntry(this.plugin, item, window.moment()).open();
 	}
 }

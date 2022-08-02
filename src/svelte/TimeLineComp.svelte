@@ -9,10 +9,7 @@
     import {ViewEventEntry} from '../modal/ViewEventEntry'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
 
-
     import {moment} from 'obsidian';
-    import { onMount } from "svelte";
-
 
     
     interface Location {
@@ -20,7 +17,7 @@
         x:number;
         y:number;
         width:number;
-        height:number;
+        height:number; 
         fullDay:boolean;
     }
 
@@ -35,24 +32,25 @@
     let eventLocations:Location[] = [];
     let interval;
     const refeshData =async () => {
-        eventLocations = [];
         await getEvents()
-
         const dayPercentage = DateToPercent(new Date());
-
         timeDisplayPosition = Math.floor(height * dayPercentage);
     } 
 
     $: {
+        //needed to update if the prop date changes i dont know why
+        date = date;
+
+        
         if(interval){
             clearInterval(interval);
         }
         loading = true;
-        console.log(date)
         interval = setInterval(refeshData, plugin.settings.refreshInterval * 1000);
         refeshData();
-        
     }
+
+   
 
     const getLocationArray = () => {
 
@@ -128,10 +126,14 @@
             }
         }
         const dateString = tmpDate.format("YYYY-MM-DD");
-        console.log(dateString)
-        events = await googleListEvents(plugin, dateString); 
+   
+        const newEvents = await googleListEvents(plugin, dateString); 
 
-        getLocationArray()
+        if(JSON.stringify(newEvents) != JSON.stringify(events)){
+            events = newEvents;
+            eventLocations = [];
+            getLocationArray()
+        }
         loading = false;
     }
 

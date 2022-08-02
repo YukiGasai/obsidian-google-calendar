@@ -4,7 +4,7 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_DAY = "google-calendar-view-day";
-export class TimeLineView extends ItemView {
+export class DayCalendarView extends ItemView {
 	timeline: TimeLineViewComp;
 	plugin: GoogleCalendarPlugin;
 

@@ -7,6 +7,7 @@
     import { googleListEvents } from "../googleApi/GoogleListEvents";
     import { ViewEventEntry } from "../modal/ViewEventEntry";
     import { getColorFromEvent } from "../googleApi/GoogleColors";
+    import { EventListModal } from "../modal/EventListModal";
 
     export let displayedMonth = window.moment();
     export let width:number = 400;
@@ -63,7 +64,7 @@
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
  
         popUpSelectedDate = date      
-    
+        new EventListModal(plugin, getEventsOfDay(events, date)).open();
     }
 
     const onHoverDay = (date: moment.Moment, container: HTMLElement) => {
@@ -106,7 +107,8 @@
         <p>Loading...</p>
     {:else} 
    
-    <div class={popUpSelectedDate&&"blured"}>
+    <!-- <div class={popUpSelectedDate&&"blured"}> -->
+    <div>
         <CalendarBase
            
             showWeekNums={false}
@@ -118,7 +120,7 @@
     </div>
     {/if}
 
-    {#if popUpSelectedDate}
+    <!-- {#if popUpSelectedDate}
         <div class="popUpContainer" on:click={closePopup}>
             <span class="popUpTitle">{(window.moment(popUpSelectedDate).calendar().split(" at"))[0]}</span>
          
@@ -129,11 +131,12 @@
                 </div>
             {/each}
         </div>
-    {/if}
+    {/if} -->
 </div>
 
 
 <style>
+    /*
     .blured{
         filter: blur(5px);
     }
@@ -177,6 +180,6 @@
     width:100px;
     min-width: 100px;
 }
-
+*/
 </style>
 

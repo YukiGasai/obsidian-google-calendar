@@ -13,7 +13,9 @@ import {
 	setRT,
 } from "../helper/LocalStorage";
 import { Notice, Platform } from "obsidian";
+import type { IncomingMessage, ServerResponse } from 'http';
 
+const PORT = 42813
 
 export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<string> {
 	if (!settingsAreCompleteAndLoggedIn(plugin)) return;
@@ -40,9 +42,9 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
 			);
 
 			const tokenData = await response.json();
-
+			console.log(tokenData)
 			setAT(tokenData.access_token);
-			setET(+new Date() + tokenData.expires_in);
+			setET(+new Date() + tokenData.expires_in*1000);
 		}
 	}
 
@@ -60,7 +62,7 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 		const oAuth2Client = new OAuth2Client(
 			plugin.settings.googleClientId,
 			plugin.settings.googleClientSecret,
-			"http://127.0.0.1:42813/callback"
+			`http://127.0.0.1:${PORT}/callback`
 		);
 		const authorizeUrl = oAuth2Client.generateAuthUrl({
 			scope: [
@@ -71,13 +73,13 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 		});
 
 		const server = http
-			.createServer(async (req: any, res: any) => {
+			.createServer(async (req: IncomingMessage, res: ServerResponse) => {
 				try {
 					if (req.url.indexOf("/callback") > -1) {
 						// acquire the code from the querystring, and close the web server.
 						const qs = new url.URL(
 							req.url,
-							"http://localhost:42813"
+							`http://localhost:${PORT}`
 						).searchParams;
 						const code = qs.get("code");
 						res.end(
@@ -98,7 +100,7 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 					console.log("Auth failed")
 				}
 			})
-			.listen(42813, async () => {
+			.listen(PORT, async () => {
 				// open the browser to the authorize url to start the workflow
 				const cp = await open(authorizeUrl, { wait: false })
 				cp.unref()		

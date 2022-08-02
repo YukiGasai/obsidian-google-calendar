@@ -6,7 +6,7 @@
 import type { Editor } from "obsidian";
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
-import { EventListModal } from "../modal/EventListModal";
+import { EventSelectReplaceModal } from "../modal/EventSelectReplaceModal";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 
 export function checkEditorForAtDates(
@@ -90,7 +90,7 @@ function check4Word(
 	}
 
 	googleListEvents(plugin, date).then((events) => {
-		new EventListModal(
+		new EventSelectReplaceModal(
 			plugin,
 			events,
 			editor,

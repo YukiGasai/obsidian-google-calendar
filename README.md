@@ -4,10 +4,12 @@ Manage your Google Calendar from inside Obsidian
 
 ## Features
 
--   List Events ✔
--   Create Events
--   Edit Events ✔
--   Delete Events ✔
+-   List Events
+-   Create Events 
+-   Edit Events   
+-   Delete Events 
+-   Auto create Notes from Events
+-   Insert Links to Events into Notes
 
 ## Installation
 
@@ -16,7 +18,7 @@ Manage your Google Calendar from inside Obsidian
 -   Restart Obsidian
 -   Activate inside the obsidian settings page
 -   [Create Google Cloud Project](https://console.cloud.google.com/projectcreate?)
--   [Activate Google Tasks API](https://console.cloud.google.com/marketplace/product/google/tasks.googleapis.com?q=search&referrer=search&project=iron-core-327018)
+-   [Activate Google Calendar API](https://console.cloud.google.com/marketplace/product/google/calendar-json.googleapis.com)
 -   [Configure OAUTH screen](https://console.cloud.google.com/apis/credentials/consent?)
     -   Select Extern
     -   Fill necessary inputs
@@ -38,14 +40,12 @@ Manage your Google Calendar from inside Obsidian
 
 ## Usage
 
-### Google Calendar Day View
+### Google Calendar Day/Timeline View
 
--   Open view by pressing the calendar icon in the left sidebar
 -   View will show you a timeine for the current day
-    -   Interact with an event by clicking on it
-    -   Edit the event by long pressing it
-    -   Press the plus button to create a new event
-    -   use the arrow buttons to switch between days
+-   Edit the event by long pressing it
+-   Press the plus button to create a new event
+-   use the arrow buttons to switch between days
 
 ### Commands
 

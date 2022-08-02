@@ -23,16 +23,16 @@ const openNewEventDialog = (event) => {
 }
 
 
-$: currentDate =  moment().add(dateOffset, "days").format("YYYY-MM-DD");
+$: date =  moment().add(dateOffset, "days").format("YYYY-MM-DD");
 
 </script>
 <div>
-    <h3>Google Calendar {currentDate}</h3>
+    <h3>Google Calendar {date}</h3>
     <button on:click={openNewEventDialog}>+</button>
     <button on:click={minusOneWeek}>&larr&larr</button>
     <button on:click={minusOneDay}>&larr</button>
     <button on:click={backToday}>Today</button>
     <button on:click={plusOneDay}>&rarr</button>
     <button on:click={plusOneWeek}>&rarr&rarr</button>
-    <TimeLine plugin={plugin} date={currentDate} />
+    <TimeLine plugin={plugin} bind:date/>
 </div>

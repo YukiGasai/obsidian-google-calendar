@@ -4,6 +4,21 @@ import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 
+
+let cachedCalendars:GoogleCalander[] = []
+
+
+function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:GoogleCalander[]):GoogleCalander[]{
+	//Remove the calendars contained in the blacklist
+	const filteredCalendars = calendars.filter((calendar) => {
+		const foundIndex = plugin.settings.calendarBlackList.findIndex(
+			(c) => c[0] == calendar.id
+		);
+		return foundIndex == -1;
+	});
+	return filteredCalendars;
+}
+
 /**
  * This functions get all google calendars from the user that were not Black listed by him
  * @param plugin Refrence to the main plugin to acess the settings 
@@ -12,6 +27,13 @@ import { getGoogleAuthToken } from "./GoogleAuth";
 export async function googleListCalendars(
 	plugin: GoogleCalendarPlugin
 ): Promise<GoogleCalander[]> {
+
+
+	if(cachedCalendars.length){
+		//Filter for every request instead of caching the filtered result to allow hot swap settings
+		return filterCalendarsByBlackList(plugin,cachedCalendars);
+	}
+
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
 		"Authorization",
@@ -29,14 +51,9 @@ export async function googleListCalendars(
 		);
 		const calendarList: GoogleCalanderList = await response.json();
 
-		//Remove the calendars contained in the blacklist
-		const calendars = calendarList.items.filter((calendar) => {
-			const foundIndex = plugin.settings.calendarBlackList.findIndex(
-				(c) => c[0] == calendar.id
-			);
+		cachedCalendars = calendarList.items;
 
-			return foundIndex == -1;
-		});
+		const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
 
 		return calendars;
 	} catch (error) {

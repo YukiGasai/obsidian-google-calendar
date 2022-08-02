@@ -44,7 +44,7 @@ export async function googleListEventsByCalendar(
 
 
 	const timezone = ct.getTimezone(googleCalander.timeZone);
-	console.log(timezone)
+
 	try {
 		do {
 			let requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
@@ -68,7 +68,6 @@ export async function googleListEventsByCalendar(
 				requestUrl += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
 			}
 
-			console.log(requestUrl)
 			const response = await fetch(requestUrl, {
 				method: "GET",
 				headers: requestHeaders,
