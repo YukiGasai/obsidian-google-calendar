@@ -13,7 +13,9 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.plugin = plugin;
 		this.eventList = eventList;
 		this.setPlaceholder("Select a event to view it");
+		this.emptyStateText = "No events found enter to create a new one"
 	}
+
 
 	getItems(): GoogleEvent[] {
 		return this.eventList;
@@ -38,4 +40,6 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.open();
 		new ViewEventEntry(this.plugin, item, window.moment()).open();
 	}
+
+
 }

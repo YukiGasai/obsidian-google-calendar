@@ -156,12 +156,10 @@ export async function googleListTodayEvents(
 
 export async function googleListEventsByMonth(
 	plugin: GoogleCalendarPlugin,
-	dateInMonth: string
+	dateInMonth: moment.Moment
 ): Promise<GoogleEvent[]> {
-	const monthStartDate = moment(dateInMonth)
-		.startOf("month")
-	const monthEndDate = moment(dateInMonth)
-		.endOf("month")
+	const monthStartDate = dateInMonth.clone().startOf("month")
+	const monthEndDate   = dateInMonth.clone().endOf("month")
 
 	const list = await googleListEvents(plugin, monthStartDate, monthEndDate);
 	return list;

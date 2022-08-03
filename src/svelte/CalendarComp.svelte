@@ -3,8 +3,8 @@
     import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
     import type { GoogleEvent } from '../helper/types';
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
-    import { googleListEvents } from "../googleApi/GoogleListEvents";
     import { EventListModal } from "../modal/EventListModal";
+    import { googleListEventsByMonth } from "../googleApi/GoogleListEvents";
 
     export let displayedMonth = window.moment();
     export let width:number = 400;
@@ -16,23 +16,13 @@
     let loading: boolean = true;
     let sources:ICalendarSource[];
     
-
-
-    async function getEventsInMonth(month: moment.Moment):Promise<GoogleEvent[]>{
- 
-        let start = month.clone().startOf("month");
-        let end   = month.clone().endOf("month");
-        const googleList = await googleListEvents(plugin, start, end);
-        events = googleList;
-        return googleList;   
-    }
-
     async function getSource(month:moment.Moment) {
-          const veranstaltung = await getEventsInMonth(month);    
+          const eventsInMonth = await googleListEventsByMonth(plugin, month);    
+          events = eventsInMonth;
           const customTagsSource: ICalendarSource = {
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
               
-                const eventsOfTheDay = getEventsOfDay(veranstaltung, day);
+                const eventsOfTheDay = getEventsOfDay(eventsInMonth, day);
                 const dots:IDot[] = eventsOfTheDay.map(event => {
                     return {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
                 })
