@@ -15,12 +15,12 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
     const startOffset = Math.abs(plugin.settings.importStartOffset);
     const endOffset = Math.abs(plugin.settings.importEndOffset);
 
-    const startDate = window.moment().local().subtract(startOffset, "day").format("YYYY-MM-DD");
-    const endDate = window.moment().local().add(endOffset, "day").format("YYYY-MM-DD");
+    const startDate = window.moment().local().subtract(startOffset, "day")
+    const endDate = window.moment().local().add(endOffset, "day")
     const events = await googleListEvents(plugin, startDate, endDate);
 
     events.forEach(event => {
-        const match = event.description.match(/:obsidian-?(.*)?:/) ?? [];
+        const match = event.description?.match(/:obsidian-?(.*)?:/) ?? [];
         
         if(match.length == 2){
             const filename = event.summary;

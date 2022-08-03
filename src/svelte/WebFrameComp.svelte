@@ -1,45 +1,26 @@
 <script lang="ts">
 
-import {moment} from "obsidian";
-
-export let date   = "today";
+export let date   = window.moment();
 export let width  = 400;
 export let height = 400;
 
-
 let webUrl:string = ""
-if (date === "today") {
-    const dateString = moment().format("yyyy/M/D");
-    webUrl = `https://calendar.google.com/calendar/u/0/r/day/${dateString}`
 
-}else if (date === "tomorrow") {
-    const dateString = moment().add(1, "days").format("yyyy/M/D");
-    webUrl = `https://calendar.google.com/calendar/u/0/r/day/${dateString}`;
+//If date is not valid default to toady
+if(!date.isValid()){
+    webUrl = "https://calendar.google.com/calendar/u/0/r/day/"
 
 }else{
-    let tmpDate = moment(date);
-            if(!tmpDate.isValid()){
-                tmpDate = moment(date, 'DD.MM.YYYY');
-                if(!tmpDate.isValid()){
-                    tmpDate = moment(date, 'DD-MM-YYYY');
-                     if(!tmpDate.isValid()){
-                        tmpDate = moment(date, 'DD/MM/YYYY');
-                        if(!tmpDate.isValid()){
-                            webUrl = "https://calendar.google.com/calendar/u/0/r/day/"
-                         }
-                     }
-                }
-            }
-    const dateString = tmpDate.format("yyyy/M/D");
+    const dateString = date.format("yyyy/M/D");
     webUrl = `https://calendar.google.com/calendar/u/0/r/day/${dateString}`;
+}
+
+const domReady = () => {
 
 }
 
-const domReady = () => {}
-
 
 </script>
-
 
 <div class="box">
     <div class="content">

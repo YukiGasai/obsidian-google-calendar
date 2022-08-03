@@ -28,9 +28,10 @@ const dateToTimeParam = (date:string, tz:string) :string => {
 export async function googleListEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	googleCalander: GoogleCalander,
-	date: string,
-	endDate?: string
+	date: moment.Moment,
+	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
+
 	let totalEventList: GoogleEvent[] = [];
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
@@ -41,7 +42,6 @@ export async function googleListEventsByCalendar(
 		"Bearer " + (await getGoogleAuthToken(plugin))
 	);
 	requestHeaders.append("Content-Type", "application/json");
-
 
 	const timezone = ct.getTimezone(googleCalander.timeZone);
 
@@ -54,13 +54,11 @@ export async function googleListEventsByCalendar(
 			requestUrl += `&maxResults=${resultSizes}`;
 			requestUrl += `&singleEvents=True`;
 			requestUrl += `&orderBy=startTime`;
-			requestUrl += `&timeMin=${dateToTimeParam(date, timezone.dstOffsetStr)}`
+			requestUrl += `&timeMin=${dateToTimeParam(date.format('YYYY-MM-DD'), timezone.dstOffsetStr)}`
 
 			// TODO This could lead to problems displaying events at the wrong dates
-		
 
-
-			const tomorrow = moment(endDate ?? date).add(1, "day").format('YYYY-MM-DD');
+			const tomorrow = (endDate ?? date).clone().add(1, "day").format('YYYY-MM-DD');
 			requestUrl += `&timeMax=${dateToTimeParam(tomorrow, timezone.dstOffsetStr)}`;
 			
 
@@ -85,6 +83,7 @@ export async function googleListEventsByCalendar(
 			totalEventList = [...totalEventList, ...newList];
 		} while (tmpRequestResult.items.length == 2500);
 
+
 		totalEventList = totalEventList.sort((a:GoogleEvent, b:GoogleEvent) : number => {
             const startA = window.moment((a.start.date || a.start.dateTime))
             const startB = window.moment((b.start.date || b.start.dateTime))
@@ -102,9 +101,10 @@ export async function googleListEventsByCalendar(
 
 export async function googleListEvents(
 	plugin: GoogleCalendarPlugin,
-	date: string,
-	endDate?: string
+	date:  moment.Moment,
+	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
+
 	try {
 		const calendarList = await googleListCalendars(plugin);
 		let eventList: GoogleEvent[] = [];
@@ -139,11 +139,10 @@ export async function googleListTodayEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	googleCalander: GoogleCalander
 ): Promise<GoogleEvent[]> {
-	const today = moment().format("YYYY-MM-DD");
 	const list = await googleListEventsByCalendar(
 		plugin,
 		googleCalander,
-		today
+		window.moment()
 	);
 	return list;
 }
@@ -151,8 +150,7 @@ export async function googleListTodayEventsByCalendar(
 export async function googleListTodayEvents(
 	plugin: GoogleCalendarPlugin
 ): Promise<GoogleEvent[]> {
-	const today = moment().format("YYYY-MM-DD");
-	const list = await googleListEvents(plugin, today);
+	const list = await googleListEvents(plugin, moment());
 	return list;
 }
 
@@ -162,10 +160,8 @@ export async function googleListEventsByMonth(
 ): Promise<GoogleEvent[]> {
 	const monthStartDate = moment(dateInMonth)
 		.startOf("month")
-		.format("YYYY-MM-DD");
 	const monthEndDate = moment(dateInMonth)
 		.endOf("month")
-		.format("YYYY-MM-DD");
 
 	const list = await googleListEvents(plugin, monthStartDate, monthEndDate);
 	return list;

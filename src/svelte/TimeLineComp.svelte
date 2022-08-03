@@ -1,17 +1,16 @@
 <script lang="ts" >
+
+    import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+    import type { GoogleEvent } from "../helper/types";
+
     import TreeMap from 'ts-treemap'
     import { DateToPercent } from "../helper/CanvasDrawHelper";
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
     import { googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
-    import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-    import type { GoogleEvent } from "../helper/types";
     import {ViewEventEntry} from '../modal/ViewEventEntry'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
 
-    import {moment} from 'obsidian';
-
-    
     interface Location {
         event:GoogleEvent;
         x:number;
@@ -24,13 +23,14 @@
     export let plugin: GoogleCalendarPlugin;
     export let height = 700;
     export let width = 300;
-    export let date = 'today';
+    export let date = window.moment();
 
     let loading = true;
     let timeDisplayPosition = 0;
     let events:GoogleEvent[] = [];
     let eventLocations:Location[] = [];
     let interval;
+
     const refeshData =async () => {
         await getEvents()
         const dayPercentage = DateToPercent(new Date());
@@ -41,7 +41,6 @@
         //needed to update if the prop date changes i dont know why
         date = date;
 
-        
         if(interval){
             clearInterval(interval);
         }
@@ -53,7 +52,6 @@
    
 
     const getLocationArray = () => {
-
 
         const startMap = new TreeMap<string, GoogleEvent[]>();
         events.forEach((event) => {
@@ -100,34 +98,12 @@
     }
 
     const getEvents = async() => {
- 
-        if(date == 'today'){
-            events = await googleListTodayEvents(plugin);
+        
+        if(!date.isValid()){
             return;
         }
-        
-        if(date == 'tomorrow'){
-            const tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
-            events = await googleListEvents(plugin, tomorrow);
-            return;
-        }
-        
-        let tmpDate = moment(date);
-        if(!tmpDate.isValid()){
-            tmpDate = moment(date, 'DD.MM.YYYY');
-            if(!tmpDate.isValid()){
-                tmpDate = moment(date, 'DD-MM-YYYY');
-                 if(!tmpDate.isValid()){
-                    tmpDate = moment(date, 'DD/MM/YYYY');
-                    if(!tmpDate.isValid()){
-                        return;
-                    }
-                }
-            }
-        }
-        const dateString = tmpDate.format("YYYY-MM-DD");
    
-        const newEvents = await googleListEvents(plugin, dateString); 
+        const newEvents = await googleListEvents(plugin, date); 
 
         if(JSON.stringify(newEvents) != JSON.stringify(events)){
             events = newEvents;
@@ -141,7 +117,7 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new ViewEventEntry(plugin, event, moment(date)).open();
+            new ViewEventEntry(plugin, event, date).open();
         }
     }
 
@@ -177,12 +153,10 @@
         </div>
     
     
-    {#if moment().isSame(date, 'day')}
+    {#if window.moment().isSame(date, 'day')}
         <div class="timeDisplay" style:top="{timeDisplayPosition}px" style:width="{width}px"/>
     {/if}
 
-
-        {eventLocations.length}
         {#each eventLocations as location, i}
             <div 
                 on:click={(e) => goToEvent(location.event,e)} 
@@ -194,15 +168,9 @@
                 style:background={getColorFromEvent(location.event)}
             >{location.event.summary}</div>
         {/each}
-      
-
-        
 
     </div>
     {/if}
-
-
-
 
     <style>
     
@@ -256,6 +224,5 @@
            flex-direction: row;
            /*border: 1px solid green;*/
        }
-    
     
     </style>

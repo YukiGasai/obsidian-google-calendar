@@ -19,14 +19,10 @@ export const insertTodayEventsIntoFile = async (plugin: GoogleCalendarPlugin,edi
         if (event.start) {
             let dateString = "";
             if (event.start.dateTime) {
-                const startTime = moment(event.start.dateTime).format(
-                    "HH:mm"
-                );
+                const startTime = moment(event.start.dateTime).format("HH:mm");
                 dateString = startTime;
                 if (event.end.dateTime) {
-                    const endTime = moment(event.end.dateTime).format(
-                        "HH:mm"
-                    );
+                    const endTime = moment(event.end.dateTime).format("HH:mm");
 
                     dateString += `-${endTime}`;
                 }

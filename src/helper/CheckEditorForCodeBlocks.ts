@@ -70,7 +70,7 @@ export async function checkEditorForCodeBlocks(
 
 	let blockDate = options.has("date")
 		? options.get("date")
-		: window.moment().format("YYYY-MM-DD");
+		: window.moment()
 
 	el.style.width = blockWidth + "px";
 	el.style.height = blockHeight + "px";
@@ -91,11 +91,11 @@ export async function checkEditorForCodeBlocks(
 	) {
 
 		if(blockDate == "today"){
-			blockDate = moment().format("YYYY-MM-DD");
+			blockDate = moment();
 		}else if (blockDate == "tomorrow"){
-			blockDate = moment().add(1, "day").format("YYYY-MM-DD");
+			blockDate = moment().add(1, "day");
 		}else if (blockDate == "yesterday"){
-			blockDate = moment().subtract(1, "day").format("YYYY-MM-DD");
+			blockDate = moment().subtract(1, "day");
 		}
 
 		if (blockType == "web") {
@@ -126,7 +126,7 @@ export async function checkEditorForCodeBlocks(
 					plugin: plugin,
 					height: blockHeight,
 					width: blockWidth,
-					displayedMonth: window.moment(blockDate),
+					displayedMonth: blockDate,
 				},
 			});
 		}

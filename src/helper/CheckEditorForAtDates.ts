@@ -29,7 +29,7 @@ function check4Word(
 	const endPos = editor.getCursor();
 	let startPos = editor.getCursor();
 	let realWord = "";
-	let date = "";
+	let date = window.moment();
 
 	if (word === "@REGEX") {
 		const realLine = editor.getLine(endPos.line);
@@ -44,12 +44,9 @@ function check4Word(
 		realWord = editor.getRange(startPos, endPos);
 
 		if (match[1] == "+") {
-			date = window.moment().add(match[2], "day").format("YYYY-MM-DD");
+			date = window.moment().add(match[2], "day");
 		} else {
-			date = window
-				.moment()
-				.subtract(match[2], "day")
-				.format("YYYY-MM-DD");
+			date = window.moment().subtract(match[2], "day");
 		}
 
 	} else if (word === "@YYYY-MM-DD") {
@@ -60,7 +57,7 @@ function check4Word(
 
 		const tmpDate = window.moment(realWord.substring(1));
 		if (tmpDate.isValid()) {
-			date = tmpDate.format("YYYY-MM-DD");
+			date = tmpDate;
 		} else {
 			return false;
 		}
@@ -75,13 +72,13 @@ function check4Word(
 
 		switch (word) {
 			case "@today":
-				date = window.moment().format("YYYY-MM-DD");
+				date = window.moment()
 				break;
 			case "@tomorrow":
-				date = window.moment().add(1, "day").format("YYYY-MM-DD");
+				date = window.moment().add(1, "day")
 				break;
 			case "@yesterday":
-				date = window.moment().add(-1, "day").format("YYYY-MM-DD");
+				date = window.moment().add(-1, "day")
 				break;
 			default:
 				return false;

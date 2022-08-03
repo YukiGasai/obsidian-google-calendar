@@ -1,14 +1,10 @@
 <script lang="ts" >
 
-import {moment} from "obsidian";
-
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import TimeLine from "./TimeLineComp.svelte";
 import {ViewEventEntry} from "../modal/ViewEventEntry"
-
-
+import { moment } from "obsidian";
 export let plugin: GoogleCalendarPlugin;
-
 
 let dateOffset = 0;
 const minusOneWeek = () => dateOffset-= 7;
@@ -23,11 +19,11 @@ const openNewEventDialog = (event) => {
 }
 
 
-$: date =  moment().add(dateOffset, "days").format("YYYY-MM-DD");
+$: date =  moment().local().add(dateOffset, "days");
 
 </script>
 <div>
-    <h3>Google Calendar {date}</h3>
+    <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
     <button on:click={openNewEventDialog}>+</button>
     <button on:click={minusOneWeek}>&larr&larr</button>
     <button on:click={minusOneDay}>&larr</button>

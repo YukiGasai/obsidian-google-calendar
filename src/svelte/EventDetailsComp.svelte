@@ -37,8 +37,8 @@
 	});
 
     const getDescription = () => {
-        if(!loading && event.description){
-		    return this.event.description.replace(/<\/?[^>]+(>|$)/g, "");
+        if(event.description){
+		    return event.description.replace(/<\/?[^>]+(>|$)/g, "");
         }
         return ""
     }

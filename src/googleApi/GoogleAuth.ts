@@ -42,7 +42,6 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
 			);
 
 			const tokenData = await response.json();
-			console.log(tokenData)
 			setAT(tokenData.access_token);
 			setET(+new Date() + tokenData.expires_in*1000);
 		}
@@ -66,7 +65,6 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 		);
 		const authorizeUrl = oAuth2Client.generateAuthUrl({
 			scope: [
-				"https://www.googleapis.com/auth/tasks",
 				"https://www.googleapis.com/auth/calendar",
 			],
 			access_type: "offline",

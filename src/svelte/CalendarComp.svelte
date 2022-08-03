@@ -2,28 +2,26 @@
     import type { ICalendarSource, IDayMetadata, IDot} from "obsidian-calendar-ui"
     import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
     import type { GoogleEvent } from '../helper/types';
-    import { onMount } from 'svelte';
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { googleListEvents } from "../googleApi/GoogleListEvents";
-    import { ViewEventEntry } from "../modal/ViewEventEntry";
-    import { getColorFromEvent } from "../googleApi/GoogleColors";
     import { EventListModal } from "../modal/EventListModal";
 
     export let displayedMonth = window.moment();
     export let width:number = 400;
     export let height:number = 400;
     export let plugin:GoogleCalendarPlugin;
+
     let interval;
     let events: GoogleEvent[];
     let loading: boolean = true;
     let sources:ICalendarSource[];
-
-    let popUpSelectedDate: moment.Moment
     
+
+
     async function getEventsInMonth(month: moment.Moment):Promise<GoogleEvent[]>{
  
-        let start = month.startOf("month").format("YYYY-MM-DD");
-        let end   = month.endOf("month").format("YYYY-MM-DD");
+        let start = month.clone().startOf("month");
+        let end   = month.clone().endOf("month");
         const googleList = await googleListEvents(plugin, start, end);
         events = googleList;
         return googleList;   
@@ -62,29 +60,9 @@
 
 
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
- 
-        popUpSelectedDate = date      
         new EventListModal(plugin, getEventsOfDay(events, date)).open();
     }
 
-    const onHoverDay = (date: moment.Moment, container: HTMLElement) => {
-       
-    }
-
-    const closePopup = (e: MouseEvent)=>{
-        
-        if(e.target instanceof HTMLDivElement){
-            popUpSelectedDate = null;
-        }
-    }
-
-    const getEventTime = (event: GoogleEvent):string => {
-        if (event.start.date){
-            return "All day"
-        }else {
-            return window.moment(event.start.dateTime).format("HH:mm")
-        }
-    }
 
     $: {
         if(interval){
@@ -107,79 +85,19 @@
         <p>Loading...</p>
     {:else} 
    
-    <!-- <div class={popUpSelectedDate&&"blured"}> -->
-    <div>
-        <CalendarBase
-           
-            showWeekNums={false}
-            {onClickDay}
-            {onHoverDay}
-            bind:sources
-            bind:displayedMonth
-        />
-    </div>
-    {/if}
-
-    <!-- {#if popUpSelectedDate}
-        <div class="popUpContainer" on:click={closePopup}>
-            <span class="popUpTitle">{(window.moment(popUpSelectedDate).calendar().split(" at"))[0]}</span>
-         
-            {#each getEventsOfDay(events,popUpSelectedDate) as event}
-                <div class="popUpEventContainer" on:click={() => new ViewEventEntry(plugin,event, popUpSelectedDate).open()}>
-                    <span class="EventTime">{getEventTime(event)}</span>
-                    <span class="EventTitle" style:color={getColorFromEvent(event)}>{event.summary}</span>
-                </div>
-            {/each}
+        <div>
+            <CalendarBase
+                showWeekNums={false}
+                {onClickDay}
+                bind:sources
+                bind:displayedMonth
+            />
         </div>
-    {/if} -->
+    {/if}
 </div>
 
 
 <style>
-    /*
-    .blured{
-        filter: blur(5px);
-    }
 
-
-
-    .popUpContainer {
-	    position: absolute;
-        top: 0;
-        left: 0;
-	    display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-	    padding: 10px;
-	    width: 80%;
-        height: 80%;
-	    background-color: rgba(16, 16, 16, 0.2);
-        box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
-        border-radius: 10px;
-  
-    }
-.popUpEventContainer{
-    display: flex;
-    flex-direction: row;
-    cursor: pointer;
-
-    padding: 5px 0px
-
-}
-
-.popUpTitle{
-    align-self: center;
-    justify-self: center;
-    border-bottom: 2px solid white;
-    margin-bottom: 5px;
-}
-
-.EventTime {
-    text-align: center;
-    width:100px;
-    min-width: 100px;
-}
-*/
 </style>
 
