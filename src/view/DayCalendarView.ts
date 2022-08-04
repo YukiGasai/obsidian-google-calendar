@@ -26,7 +26,7 @@ export class DayCalendarView extends ItemView {
 	async onOpen(): Promise<void> {
 		this.timeline = new TimeLineViewComp({
 			target: this.contentEl,
-			props: { plugin: this.plugin },
+			props: { plugin: this.plugin, navigation: true },
 		});
 	}
 	async onClose(): Promise<void> {

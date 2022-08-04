@@ -61,3 +61,5 @@ Shows a list of all calendars selecting a calendar will show todays events
 
 Will insert a table into the currently opened file
 The table contains all events of the current day from every calendar
+
+    

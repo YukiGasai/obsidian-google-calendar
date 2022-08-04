@@ -7,13 +7,19 @@ import { ViewEventEntry } from './ViewEventEntry';
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	plugin: GoogleCalendarPlugin;
 	eventList: GoogleEvent[];
+	eventsChanged: boolean;
+	closeFunction?: () => void;
 
-	constructor(plugin: GoogleCalendarPlugin, eventList: GoogleEvent[]) {
+	constructor(plugin: GoogleCalendarPlugin, eventList: GoogleEvent[], eventsChanged = false, closeFunction?: () => void) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.eventList = eventList;
 		this.setPlaceholder("Select a event to view it");
 		this.emptyStateText = "No events found enter to create a new one"
+		this.eventsChanged = eventsChanged;
+		if(closeFunction){
+			this.closeFunction = closeFunction
+		}
 	}
 
 
@@ -38,7 +44,13 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		_: MouseEvent | KeyboardEvent
 	): Promise<void> {
 		this.open();
-		new ViewEventEntry(this.plugin, item, window.moment()).open();
+		new ViewEventEntry(this.plugin, item, window.moment(), () => this.eventsChanged = true).open();
+	}
+
+	onClose(): void {
+		if(this.closeFunction && this.eventsChanged){
+			this.closeFunction();
+		}
 	}
 
 

@@ -31,7 +31,7 @@ export async function googleRemoveEvent(
 	}
 
 	const response = await fetch(
-		`https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}?key=AIzaSyD3TpUOD5tMkhmv2SFFFGpL81D5pMJHTd8`,
+		`https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}?key=${plugin.settings.googleApiToken}`,
 		{
 			method: "DELETE",
 			headers: requestHeaders,

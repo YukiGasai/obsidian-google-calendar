@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+
+
+/*
+	This file is used to authenticate the user to the google google cloud service 
+	and refresh the access token if needed 
+*/
+
 import type GoogleCalendarPlugin from './../GoogleCalendarPlugin';
+import type { IncomingMessage, ServerResponse } from 'http';
+
 import {
 	settingsAreComplete,
 	settingsAreCompleteAndLoggedIn,
@@ -13,19 +22,31 @@ import {
 	setRT,
 } from "../helper/LocalStorage";
 import { Notice, Platform } from "obsidian";
-import type { IncomingMessage, ServerResponse } from 'http';
+
+
 
 const PORT = 42813
 
+/**
+ * Function the get the acces token used in every request to the Google Calendar API
+ * 
+ * Function will check if a accses token exists and if its still valid
+ * if not it will request a new access token using the refersh token
+ * 
+ * @param plugin Refrence to the main plugin to acess the settings
+ * @returns A valid access Token
+ */
 export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<string> {
 	if (!settingsAreCompleteAndLoggedIn(plugin)) return;
 
+	//Check if the Access token is still valid
 	if (
 		getET(plugin) == 0 ||
 		getET(plugin) == undefined ||
 		isNaN(getET(plugin)) ||
 		getET(plugin) < +new Date()
 	) {
+		//Acceess token is no loger valid have to create a new one
 		if (getRT() != "") {
 			const refreshBody = {
 				client_id: plugin.settings.googleClientId,
@@ -41,6 +62,7 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
 				}
 			);
 
+			//Save new Access token and Expiration Time
 			const tokenData = await response.json();
 			setAT(tokenData.access_token);
 			setET(+new Date() + tokenData.expires_in*1000);
@@ -50,6 +72,17 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
 	return getAT();
 }
 
+/**
+ * Function to allow the user to grant the APplication access to his google calendar by OAUTH authentication
+ * 
+ * Function will start a local server 
+ * User is redirected to OUATh screen
+ * If authentication is sucessfull user is redirected to local server
+ * Server will read the tokens and save it to local storage
+ * Local server will shut down
+ * 
+ * @param plugin Refrence to the main plugin to acess the settings
+ */
 export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 	if (Platform.isDesktop) {
 		if (!settingsAreComplete(plugin)) return;

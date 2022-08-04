@@ -141,17 +141,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		}
 
 		new Setting(containerEl)
-			.setName("Confirmations")
-			.setDesc("Ask for confirmations when deleting a event")
-			.addToggle((toggle) => {
-				toggle.setValue(this.plugin.settings.askConfirmation);
-				toggle.onChange(async (state) => {
-					this.plugin.settings.askConfirmation = state;
-					await this.plugin.saveSettings();
-				});
-			});
-
-		new Setting(containerEl)
 			.setName("Notifications")
 			.setDesc("Show notifications of info and errors")
 			.addToggle((toggle) => {

@@ -99,6 +99,8 @@
 
     const getEvents = async() => {
         
+console.log(date)
+
         if(!date.isValid()){
             return;
         }
@@ -117,7 +119,9 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new ViewEventEntry(plugin, event, date).open();
+            new ViewEventEntry(plugin, event, date, (id) => {
+                date = date
+            }).open();
         }
     }
 
@@ -161,6 +165,7 @@
             <div 
                 on:click={(e) => goToEvent(location.event,e)} 
                 class="event" 
+                id="{location.event.id}"
                 style:top="{location.y}px"
                 style:left="{location.x}px"
                 style:width="{location.width}px"
@@ -186,42 +191,40 @@
             color:black;
             font-size: 0.5em;
             box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
+            overflow: hidden;
         }
     
         .hourLine::after{
             content: "";
             position: absolute;
-            width:250px;
-            left:50px;
-        
-        
+            width: 90%;
+            left:25px;
             border-bottom: 1px solid white;
         }
     
        .hourText{
         display:block;
         font-family: "consolas";
-       
        }
+
        .timeline, .hourText, .hourTextContainer{
            overflow: hidden;
        }
-       
-    
-       
+              
        .timeDisplay{
            position: absolute;
-        
            height:3px;
            background:red;
+           overflow: visible;
     
        }
-    
     
        .timeline{
            position:relative;
            display: flex;
            flex-direction: row;
+           overflow: visible;
+       
            /*border: 1px solid green;*/
        }
     

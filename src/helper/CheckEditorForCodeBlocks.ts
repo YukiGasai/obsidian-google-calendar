@@ -6,7 +6,7 @@
 
 import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { Platform, moment } from "obsidian";
-import TimeLineComp from "../svelte/TimeLineComp.svelte";
+import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
 
@@ -62,41 +62,54 @@ export async function checkEditorForCodeBlocks(
 
 	const blockWidth = options.has("width")
 		? parseInt(options.get("width"))
-		: 300;
+		: undefined;
 
-	const blockHeight = options.has("height")
+	const blockHeight:number = options.has("height")
 		? parseInt(options.get("height"))
-		: 500;
+		: undefined;
 
-	let blockDate = options.has("date")
+	const blockDateString = options.has("date")
 		? options.get("date")
-		: window.moment()
+		: undefined
+
+	const hasNavigation = options.has("navigation")
+	? options.get("navigation")
+	: undefined
 
 	el.style.width = blockWidth + "px";
 	el.style.height = blockHeight + "px";
 
 	if (
-		blockDate == "today" ||
-		blockDate == "tomorrow" ||
-		blockDate == "yesterday" ||
-		moment(blockDate, "YYYY-MM-DD", true).isValid() ||
-		moment(blockDate, "YYYY.MM.DD", true).isValid() ||
-		moment(blockDate, "YYYY/MM/DD", true).isValid() ||
-		moment(blockDate, "MM-DD-YYYY", true).isValid() ||
-		moment(blockDate, "MM.DD.YYYY", true).isValid() ||
-		moment(blockDate, "MM/DD/YYYY", true).isValid() ||
-		moment(blockDate, "DD-MM-YYYY", true).isValid() ||
-		moment(blockDate, "DD.MM.YYYY", true).isValid() ||
-		moment(blockDate, "DD/MM/YYYY", true).isValid()
+		blockDateString == undefined ||
+		blockDateString == "today" ||
+		blockDateString == "tomorrow" ||
+		blockDateString == "yesterday" ||
+		moment(blockDateString, "YYYY-MM-DD", true).isValid() ||
+		moment(blockDateString, "YYYY.MM.DD", true).isValid() ||
+		moment(blockDateString, "YYYY/MM/DD", true).isValid() ||
+		moment(blockDateString, "MM-DD-YYYY", true).isValid() ||
+		moment(blockDateString, "MM.DD.YYYY", true).isValid() ||
+		moment(blockDateString, "MM/DD/YYYY", true).isValid() ||
+		moment(blockDateString, "DD-MM-YYYY", true).isValid() ||
+		moment(blockDateString, "DD.MM.YYYY", true).isValid() ||
+		moment(blockDateString, "DD/MM/YYYY", true).isValid()
 	) {
+		let blockDate:moment.Moment;
 
-		if(blockDate == "today"){
+		if(blockDateString == undefined){
+			blockDate = undefined
+		}else if(blockDateString == "today"){
 			blockDate = moment();
-		}else if (blockDate == "tomorrow"){
+		}else if (blockDateString == "tomorrow"){
 			blockDate = moment().add(1, "day");
-		}else if (blockDate == "yesterday"){
+		}else if (blockDateString == "yesterday"){
 			blockDate = moment().subtract(1, "day");
+		}else{
+			blockDate = moment(blockDateString);
 		}
+
+
+		el.style.padding = "10px"
 
 		if (blockType == "web") {
 			if (Platform.isDesktopApp) {
@@ -110,13 +123,14 @@ export async function checkEditorForCodeBlocks(
 				});
 			}
 		} else if (blockType == "day") {
-			new TimeLineComp({
+			new TimeLineViewComp({
 				target: el,
 				props: {
 					plugin: plugin,
 					height: blockHeight,
 					width: blockWidth,
 					date: blockDate,
+					navigation: hasNavigation=="true"
 				},
 			});
 		} else if (blockType == "month") {

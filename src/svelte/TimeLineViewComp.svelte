@@ -4,7 +4,12 @@ import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import TimeLine from "./TimeLineComp.svelte";
 import {ViewEventEntry} from "../modal/ViewEventEntry"
 import { moment } from "obsidian";
+
 export let plugin: GoogleCalendarPlugin;
+export let height:number = undefined;
+export let width:number = undefined;
+export let date:moment.Moment = undefined;
+export let navigation:boolean = false;
 
 let dateOffset = 0;
 const minusOneWeek = () => dateOffset-= 7;
@@ -15,20 +20,47 @@ const plusOneDay   = () => dateOffset+= 1;
 
 const openNewEventDialog = (event) => {  
 
-    new ViewEventEntry(plugin, {start:{}, end:{}}, window.moment()).open()
+    new ViewEventEntry(plugin, {start:{}, end:{}}, window.moment(), (id:string) =>{
+        date=date;
+    }).open()
 }
 
-
-$: date =  moment().local().add(dateOffset, "days");
+$: date = navigation ? moment().local().add(dateOffset, "days") : date;
 
 </script>
-<div>
-    <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
-    <button on:click={openNewEventDialog}>+</button>
-    <button on:click={minusOneWeek}>&larr&larr</button>
-    <button on:click={minusOneDay}>&larr</button>
-    <button on:click={backToday}>Today</button>
-    <button on:click={plusOneDay}>&rarr</button>
-    <button on:click={plusOneWeek}>&rarr&rarr</button>
-    <TimeLine plugin={plugin} bind:date/>
+<div style="padding-left: 10px;">
+    {#if navigation}
+    <div class="titleContainer">
+        <button on:click={openNewEventDialog}>+</button>
+        <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
+    </div>
+    <div class="navigationContainer">
+        <button on:click={minusOneWeek}>&larr&larr</button>
+        <button on:click={minusOneDay}>&larr</button>
+        <button on:click={backToday}>Today</button>
+        <button on:click={plusOneDay}>&rarr</button>
+        <button on:click={plusOneWeek}>&rarr&rarr</button>
+    </div>
+    {/if}
+    <TimeLine plugin={plugin} bind:date height={height} width={width}/>
 </div>
+
+<style>
+
+    .titleContainer{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .navigationContainer{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding-bottom: 30px;
+    }
+
+</style>

@@ -6,29 +6,58 @@ import { createNotice } from "./NoticeHelper";
 import path from "path";
 
 
+/**
+ * This function implements the automatic creation of notes from a google calendar event
+ * 
+ * How it works:
+ * If a google calendar events description contains :obsidian: a new note for this event is created
+ * To also set a template for the file the text can be expanded with the template name :obsidian:TemplateName:
+ * 
+ * This feature can be toggled in the settings the import time range can be changed in the settings
+ * 
+ *  This function is called once the obsidian plugin is loaded
+ * 
+ * 
+ * @param plugin Refrence to the main plugin to acess the settings
+ */
 export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<void> => {
 
+    //Don't run if disabled in the settings
     if(!plugin.settings.autoCreateEventNotes){
         return;
     }
 
+    //get the import time range from the settings
     const startOffset = Math.abs(plugin.settings.importStartOffset);
     const endOffset = Math.abs(plugin.settings.importEndOffset);
 
     const startDate = window.moment().local().subtract(startOffset, "day")
     const endDate = window.moment().local().add(endOffset, "day")
+
+    //get all events in the import time range
     const events = await googleListEvents(plugin, startDate, endDate);
 
+    // check every event from the trigger text :obsidian:
     events.forEach(event => {
+        //regex will check for text and extract a template name if it exists
         const match = event.description?.match(/:obsidian-?(.*)?:/) ?? [];
         
         if(match.length == 2){
+            //the trigger text was found and a new note will be created
             const filename = event.summary;
             createNoteFromEvent(plugin, filename, match[1]);
         }
     })
 }
 
+/**
+ * This function will create a new Note in the vault of the user if a template name is given the plugin will access the 
+ * Templates plugin to try and include the selected Template into the newly created file
+ * 
+ * @param plugin Refrence to the main plugin to acess the settings
+ * @param fileName The name of the new Note
+ * @param templateName  The used Template to fill the file
+ */
 const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string, templateName?:string): Promise<void> => {
     const { vault } = plugin.app;
     const { adapter } = vault;

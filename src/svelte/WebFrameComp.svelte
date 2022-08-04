@@ -1,9 +1,9 @@
 <script lang="ts">
 
 export let date   = window.moment();
-export let width  = 400;
-export let height = 400;
-
+export let width  = 0;
+export let height = 0;
+let frame;
 let webUrl:string = ""
 
 //If date is not valid default to toady
@@ -16,7 +16,14 @@ if(!date.isValid()){
 }
 
 const domReady = () => {
-
+  frame.insertCSS(`
+    .K36rb .QQYuzf {
+      margin-left: -256px;
+    }
+    .KMkTad .QQYuzf {
+      display: none;
+    }
+  `);
 }
 
 
@@ -30,6 +37,7 @@ const domReady = () => {
         allowpopups
         dom-ready="{domReady}"
         class="fullSize"
+        bind:this={frame}
     />
     {:else}
     <webview 
@@ -38,6 +46,7 @@ const domReady = () => {
         dom-ready="{domReady}"
         style:width="{width}px"
         style:height="{height}px"
+        bind:this={frame}
     />
     {/if}
     </div>

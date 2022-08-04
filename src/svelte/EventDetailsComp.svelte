@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { GoogleCalander, GoogleEvent } from "../helper/types";
     import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+    
     import { onMount } from 'svelte';
     import { googleListCalendars } from "../googleApi/GoogleListCalendars";
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
@@ -23,13 +24,19 @@
 
         fullDay = event?.start?.dateTime == undefined
 
+
+        //Add the missing time to the object for a better user expirince
+        if(fullDay){
+            event.start.dateTime = currentDate.format()
+            event.end.dateTime   = currentDate.add(1, "hour").format()
+        }else{
+            event.start.date = currentDate.format("YYYY-MM-DD")
+            event.end.date   = currentDate.format("YYYY-MM-DD")
+        }
+
         if(event.id == undefined){
             event.summary = ""
             event.description = ""
-            event.start.date = currentDate.format("YYYY-MM-DD")
-            event.end.date   = currentDate.format("YYYY-MM-DD")
-            event.start.dateTime = currentDate.format()
-            event.end.dateTime   = currentDate.add(1, "hour").format()
             event.parent = calendars[calendars.length - 1];
             fullDay = false
         }
@@ -164,7 +171,7 @@
             delete event.end.date;
         }
   
-         const updatedEvent = await googleUpdateEvent(plugin, event)
+        const updatedEvent = await googleUpdateEvent(plugin, event)
         if(updatedEvent.id){
             closeFunction();
         }
@@ -222,14 +229,14 @@
 
     <div class="googleEventButtonContainer">
         {#if event.id}
-            <button class="danger" on:click="{updateEvent}">Update</button>
+            <button on:click="{updateEvent}">Update</button>
     
-            <button class="danger" on:click="{deleteEvent}">Delete</button>
+            <button on:click="{deleteEvent}">Delete</button>
          
             {#if event.recurringEventId }
-                <button class="danger" on:click="{updateAllEvents}">Update All</button>
+                <button disabled class="disabled" on:click="{updateAllEvents}">Update All</button>
     
-                <button class="danger" on:click="{deleteAllEvents}">Delete All</button>
+                <button on:click="{deleteAllEvents}">Delete All</button>
             {/if}
          
         {:else}
@@ -240,6 +247,10 @@
 
 
 <style>
+
+    .disabled{
+        opacity: 0.2;
+    } 
 
     label{
         margin-top: 5px;

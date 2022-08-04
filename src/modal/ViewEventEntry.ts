@@ -8,17 +8,22 @@ export class ViewEventEntry extends Modal {
 	selectedEvent: GoogleEvent;
 	currentDate: moment.Moment;
 	calendarList: GoogleCalander[];
+	closeFunction: (id:string) => void;
 
 	onSubmit: (event: GoogleEvent) => void;
 	constructor(
 		plugin: GoogleCalendarPlugin,
 		selectedEvent: GoogleEvent,
-		currentDate: moment.Moment
+		currentDate: moment.Moment,
+		closeFunction?: (id:string) => void
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.selectedEvent = selectedEvent;
 		this.currentDate = currentDate;
+		if(closeFunction){
+			this.closeFunction = closeFunction;
+		}
 	}
 
 	async onOpen(): Promise<void> {
@@ -29,7 +34,12 @@ export class ViewEventEntry extends Modal {
 				plugin: this.plugin,
 				event: this.selectedEvent,
 				currentDate: this.currentDate,
-				closeFunction: () => this.close(),
+				closeFunction: () => {
+					if(this.closeFunction){
+						this.closeFunction(this.selectedEvent.id);
+					}
+					this.close()
+				} 
 			},
 		});
 	}

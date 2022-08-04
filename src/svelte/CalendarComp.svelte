@@ -2,6 +2,7 @@
     import type { ICalendarSource, IDayMetadata, IDot} from "obsidian-calendar-ui"
     import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
     import type { GoogleEvent } from '../helper/types';
+    
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
     import { googleListEventsByMonth } from "../googleApi/GoogleListEvents";
@@ -50,7 +51,7 @@
 
 
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
-        new EventListModal(plugin, getEventsOfDay(events, date)).open();
+        new EventListModal(plugin, getEventsOfDay(events, date), false, () => displayedMonth = displayedMonth).open();
     }
 
 

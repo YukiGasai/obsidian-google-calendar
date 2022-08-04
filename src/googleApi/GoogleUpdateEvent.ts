@@ -25,15 +25,19 @@ export async function googleUpdateEvent(
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
-	// Use the reacurance id to delete all events from a reacuring task
+	// Use the reacurance id to update all events from a reacuring task
 	let id = event.recurringEventId ?? event.id;
 
+	//Check if the user wants to update all events from a reacrung task
 	if (updateSingle && event.recurringEventId) {
 		id = event.id;
 	}
+ 
 
+	console.log(id);
+
+	//clean the event object to send it to the api directly
 	const calenderId = event.parent.id;
-
 	delete event.parent;
 
 	try {

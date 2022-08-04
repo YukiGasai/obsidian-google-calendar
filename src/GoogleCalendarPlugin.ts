@@ -22,7 +22,6 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientSecret: "",
 	googleApiToken: "",
 	googleRefreshToken: "",
-	askConfirmation: true,
 	refreshInterval: 10,
 	showNotice: true,
 	autoCreateEventNotes: true,
