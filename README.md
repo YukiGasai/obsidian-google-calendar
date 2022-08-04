@@ -1,3 +1,4 @@
+
 # Obsidian Google Calendar
 
 Manage your Google Calendar from inside Obsidian
@@ -64,14 +65,14 @@ A timeline view to see all events over a day
 
 | Name | Description |
 | ---  | --- |
-| Open Google Calendar web view|	Opens the web view |
-| Open Google Calendar month view|	Opens the month/calendar view|
-| Open Google Calendar day view|	Opens the day/timeline view|
-| Insert todays Google Events|	    Inserts todays events into the active file as a table |
-| Insert Google Event CodeBlock|	Inserts a codeblock into the active file to display the 3 views  |
-| List Google Events|	            Opens a dropdown to view todays events |
-| List Google Calendars|	        Opens a dropdown to view all calendars |
-| Copy Google Calendar Refresh Token to Clipboard|	Copies the refresh token (PC only) |
+| Open Google Calendar web view|    Opens the web view |
+| Open Google Calendar month view|  Opens the month/calendar view|
+| Open Google Calendar day view|    Opens the day/timeline view|
+| Insert todays Google Events|      Inserts todays events into the active file as a table |
+| Insert Google Event CodeBlock|    Inserts a codeblock into the active file to display the 3 views  |
+| List Google Events|               Opens a dropdown to view todays events |
+| List Google Calendars|            Opens a dropdown to view all calendars |
+| Copy Google Calendar Refresh Token to Clipboard|  Copies the refresh token (PC only) |
 
 
 ### @Anotation
@@ -93,15 +94,16 @@ This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day view 
     ```
 ```
 
-### Auto Create Events
+### Auto create Events
 
-The plugin allows you to gernate Notes automaicaly from Google Evetns.
-1. To achive this acitvate it inside the settings.
-1. Select a Import date range. This is the range in witch events are checked. The center is always today.
+The plugin allows you to generate notes automatically from Google Events.
+1. To achieve this, activate it inside the settings.
+1. Select an Import date range. This is the range in which events are checked. The center is always today.
 1. Google events that contain `:obsidian:` inside the description will create new notes if the plugin starts
 
 You can also define a template that should be used when creating new notes by adding the template title `:obsidian:UniTemplate:`
 Make sure to activate the core plugin Templates
+
 The option to use the plugin templater is WIP
 
 
@@ -112,4 +114,6 @@ The option to use the plugin templater is WIP
 [Obsidian Custom Frames](https://github.com/Ellpeck/ObsidianCustomFrames)
 
 [Hotkeys for templates](https://github.com/Vinzent03/obsidian-hotkeys-for-templates)
+
+
 
