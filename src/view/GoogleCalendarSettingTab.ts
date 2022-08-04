@@ -28,7 +28,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		containerEl.createEl("h2", { text: "Settings for Google Calendar" });
-
+		containerEl.createEl("h4", { text: "Please restart Obsidian to let changes take effect"})
 		new Setting(containerEl)
 			.setName("ClientId")
 			.setDesc("Google client id")

@@ -31,6 +31,7 @@ Manage your Google Calendar from inside Obsidian
 -   add the keys into the fields under the plugin settings
 -   Press Login
 
+
 ### Using the plugin on Mobile (work around)
 
 -   Login on a desktop device
@@ -40,26 +41,75 @@ Manage your Google Calendar from inside Obsidian
 
 ## Usage
 
-### Google Calendar Day/Timeline View
+### Views
 
--   View will show you a timeine for the current day
--   Edit the event by long pressing it
--   Press the plus button to create a new event
--   use the arrow buttons to switch between days
+#### Web View
+A webframe to the original google calendar page
+
+![](https://i.imgur.com/oukwdQY.png)
+
+#### Month view
+A calendar based on the [obsidian-calendar-ui](https://github.com/liamcain/obsidian-calendar-ui) to display events over a month
+
+![](https://i.imgur.com/JEnuZ2E.png)
+
+#### Day view
+A timeline view to see all events over a day
+
+![](https://i.imgur.com/f9nYmOn.png)
+
 
 ### Commands
 
-#### List Google Events
 
-Shows a list of all events of the current day from every calendar
+| Name | Description |
+| ---  | --- |
+| Open Google Calendar web view|	Opens the web view |
+| Open Google Calendar month view|	Opens the month/calendar view|
+| Open Google Calendar day view|	Opens the day/timeline view|
+| Insert todays Google Events|	    Inserts todays events into the active file as a table |
+| Insert Google Event CodeBlock|	Inserts a codeblock into the active file to display the 3 views  |
+| List Google Events|	            Opens a dropdown to view todays events |
+| List Google Calendars|	        Opens a dropdown to view all calendars |
+| Copy Google Calendar Refresh Token to Clipboard|	Copies the refresh token (PC only) |
 
-#### List Google Calendars
 
-Shows a list of all calendars selecting a calendar will show todays events
+### @Anotation
+Refrence Google Calendar events inside text by typing @today or @01.01.2022 then select the event you want to insert.
 
-#### Insert Todays Events
+Other Options are @tomorrow, @yesterday, @+1 @-1 
 
-Will insert a table into the currently opened file
-The table contains all events of the current day from every calendar
+### CodeBlock
+This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day view inside file
 
-    
+#### Parameters
+```
+    ```gEvent
+        type: [web, month, day] necessary
+        date: [today, tomorrow, yesterday, A specific date] optional
+        width: number optional
+        height: number  optional
+        navigation: boolean optional
+    ```
+```
+
+### Auto Create Events
+
+The plugin allows you to gernate Notes automaicaly from Google Evetns.
+1. To achive this acitvate it inside the settings.
+1. Select a Import date range. This is the range in witch events are checked. The center is always today.
+1. Google events that contain `:obsidian:` inside the description will create new notes if the plugin starts
+
+You can also define a template that should be used when creating new notes by adding the template title `:obsidian:UniTemplate:`
+Make sure to activate the core plugin Templates
+The option to use the plugin templater is WIP
+
+
+## Thanks you to the following plugins:
+
+[obsidian-calendar-plugin](https://github.com/liamcain/obsidian-calendar-plugin)
+
+[Obsidian Custom Frames](https://github.com/Ellpeck/ObsidianCustomFrames)
+
+[Hotkeys for templates](https://github.com/Vinzent03/obsidian-hotkeys-for-templates)
+
