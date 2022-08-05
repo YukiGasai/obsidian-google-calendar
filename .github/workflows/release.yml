@@ -6,7 +6,7 @@ on:
             - "*"
 
 env:
-    PLUGIN_NAME: obsidian-google-tasks
+    PLUGIN_NAME: obsidian-google-calendar
 
 jobs:
     build:
