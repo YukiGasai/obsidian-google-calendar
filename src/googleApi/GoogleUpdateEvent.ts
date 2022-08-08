@@ -33,9 +33,6 @@ export async function googleUpdateEvent(
 		id = event.id;
 	}
  
-
-	console.log(id);
-
 	//clean the event object to send it to the api directly
 	const calenderId = event.parent.id;
 	delete event.parent;

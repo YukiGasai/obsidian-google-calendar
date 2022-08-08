@@ -7,6 +7,7 @@ import {
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleListTodayEvents } from "./googleApi/GoogleListEvents";
+import { getGoogleColors } from "./googleApi/GoogleColors";
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
@@ -32,9 +33,11 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 
 export default class GoogleCalendarPlugin extends Plugin {
 	settings: GoogleCalendarPluginSettings;
-
+	overwriteCache = false;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	templatePlugin:any;
+	coreTemplatePlugin:any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	templaterPlugin:any;
 
 	initView = async (viewId:string): Promise<void> => {
 		if (
@@ -55,9 +58,15 @@ export default class GoogleCalendarPlugin extends Plugin {
 	onLayoutReady = ():void => {
 		//Get the template plugin to run their commands
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const templatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
-		if(templatePlugin && templatePlugin.enabled){
-			this.templatePlugin = templatePlugin;
+		const coreTemplatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
+		if(coreTemplatePlugin && coreTemplatePlugin.enabled){
+			this.coreTemplatePlugin = coreTemplatePlugin;
+		}
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const templaterPlugin = (this.app as any).plugins.plugins["templater-obsidian"];
+		if(templaterPlugin && templaterPlugin._loaded){
+			this.templaterPlugin = templaterPlugin;
 		}
 
 		checkForEventNotes(this);
@@ -65,7 +74,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
-
+		await getGoogleColors(this);
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
 
@@ -168,7 +177,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Insert Google Event CodeBlock",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
-					"```gEvent\ndate:today\ntype:self\n```",
+					"```gEvent\ndate:"+window.moment().format("YYYY-MM-DD")+"\ntype:day\n```",
 					editor.getCursor()
 				);
 			},

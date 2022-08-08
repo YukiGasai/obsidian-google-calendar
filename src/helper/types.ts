@@ -253,3 +253,12 @@ export interface TimeLineOptions {
 	height: number;
 }
 
+export interface EventCacheKey {
+	start: string;
+	end: string;
+	calendar: string;
+}
+export interface EventCacheValue {
+	events: GoogleEvent[];
+	updated: moment.Moment;
+}

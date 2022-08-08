@@ -45,7 +45,7 @@
             clearInterval(interval);
         }
         loading = true;
-        interval = setInterval(refeshData, plugin.settings.refreshInterval * 1000);
+        interval = setInterval(refeshData, 5000);
         refeshData();
     }
 
@@ -99,8 +99,6 @@
 
     const getEvents = async() => {
         
-console.log(date)
-
         if(!date.isValid()){
             return;
         }
@@ -120,6 +118,7 @@ console.log(date)
             window.open(event.htmlLink);
         }else{
             new ViewEventEntry(plugin, event, date, (id) => {
+                plugin.overwriteCache = true;
                 date = date
             }).open();
         }

@@ -8,52 +8,37 @@
  */
 
 import type { GoogleEvent } from "../helper/types";
+import type GoogleCalendarPlugin from './../GoogleCalendarPlugin';
 
-export function googleCalendarColors(): string[] {
-	return [
-		"#ac725e",
-		"#d06b64",
-		"#f83a22",
-		"#fa573c",
-		"#ff7537",
-		"#ffad46",
-		"#42d692",
-		"#16a765",
-		"#7bd148",
-		"#b3dc6c",
-		"#fbe983",
-		"#fad165",
-		"#92e1c0",
-		"#9fe1e7",
-		"#9fc6e7",
-		"#4986e7",
-		"#9a9cff",
-		"#b99aff",
-		"#c2c2c2",
-		"#cabdbf",
-		"#cca6ac",
-		"#f691b2",
-		"#cd74e6",
-		"#a47ae2",
-	];
-}
+const calendarColors = new Map<string, string>();
+const eventColors    = new Map<string, string>();
 
-export function googleEventColors(): string[] {
-	return [
-		"#a4bdfc",
-		"#7ae7bf",
-		"#dbadff",
-		"#ff887c",
-		"#fbd75b",
-		"#ffb878",
-		"#46d6db",
-		"#e1e1e1",
-		"#5484ed",
-		"#51b749",
-		"#dc2127",
-	];
-}
+export async function getGoogleColors(plugin:GoogleCalendarPlugin):Promise<void> {
 
+	const requestHeaders: HeadersInit = new Headers();
+	requestHeaders.append("Content-Type", "application/json");
+
+	const response = await fetch(`https://www.googleapis.com/calendar/v3/colors?key=${plugin.settings.googleApiToken}`, {
+		method: "GET",
+		headers: requestHeaders
+	});
+
+	const colorData = await response.json();
+
+	for (let i = 1; ; i++) {
+		const color = colorData.calendar[i+""]?.background;
+		if(!color)break;
+		
+		calendarColors.set(i+"", color)
+	}
+
+	for (let i = 1; ; i++) {
+		const color = colorData.event[i+""]?.background;
+		if(!color)break;
+		
+		eventColors.set(i+"", color)
+	}
+} 
 
 /**
  *  This function just returns the true color of an event
@@ -61,12 +46,14 @@ export function googleEventColors(): string[] {
  * @returns a hex color string 
  */
 export function getColorFromEvent(event: GoogleEvent): string {
-	if(event.colorId) {
-		return googleEventColors()[event.colorId]
-	}else if( event.parent.colorId ){
-		return googleCalendarColors()[event.parent.colorId]
+
+	if(event.colorId && eventColors.has(event.colorId)) {
+		return eventColors.get(event.colorId);
+		
+	}else if( event.parent.colorId && calendarColors.has(event.parent.colorId)){
+		return calendarColors.get(event.parent.colorId);
+
 	} else {
 		return "#a4bdfc"
 	}
-
 }

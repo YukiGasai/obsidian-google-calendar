@@ -51,7 +51,10 @@
 
 
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
-        new EventListModal(plugin, getEventsOfDay(events, date), false, () => displayedMonth = displayedMonth).open();
+        new EventListModal(plugin, getEventsOfDay(events, date), false, () => {
+            plugin.overwriteCache = true;
+            displayedMonth = displayedMonth
+        }).open();
     }
 
 
@@ -59,7 +62,7 @@
         if(interval){
             clearInterval(interval);
         }
-        interval = setInterval(() => getSource(displayedMonth), plugin.settings.refreshInterval * 1000)
+        interval = setInterval(() => getSource(displayedMonth), 5000)
         getSource(displayedMonth)
 
     }

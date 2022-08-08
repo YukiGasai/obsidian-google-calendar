@@ -1,4 +1,5 @@
 import type {
+	EventCacheValue,
 	GoogleCalander,
 	GoogleEvent,
 	GoogleEventList,
@@ -10,6 +11,9 @@ import { getGoogleAuthToken } from "./GoogleAuth";
 import { moment } from "obsidian";
 import { googleListCalendars } from "./GoogleListCalendars";
 import ct from 'countries-and-timezones'
+
+
+const cachedEvents = new Map<string, EventCacheValue>();
 
 
 const dateToTimeParam = (date:string, tz:string) :string => {
@@ -32,6 +36,30 @@ export async function googleListEventsByCalendar(
 	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
 
+	//Turn dates into strings for request and caching
+	const timezone = ct.getTimezone(googleCalander.timeZone);
+
+	const startString = dateToTimeParam(date.format('YYYY-MM-DD'),timezone.dstOffsetStr);
+	let endString = "";
+	if(endDate){
+
+		endString = dateToTimeParam(endDate.format('YYYY-MM-DD'),timezone.dstOffsetStr);
+
+	}else{
+		endDate = date.clone().add(1, "day")
+		endString = dateToTimeParam(endDate.format('YYYY-MM-DD'),timezone.dstOffsetStr)
+	}
+
+	const cacheKey:string = JSON.stringify({start: startString, end: endString, calendar: googleCalander.id});
+
+
+	if(cachedEvents.has(cacheKey) && !plugin.overwriteCache){
+		const {events, updated} = cachedEvents.get(cacheKey);
+		if(updated.clone().add(plugin.settings.refreshInterval, "second").isAfter(moment())){
+			return events;
+		}
+	}
+
 	let totalEventList: GoogleEvent[] = [];
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
@@ -43,7 +71,7 @@ export async function googleListEventsByCalendar(
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
-	const timezone = ct.getTimezone(googleCalander.timeZone);
+
 
 	try {
 		do {
@@ -54,12 +82,8 @@ export async function googleListEventsByCalendar(
 			requestUrl += `&maxResults=${resultSizes}`;
 			requestUrl += `&singleEvents=True`;
 			requestUrl += `&orderBy=startTime`;
-			requestUrl += `&timeMin=${dateToTimeParam(date.format('YYYY-MM-DD'), timezone.dstOffsetStr)}`
-
-			// TODO This could lead to problems displaying events at the wrong dates
-
-			const tomorrow = (endDate ?? date).clone().add(1, "day").format('YYYY-MM-DD');
-			requestUrl += `&timeMax=${dateToTimeParam(tomorrow, timezone.dstOffsetStr)}`;
+			requestUrl += `&timeMin=${startString}`
+			requestUrl += `&timeMax=${endString}`;
 			
 
 			if (tmpRequestResult && tmpRequestResult.nextPageToken) {
@@ -90,6 +114,8 @@ export async function googleListEventsByCalendar(
 
             return startA.isBefore(startB, "minute") ? -1 : 1;
         })
+
+		cachedEvents.set(cacheKey, {events: totalEventList, updated:moment()})
 
 		return totalEventList;
 	} catch (error) {
@@ -126,6 +152,10 @@ export async function googleListEvents(
 
             return startA.isBefore(startB, "minute") ? -1 : 1;
         })
+
+		if(plugin.overwriteCache){
+			plugin.overwriteCache = false;
+		}
 
 		return eventList;
 	} catch (error) {

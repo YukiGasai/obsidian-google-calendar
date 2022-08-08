@@ -181,22 +181,13 @@
 
 
 <div class="googleEventDetails">
-
-    {#if event.recurringEventId }
-    <a href={event.htmlLink}><h1>Google Calendar Recurring Event</h1></a>  
-    {:else}
-    <a href={event.htmlLink}><h1>Google Calendar Event</h1></a>  
-    {/if}
    
-
-    <label for="summary">Summary</label>
-    <input name="summary" type="text" bind:value="{event.summary}">
+    <input class="summaryInput" name="summary" type="text" placeholder="Summary" bind:value="{event.summary}">
 
     <label for="description">Description</label>
     <textarea name="description" on:change="{changeDescription}">{getDescription()}</textarea>
 
    
-
     {#if loading}
         <span>Loading</span>
     {:else}
@@ -208,6 +199,7 @@
             <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id == event.parent.id}">{calendar.summary}</option>
         {/each}
     </select>
+    
     {/if}
 
     <div class="googleFullDayContainer">
@@ -229,24 +221,54 @@
 
     <div class="googleEventButtonContainer">
         {#if event.id}
-            <button on:click="{updateEvent}">Update</button>
-    
-            <button on:click="{deleteEvent}">Delete</button>
-         
+
             {#if event.recurringEventId }
-                <button disabled class="disabled" on:click="{updateAllEvents}">Update All</button>
-    
-                <button on:click="{deleteAllEvents}">Delete All</button>
+            <a href={event.htmlLink}><span>Recurring Event</span></a>  
+            {:else}
+            <a href={event.htmlLink}><span>Single Event</span></a>  
             {/if}
-         
+
+            <div class="buttonRow">
+                <button on:click="{updateEvent}">Update</button>
+    
+                <button on:click="{deleteEvent}">Delete</button>
+            </div>
+            {#if event.recurringEventId }
+                <div class="buttonRow">
+                    <button disabled class="disabled" on:click="{updateAllEvents}">Update All</button>
+                    
+                    <button on:click="{deleteAllEvents}">Delete All</button>
+                </div>
+            {/if}    
+
         {:else}
-            <button on:click="{createEvent}">Create</button>
+            <div class="buttonRow">
+                <button on:click="{createEvent}">Create</button>
+            </div>
         {/if}
     </div>
 </div>
 
 
 <style>
+
+    .buttonRow{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        padding: 5px;
+    }
+
+    .summaryInput {
+        border: none;
+        border-bottom: 2px solid;
+        border-radius: 0px;
+
+        height:40px;
+        font-size: 35px;
+        text-align: center;
+    }
 
     .disabled{
         opacity: 0.2;
@@ -267,8 +289,8 @@
     .googleEventButtonContainer{
         margin-top: 10px;
         display: flex;
-        flex-direction: row;
-        justify-content: space-evenly;
+        flex-direction: column;
+        justify-content: space-around;
 
     }
 

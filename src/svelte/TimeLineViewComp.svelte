@@ -35,17 +35,24 @@ $: date = navigation ? moment().local().add(dateOffset, "days") : date;
         <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
     </div>
     <div class="navigationContainer">
-        <button on:click={minusOneWeek}>&larr&larr</button>
-        <button on:click={minusOneDay}>&larr</button>
-        <button on:click={backToday}>Today</button>
-        <button on:click={plusOneDay}>&rarr</button>
-        <button on:click={plusOneWeek}>&rarr&rarr</button>
+        <button class="fixedSizeButton" on:click={minusOneWeek}>&lt;&lt;</button>
+        <button class="fixedSizeButton" on:click={minusOneDay}>&lt;</button>
+        <button class="fixedSizeButton" on:click={backToday}>Today</button>
+        <button class="fixedSizeButton" on:click={plusOneDay}>&gt;</button>
+        <button class="fixedSizeButton" on:click={plusOneWeek}>&gt;&gt;</button>
     </div>
     {/if}
     <TimeLine plugin={plugin} bind:date height={height} width={width}/>
 </div>
 
 <style>
+
+    .fixedSizeButton {
+        
+        text-align: center;
+        padding: 10px 5%;
+        margin: 0;
+    }
 
     .titleContainer{
         display: flex;
@@ -58,7 +65,7 @@ $: date = navigation ? moment().local().add(dateOffset, "days") : date;
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: center;
+        justify-content: space-around;
         flex-wrap: wrap;
         padding-bottom: 30px;
     }

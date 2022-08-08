@@ -1,10 +1,8 @@
 import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 import { googleListEvents } from "../googleApi/GoogleListEvents";
-import { normalizePath } from "obsidian";
+import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
-import path from "path";
-
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -40,12 +38,12 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
     // check every event from the trigger text :obsidian:
     events.forEach(event => {
         //regex will check for text and extract a template name if it exists
-        const match = event.description?.match(/:obsidian-?(.*)?:/) ?? [];
+        const match = event.description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
         
-        if(match.length == 2){
+        if(match.length == 3){
             //the trigger text was found and a new note will be created
             const filename = event.summary;
-            createNoteFromEvent(plugin, filename, match[1]);
+            createNoteFromEvent(plugin, filename, match[1], match[2]);
         }
     })
 }
@@ -58,16 +56,29 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
  * @param fileName The name of the new Note
  * @param templateName  The used Template to fill the file
  */
-const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string, templateName?:string): Promise<void> => {
+const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string, folderName?:string, templateName?:string): Promise<void> => {
     const { vault } = plugin.app;
     const { adapter } = vault;
 
-    const newFileFolderPath = app.fileManager.getNewFileParent("").path;
-    const filePath = path.join(newFileFolderPath, `${fileName}.md`);
+    
+    let folderPath = app.fileManager.getNewFileParent("").path;
 
+    if(folderName){
+        if(folderName.endsWith("-")){
+            folderName = folderName.slice(0, -1);   
+        }
+
+        folderName = "/" + folderName.split(/[/\\]/).join("/");
+
+        if(await adapter.exists(folderName)){
+            folderPath = folderName;
+        }
+    }
+
+    const filePath = normalizePath(`${folderPath}/${fileName}.md`);
 
     //check if file already exists
-    if(await adapter.exists(normalizePath(filePath))){
+    if(await adapter.exists(filePath)){
         return;
     }
 
@@ -76,12 +87,9 @@ const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string
     createNotice(plugin, `EventNote ${fileName} created.`)
 
     //check if the template plugin is active
-    if(!plugin.templatePlugin || !templateName){
+    if((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName){
         return;
     }
-    
-    //Get the folder where the templates are stored from the template plugin
-    const coreTemplateFolderPath = normalizePath(plugin.templatePlugin.instance.options.folder);
 
     //Check if the template name has a file extension
     if(!templateName.match(/.*\.md/)){
@@ -89,20 +97,83 @@ const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string
     
     }
 
-    //Get Path to template file and check if it exists
-    const templateFilePath = path.join(coreTemplateFolderPath, templateName);
-    if(!await adapter.exists(templateFilePath)){
-        createNotice(plugin, `Template ${templateName} doesn't exit.`)
-        return;
-    }
-
-    //Get the file from the path
-    const templateFile = vault.getAbstractFileByPath(normalizePath(templateFilePath));
-
     //Open file in active panel needed to insert template
     await plugin.app.workspace.activeLeaf.openFile(File);
-    //Insert the template by calling the command from the plugin
-    await plugin.templatePlugin.instance.insertTemplate(templateFile);
-    //Close the file to allow multiples inserts
-    await plugin.app.workspace.activeLeaf.detach();
+
+    if(plugin.templaterPlugin && plugin.coreTemplatePlugin){
+        if(!(await insertTemplaterTemplate())){
+            if(!(await insertCoreTemplate())){
+                createNotice(plugin, "Template not compatable")
+            }
+        }       
+    }else if(plugin.templaterPlugin){
+        if(!(await insertTemplaterTemplate())){
+            createNotice(plugin, "Template not compatable")
+        }
+    }else if(plugin.coreTemplatePlugin){
+        if(!(await insertCoreTemplate())){
+            createNotice(plugin, "Template not compatable")
+        }
+    }
+
+    async function insertCoreTemplate() : Promise<boolean>{
+        //Get the folder where the templates are stored from the template plugin
+        const coreTemplateFolderPath = normalizePath(plugin.coreTemplatePlugin.instance.options.folder);
+
+        //Get Path to template file and check if it exists
+        const templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
+        if(!await adapter.exists(templateFilePath)){
+            createNotice(plugin, `Template ${templateName} doesn't exit.`)
+            return false;
+        }
+
+        //Get the file from the path
+        const templateFile = vault.getAbstractFileByPath((templateFilePath));
+
+        const result = await adapter.read(normalizePath(templateFilePath));
+
+        if(result.contains("<%") && result.contains("%>")){
+            return false;
+        }
+
+        //Insert the template by calling the command from the plugin
+        try{
+            await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);            
+        }catch{
+            return false
+        }
+        //Close the file to allow multiples inserts
+        await plugin.app.workspace.activeLeaf.detach();
+        return true;
+    }
+
+    async function insertTemplaterTemplate(){
+        const templaterFolderPath = normalizePath(plugin.templaterPlugin.settings.templates_folder);
+    
+        //Get Path to template file and check if it exists
+        const templateFilePath = `${templaterFolderPath}/${templateName}`;
+        if(!await adapter.exists(templateFilePath)){
+            createNotice(plugin, `Template ${templateName} doesn't exit.`)
+            return false;
+        }
+    
+        const templateFile = plugin.app.vault.getAbstractFileByPath(templateFilePath);
+
+        const result = await adapter.read(normalizePath(templateFilePath));
+
+        if(result.contains("{{") && result.contains("}}")){
+            return false;
+        }
+
+        if (templateFile instanceof TFile) {
+            try{
+            await plugin.templaterPlugin.templater.append_template_to_active_file(templateFile);
+            }catch{
+                return false;
+            }
+        }
+        return true;
+    }
 }
+
+
