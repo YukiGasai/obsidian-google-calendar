@@ -3,6 +3,7 @@ import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -21,7 +22,7 @@ import { createNotice } from "./NoticeHelper";
 export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<void> => {
 
     //Don't run if disabled in the settings
-    if(!plugin.settings.autoCreateEventNotes){
+    if(!plugin.settings.autoCreateEventNotes || !settingsAreCompleteAndLoggedIn(plugin)){
         return;
     }
 

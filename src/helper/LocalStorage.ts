@@ -9,7 +9,7 @@ import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
  * @returns googleAccessToken
  */
 export const getAT = (): string => {
-	return window.localStorage.getItem("googleAccessToken") ?? "";
+	return window.localStorage.getItem("googleCalendarAccessToken") ?? "";
 };
 
 /**
@@ -17,7 +17,7 @@ export const getAT = (): string => {
  * @returns googleRefreshToken
  */
 export const getRT = (): string => {
-	return window.localStorage.getItem("googleRefreshToken") ?? "";
+	return window.localStorage.getItem("googleCalendarRefreshToken") ?? "";
 };
 
 /**
@@ -26,7 +26,7 @@ export const getRT = (): string => {
  */
 export const getET = (plugin: GoogleCalendarPlugin): number => {
 	const expirationTimeString =
-		window.localStorage.getItem("googleExpirationTime") ?? "0";
+		window.localStorage.getItem("googleCalendarExpirationTime") ?? "0";
 	return parseInt(expirationTimeString, 10);
 };
 
@@ -40,7 +40,7 @@ export const getET = (plugin: GoogleCalendarPlugin): number => {
  * @returns googleAccessToken
  */
 export const setAT = (googleAccessToken: string): void => {
-	window.localStorage.setItem("googleAccessToken", googleAccessToken);
+	window.localStorage.setItem("googleCalendarAccessToken", googleAccessToken);
 };
 
 /**
@@ -49,7 +49,7 @@ export const setAT = (googleAccessToken: string): void => {
  * @returns googleRefreshToken
  */
 export const setRT = (googleRefreshToken: string): void => {
-	window.localStorage.setItem("googleRefreshToken", googleRefreshToken);
+	window.localStorage.setItem("googleCalendarRefreshToken", googleRefreshToken);
 };
 
 /**
@@ -59,7 +59,7 @@ export const setRT = (googleRefreshToken: string): void => {
  */
 export const setET = (googleExpirationTime: number): void => {
 	window.localStorage.setItem(
-		"googleExpirationTime",
+		"googleCalendarExpirationTime",
 		googleExpirationTime + ""
 	);
 };

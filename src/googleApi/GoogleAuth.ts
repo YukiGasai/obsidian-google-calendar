@@ -101,6 +101,7 @@ export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
 				"https://www.googleapis.com/auth/calendar",
 			],
 			access_type: "offline",
+			prompt: "consent"
 		});
 
 		const server = http

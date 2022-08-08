@@ -214,61 +214,63 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			await this.plugin.saveSettings();
 		});
 
-		containerEl.createEl("h3", "Calendar Blacklist");
-		const calendarBlackList = this.plugin.settings.calendarBlackList;
+		if(settingsAreCompleteAndLoggedIn(this.plugin)){
+			containerEl.createEl("h3", "Calendar Blacklist");
+			const calendarBlackList = this.plugin.settings.calendarBlackList;
 
-		new Setting(containerEl)
-			.setName("Add Item to BlackList")
-			.addDropdown(async (dropdown) => {
-				dropdown.addOption("Default", "Select Option to add");
-				const calendars = await googleListCalendars(this.plugin);
-								
-				calendars.forEach((calendar) => {
-					dropdown.addOption(
-						calendar.id + "_=_" + calendar.summary,
-						calendar.summary
-					);
-			
-				});
+			new Setting(containerEl)
+				.setName("Add Item to BlackList")
+				.addDropdown(async (dropdown) => {
+					dropdown.addOption("Default", "Select Option to add");
+					const calendars = await googleListCalendars(this.plugin);
 
-				dropdown.onChange(async (value) => {
-					const [id, summery] = value.split("_=_");
-					if (!calendarBlackList.contains([id, summery])) {
-						this.plugin.settings.calendarBlackList = [
-							...calendarBlackList,
-							[id, summery],
-						];
+					calendars.forEach((calendar) => {
+						dropdown.addOption(
+							calendar.id + "_=_" + calendar.summary,
+							calendar.summary
+						);
+						
+					});
 
-						await this.plugin.saveSettings();
-					}
-					const setting = new Setting(containerEl)
-						.setName(summery)
-						.addButton((button) => {
-							button.setButtonText("Remove");
-							button.onClick(async (state) => {
-								this.plugin.settings.calendarBlackList.remove([
-									id,
-									summery,
-								]);
-								setting.settingEl.remove();
-								await this.plugin.saveSettings();
+					dropdown.onChange(async (value) => {
+						const [id, summery] = value.split("_=_");
+						if (!calendarBlackList.contains([id, summery])) {
+							this.plugin.settings.calendarBlackList = [
+								...calendarBlackList,
+								[id, summery],
+							];
+
+							await this.plugin.saveSettings();
+						}
+						const setting = new Setting(containerEl)
+							.setName(summery)
+							.addButton((button) => {
+								button.setButtonText("Remove");
+								button.onClick(async (state) => {
+									this.plugin.settings.calendarBlackList.remove([
+										id,
+										summery,
+									]);
+									setting.settingEl.remove();
+									await this.plugin.saveSettings();
+								});
 							});
-						});
-				});
-			});
-
-		calendarBlackList.forEach((calendar) => {
-			const setting = new Setting(containerEl)
-				.setName(calendar[1])
-				.addButton((button) => {
-					button.setButtonText("Remove");
-					button.onClick(async (state) => {
-						this.plugin.settings.calendarBlackList.remove(calendar);
-						setting.settingEl.remove();
-						await this.plugin.saveSettings();
 					});
 				});
-		});
+
+			calendarBlackList.forEach((calendar) => {
+				const setting = new Setting(containerEl)
+					.setName(calendar[1])
+					.addButton((button) => {
+						button.setButtonText("Remove");
+						button.onClick(async (state) => {
+							this.plugin.settings.calendarBlackList.remove(calendar);
+							setting.settingEl.remove();
+							await this.plugin.saveSettings();
+						});
+					});
+			});
+		}
 	}
 }
 

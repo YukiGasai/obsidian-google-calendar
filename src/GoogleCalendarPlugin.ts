@@ -7,7 +7,7 @@ import {
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleListTodayEvents } from "./googleApi/GoogleListEvents";
-import { getGoogleColors } from "./googleApi/GoogleColors";
+
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
@@ -74,9 +74,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
-		await getGoogleColors(this);
-		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
+		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
 			checkEditorForCodeBlocks(text, el, this)

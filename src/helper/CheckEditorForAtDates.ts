@@ -13,6 +13,7 @@ export function checkEditorForAtDates(
 	editor: Editor,
 	plugin: GoogleCalendarPlugin
 ): void {
+	console.log("checkEditorForAtDates")
 	// Run functions until one of the functions returns true to stop the chain.
 	check4Word("@today", editor, plugin) ||
 	check4Word("@tomorrow", editor, plugin) ||
@@ -26,6 +27,7 @@ function check4Word(
 	editor: Editor,
 	plugin: GoogleCalendarPlugin
 ): boolean {
+
 	const endPos = editor.getCursor();
 	let startPos = editor.getCursor();
 	let realWord = "";
@@ -33,6 +35,9 @@ function check4Word(
 
 	if (word === "@REGEX") {
 		const realLine = editor.getLine(endPos.line);
+		//Lag prevention
+		if(realLine.length >50)return false;
+
 		const match = realLine.match(/.*@([+,-])(\d+).*/) ?? [];
 
 		if (match.length != 3) return false;
@@ -58,6 +63,7 @@ function check4Word(
 		if(realWord.length != "@YYYY-MM-DD".length)return false;
 		if (!realWord.startsWith("@")) return false;
 
+		if(realWord.substring(1).length<100)return false;
 
 		const tmpDate = window.moment(realWord.substring(1));
 		if (tmpDate.isValid()) {
@@ -65,7 +71,7 @@ function check4Word(
 		} else {
 			return false;
 		}
-
+		
 	} else {
 		startPos = { ...endPos, ch: endPos.ch - word.length };
 

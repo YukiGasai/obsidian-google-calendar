@@ -3,6 +3,7 @@ import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
+import { getGoogleColors } from "./GoogleColors";
 
 
 let cachedCalendars:GoogleCalander[] = []
@@ -33,6 +34,9 @@ export async function googleListCalendars(
 		//Filter for every request instead of caching the filtered result to allow hot swap settings
 		return filterCalendarsByBlackList(plugin,cachedCalendars);
 	}
+
+	//Make sure the colors for calendar and events are loaded before getting the first calendar
+	await getGoogleColors(plugin);
 
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
