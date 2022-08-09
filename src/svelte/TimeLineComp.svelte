@@ -52,7 +52,7 @@
    
 
     const getLocationArray = () => {
-
+        console.log(events);
         const startMap = new TreeMap<string, GoogleEvent[]>();
         events.forEach((event) => {
             const start = event.start.date || event.start.dateTime;

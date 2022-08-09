@@ -13,7 +13,6 @@ export function checkEditorForAtDates(
 	editor: Editor,
 	plugin: GoogleCalendarPlugin
 ): void {
-	console.log("checkEditorForAtDates")
 	// Run functions until one of the functions returns true to stop the chain.
 	check4Word("@today", editor, plugin) ||
 	check4Word("@tomorrow", editor, plugin) ||

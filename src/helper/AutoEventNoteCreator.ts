@@ -5,6 +5,7 @@ import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
+
 /**
  * This function implements the automatic creation of notes from a google calendar event
  * 
@@ -57,7 +58,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
  * @param fileName The name of the new Note
  * @param templateName  The used Template to fill the file
  */
-const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string, folderName?:string, templateName?:string): Promise<void> => {
+export const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string, folderName?:string, templateName?:string): Promise<void> => {
     const { vault } = plugin.app;
     const { adapter } = vault;
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+    //TODO clean up date dateTime 
     import type { GoogleCalander, GoogleEvent } from "../helper/types";
     import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     
@@ -7,7 +8,7 @@
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
-
+    import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 
     export let plugin: GoogleCalendarPlugin;
     export let event: GoogleEvent;
@@ -18,6 +19,10 @@
     let loading = true;
     let fullDay;
 
+    let startDateTime;
+    let endDateTime;
+    let startDate;
+
     onMount(async () => {
         calendars = await googleListCalendars(plugin);
         loading = false;
@@ -25,20 +30,22 @@
         fullDay = event?.start?.dateTime == undefined
 
 
-        //Add the missing time to the object for a better user expirince
-        if(fullDay){
-            event.start.dateTime = currentDate.format()
-            event.end.dateTime   = currentDate.add(1, "hour").format()
-        }else{
-            event.start.date = currentDate.format("YYYY-MM-DD")
-            event.end.date   = currentDate.format("YYYY-MM-DD")
-        }
-
         if(event.id == undefined){
             event.summary = ""
             event.description = ""
             event.parent = calendars[calendars.length - 1];
             fullDay = false
+        }
+
+        //Add the missing time to the object for a better user expirince
+        if(fullDay){
+            startDate = window.moment(event.start.date).format()
+            startDateTime = currentDate.format()
+            endDateTime   = currentDate.add(1, "hour").format()
+        }else{
+            startDate = currentDate.format("YYYY-MM-DD")
+            startDateTime = window.moment(event.start.dateTime).format()
+            endDateTime = window.moment(event.end.dateTime).format()
         }
 
 	});
@@ -79,22 +86,20 @@
 
     const changeStartDateTime = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
-           event.start.dateTime = window.moment(e.target.value).format()
+           startDateTime = window.moment(e.target.value).format()
         } 
     }
 
 
     const changeEndDateTime = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
-            event.end.dateTime = window.moment(e.target.value).format()
+            endDateTime = window.moment(e.target.value).format()
         } 
     }
 
     const changeDate = (e:Event) => {
         if(e.target instanceof HTMLInputElement){
-            const date = window.moment(e.target.value).format("YYYY-MM-DD")
-            event.start.date = date
-            event.end.date = date
+            startDate = window.moment(e.target.value).format("YYYY-MM-DD")
         } 
     }
 
@@ -140,6 +145,15 @@
 
 
     const updateEvent = async () => {
+
+        if(fullDay){
+            event.start.date = startDate;
+            event.end.date = startDate;
+        }else{
+            event.start.dateTime = startDateTime;
+            event.end.dateTime = endDateTime;
+        }
+
         if(fullDay){
             delete event.start.dateTime;
             delete event.end.dateTime;
@@ -148,6 +162,7 @@
             delete event.start.date;
             delete event.end.date;
         }
+
 
         let updatedEvent;
         if(event.recurringEventId){
@@ -161,6 +176,13 @@
     }
 
     const updateAllEvents = async () => {
+        if(fullDay){
+            event.start.date = startDate;
+            event.end.date = startDate;
+        }else{
+            event.start.dateTime = startDateTime;
+            event.end.dateTime = endDateTime;
+        }
 
         if(fullDay){
             delete event.start.dateTime;
@@ -170,12 +192,27 @@
             delete event.start.date;
             delete event.end.date;
         }
-  
+
         const updatedEvent = await googleUpdateEvent(plugin, event)
         if(updatedEvent.id){
             closeFunction();
         }
     }
+
+    const openCreateNote = async () => {
+        const file = plugin.app.vault.getFiles().find(file => file.basename == event.summary)
+        
+        if(file){
+            plugin.app.workspace.getLeaf(true).openFile(file);
+        }else{
+            await createNoteFromEvent (plugin, event.summary);
+        }
+    }
+
+    const openInBrowser = () => {
+        window.open(event.htmlLink);
+    }
+
 
 </script>
 
@@ -222,11 +259,16 @@
     <div class="googleEventButtonContainer">
         {#if event.id}
 
-            {#if event.recurringEventId }
-            <a href={event.htmlLink}><span>Recurring Event</span></a>  
-            {:else}
-            <a href={event.htmlLink}><span>Single Event</span></a>  
-            {/if}
+            <div class="buttonRow">
+                {#if event.recurringEventId }
+                    <button on:click="{openInBrowser}">Recurring Event</button>
+                {:else}
+                    <button on:click="{openInBrowser}">Single Event</button>
+                {/if}
+
+                <button on:click="{openCreateNote}">Open/Create</button>
+            </div>
+
 
             <div class="buttonRow">
                 <button on:click="{updateEvent}">Update</button>
