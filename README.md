@@ -72,6 +72,8 @@ A timeline view to see all events over a day
 | Insert Google Event CodeBlock|    Inserts a codeblock into the active file to display the 3 views  |
 | List Google Events|               Opens a dropdown to view todays events |
 | List Google Calendars|            Opens a dropdown to view all calendars |
+| Create Google Calendar Event|     Opens an empty details view to create a new event |
+| Google Calendar Trigger Auto Import| Runs the Auto create Notes function again |
 | Copy Google Calendar Refresh Token to Clipboard|  Copies the refresh token (PC only) |
 
 
@@ -94,7 +96,7 @@ This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day view 
     ```
 ```
 
-### Auto create Events
+### Auto create Notes
 
 The plugin allows you to generate notes automatically from Google Events.
 1. To achieve this, activate it inside the settings.

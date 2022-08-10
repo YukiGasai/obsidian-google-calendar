@@ -8,7 +8,7 @@
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
-    import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
+    import { manuallyCreateNoteFromEvent } from "../helper/AutoEventNoteCreator";
 
     export let event: GoogleEvent;
     export let currentDate: moment.Moment;
@@ -125,7 +125,6 @@
         }
 
         googleCreateEvent(event).then(newEvent =>{
-            console.log(newEvent);
             closeFunction();
         });
     
@@ -215,8 +214,9 @@
         
         if(file){
             plugin.app.workspace.getLeaf(true).openFile(file);
+            closeFunction();
         }else{
-            await createNoteFromEvent (event.summary);
+            await manuallyCreateNoteFromEvent(event);
         }
     }
 

@@ -1,8 +1,11 @@
+import type { GoogleEvent } from "../helper/types";
+
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
+
 
 
 /**
@@ -47,6 +50,23 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
             createNoteFromEvent(filename, match[1], match[2]);
         }
     })
+}
+
+
+export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<void> => {
+
+    if(!settingsAreCompleteAndLoggedIn()){
+        return;
+    }
+
+    //regex will check for text and extract a template name if it exists
+    const match = event.description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
+    
+
+    //the trigger text was found and a new note will be created
+    const filename = event.summary;
+    createNoteFromEvent(filename, match?.[1], match?.[2]);
+      
 }
 
 /**

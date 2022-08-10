@@ -164,7 +164,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		//Create event command
 		this.addCommand({
-			id: "create-google-calendars-event",
+			id: "create-google-calendar-event",
 			name: "Create Google Calendar Event",
 
 			checkCallback: (checking: boolean) => {
@@ -186,7 +186,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		});
 
 
-				//List events command
+		//List calendar command
 		this.addCommand({
 			id: "list-google-calendars",
 			name: "List Google Calendars",
@@ -227,6 +227,26 @@ export default class GoogleCalendarPlugin extends Plugin {
 				googleListTodayEvents().then((events) => {
 					new EventListModal(events).open()
 				});
+			},
+		});
+
+
+		this.addCommand({
+			id: "google-calendar-trigger-auto-import",
+			name: "Google Calendar Trigger Auto Import",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn(false);
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				checkForEventNotes(this);
 			},
 		});
 
