@@ -6,7 +6,7 @@ import {
 } from "./view/GoogleCalendarSettingTab";
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
-import { googleListTodayEvents } from "./googleApi/GoogleListEvents";
+import { googleClearCachedEvents, googleListTodayEvents } from "./googleApi/GoogleListEvents";
 
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
@@ -17,6 +17,7 @@ import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
 import { getRT } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
+import { ViewEventEntry } from "./modal/ViewEventEntry";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -140,6 +141,52 @@ export default class GoogleCalendarPlugin extends Plugin {
 		});
 
 		//List events command
+		this.addCommand({
+			id: "list-google-calendars",
+			name: "List Google Calendars",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn(false);
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				googleListCalendars().then((calendars) => {
+					new CalendarsListModal(calendars).open();
+				});
+			},
+		});
+
+		//Create event command
+		this.addCommand({
+			id: "create-google-calendars-event",
+			name: "Create Google Calendar Event",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn(false);
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+	
+				new ViewEventEntry({start:{}, end:{}}, window.moment(), () => {
+					googleClearCachedEvents()
+				}).open()
+				
+			},
+		});
+
+
+				//List events command
 		this.addCommand({
 			id: "list-google-calendars",
 			name: "List Google Calendars",

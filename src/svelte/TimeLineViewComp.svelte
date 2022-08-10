@@ -2,6 +2,7 @@
 
 import TimeLine from "./TimeLineComp.svelte";
 import {ViewEventEntry} from "../modal/ViewEventEntry"
+import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
 
 export let height:number = undefined;
 export let width:number = undefined;
@@ -18,6 +19,7 @@ const plusOneDay   = () => dateOffset+= 1;
 const openNewEventDialog = (event) => {  
 
     new ViewEventEntry({start:{}, end:{}}, window.moment(), () =>{
+        googleClearCachedEvents()
         date=date;
     }).open()
 }
@@ -26,7 +28,7 @@ $: date = navigation ? window.moment().local().add(dateOffset, "days") : date;
 
 </script>
 <div style="padding-left: 10px;">
-    {#if navigation}
+    {#if navigation && date}
     <div class="titleContainer">
         <button on:click={openNewEventDialog}>+</button>
         <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>

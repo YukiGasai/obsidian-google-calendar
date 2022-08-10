@@ -35,6 +35,8 @@
             event.description = ""
             event.parent = calendars[calendars.length - 1];
             fullDay = false
+            event.start.dateTime = window.moment().format();
+            event.end.dateTime = window.moment().add(1, "hour").format();
         }
 
         //Add the missing time to the object for a better user expirince
@@ -103,7 +105,15 @@
         } 
     }
 
-    const createEvent = () => {
+    const createEvent = async () => {
+
+        if(fullDay){
+            event.start.date = startDate;
+            event.end.date = startDate;
+        }else{
+            event.start.dateTime = startDateTime;
+            event.end.dateTime = endDateTime;
+        }
 
         if(fullDay){
             delete event.start.dateTime;
@@ -114,11 +124,12 @@
             delete event.end.date;
         }
 
-        const newEvent = googleCreateEvent(event);
-    
-        if(newEvent){
+        googleCreateEvent(event).then(newEvent =>{
+            console.log(newEvent);
             closeFunction();
-        }
+        });
+    
+
     
     }
 
@@ -247,13 +258,13 @@
 
     {#if fullDay}
         <label for="eventDate">Date</label>
-        <input type="date" name="eventDate" value="{dateToInput(event.start.date)}" on:change="{changeDate}">
+        <input type="date" name="eventDate" value="{dateToInput(startDate)}" on:change="{changeDate}">
     {:else}
         <label for="eventStartDate">Start Date</label>
-        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(event.start.dateTime)}" on:change="{changeStartDateTime}">
+        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(startDateTime)}" on:change="{changeStartDateTime}">
 
         <label for="eventEndDate">End Date</label>
-        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(event.end.dateTime)}"  on:change="{changeEndDateTime}" >
+        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(endDateTime)}"  on:change="{changeEndDateTime}" >
     {/if}
 
     <div class="googleEventButtonContainer">
