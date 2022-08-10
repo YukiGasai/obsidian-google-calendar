@@ -1,16 +1,14 @@
 <script lang="ts">
     import type { ICalendarSource, IDayMetadata, IDot} from "obsidian-calendar-ui"
-    import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
     import type { GoogleEvent } from '../helper/types';
     
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
-    import { googleListEventsByMonth } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, googleListEventsByMonth } from "../googleApi/GoogleListEvents";
 
     export let displayedMonth = window.moment();
     export let width:number = 400;
     export let height:number = 400;
-    export let plugin:GoogleCalendarPlugin;
 
     let interval;
     let events: GoogleEvent[];
@@ -18,7 +16,7 @@
     let sources:ICalendarSource[];
     
     async function getSource(month:moment.Moment) {
-          const eventsInMonth = await googleListEventsByMonth(plugin, month);    
+          const eventsInMonth = await googleListEventsByMonth(month);    
           events = eventsInMonth;
           const customTagsSource: ICalendarSource = {
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
@@ -51,8 +49,8 @@
 
 
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
-        new EventListModal(plugin, getEventsOfDay(events, date), false, () => {
-            plugin.overwriteCache = true;
+        new EventListModal(getEventsOfDay(events, date), false, () => {
+            googleClearCachedEvents();
             displayedMonth = displayedMonth
         }).open();
     }

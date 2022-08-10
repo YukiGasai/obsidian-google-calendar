@@ -1,10 +1,9 @@
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import type { GoogleEvent } from "../helper/types";
 
 import { Editor, EditorPosition, FuzzySuggestModal } from "obsidian";
 
 export class EventSelectReplaceModal extends FuzzySuggestModal<GoogleEvent> {
-	plugin: GoogleCalendarPlugin;
 	eventList: GoogleEvent[];
 	editor: Editor;
 	start: EditorPosition;
@@ -12,15 +11,13 @@ export class EventSelectReplaceModal extends FuzzySuggestModal<GoogleEvent> {
 	word: string;
 
 	constructor(
-		plugin: GoogleCalendarPlugin,
 		eventList: GoogleEvent[],
 		editor: Editor,
 		start: EditorPosition,
 		end: EditorPosition,
 		word: string
 	) {
-		super(plugin.app);
-		this.plugin = plugin;
+		super(GoogleCalendarPlugin.getInstance().app);
 		this.eventList = eventList;
 		this.setPlaceholder("Select an event to insert");
 		this.editor = editor;
@@ -37,10 +34,8 @@ export class EventSelectReplaceModal extends FuzzySuggestModal<GoogleEvent> {
 		return `${item.summary}\t`;
 	}
 
-	async onChooseItem(
-		item: GoogleEvent,
-		_: MouseEvent | KeyboardEvent
-	): Promise<void> {
+	async onChooseItem(item: GoogleEvent): Promise<void> {
+		
 		const replacementString = `[${item.summary}](${item.htmlLink})`;
 
 		this.editor.replaceRange(

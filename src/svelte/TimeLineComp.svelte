@@ -1,13 +1,12 @@
 <script lang="ts" >
 
-    import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import type { GoogleEvent } from "../helper/types";
 
     import TreeMap from 'ts-treemap'
     import { DateToPercent } from "../helper/CanvasDrawHelper";
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
-    import { googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
     import {ViewEventEntry} from '../modal/ViewEventEntry'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
 
@@ -20,7 +19,6 @@
         fullDay:boolean;
     }
 
-    export let plugin: GoogleCalendarPlugin;
     export let height = 700;
     export let width = 300;
     export let date = window.moment();
@@ -31,7 +29,7 @@
     let eventLocations:Location[] = [];
     let interval;
 
-    const refeshData =async () => {
+    const refeshData = async () => {
         await getEvents()
         const dayPercentage = DateToPercent(new Date());
         timeDisplayPosition = Math.floor(height * dayPercentage);
@@ -52,7 +50,6 @@
    
 
     const getLocationArray = () => {
-        console.log(events);
         const startMap = new TreeMap<string, GoogleEvent[]>();
         events.forEach((event) => {
             const start = event.start.date || event.start.dateTime;
@@ -103,7 +100,7 @@
             return;
         }
    
-        const newEvents = await googleListEvents(plugin, date); 
+        const newEvents = await googleListEvents(date); 
 
         if(JSON.stringify(newEvents) != JSON.stringify(events)){
             events = newEvents;
@@ -117,8 +114,8 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new ViewEventEntry(plugin, event, date, (id) => {
-                plugin.overwriteCache = true;
+            new ViewEventEntry(event, date, () => {
+                googleClearCachedEvents();
                 date = date
             }).open();
         }

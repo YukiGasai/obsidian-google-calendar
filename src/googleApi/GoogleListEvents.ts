@@ -4,11 +4,10 @@ import type {
 	GoogleEvent,
 	GoogleEventList,
 } from "../helper/types";
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
-import { moment } from "obsidian";
 import { googleListCalendars } from "./GoogleListCalendars";
 import ct from 'countries-and-timezones'
 
@@ -21,20 +20,24 @@ const dateToTimeParam = (date:string, tz:string) :string => {
 }
 
 
+export function googleClearCachedEvents():void{
+	cachedEvents.clear()
+}
+
 /**
  * 
- * @param plugin  Refrence to the main plugin to acess the settings
  * @param googleCalander 
  * @param date 
  * @param endDate 
  * @returns 
  */
 export async function googleListEventsByCalendar(
-	plugin: GoogleCalendarPlugin,
 	googleCalander: GoogleCalander,
 	date: moment.Moment,
 	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
+	
+	const plugin = GoogleCalendarPlugin.getInstance();
 
 	//Turn dates into strings for request and caching
 	const timezone = ct.getTimezone(googleCalander.timeZone);
@@ -53,9 +56,9 @@ export async function googleListEventsByCalendar(
 	const cacheKey:string = JSON.stringify({start: startString, end: endString, calendar: googleCalander.id});
 
 
-	if(cachedEvents.has(cacheKey) && !plugin.overwriteCache){
+	if(cachedEvents.has(cacheKey)){
 		const {events, updated} = cachedEvents.get(cacheKey);
-		if(updated.clone().add(plugin.settings.refreshInterval, "second").isAfter(moment())){
+		if(updated.clone().add(plugin.settings.refreshInterval, "second").isAfter(window.moment())){
 			return events;
 		}
 	}
@@ -67,7 +70,7 @@ export async function googleListEventsByCalendar(
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
 		"Authorization",
-		"Bearer " + (await getGoogleAuthToken(plugin))
+		"Bearer " + (await getGoogleAuthToken())
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
@@ -115,29 +118,27 @@ export async function googleListEventsByCalendar(
             return startA.isBefore(startB, "minute") ? -1 : 1;
         })
 
-		cachedEvents.set(cacheKey, {events: totalEventList, updated:moment()})
+		cachedEvents.set(cacheKey, {events: totalEventList, updated: window.moment()})
 
 		return totalEventList;
 	} catch (error) {
 		console.log(error);
-		createNotice(plugin, "Could not load google events");
+		createNotice("Could not load google events");
 		return [];
 	}
 }
 
 export async function googleListEvents(
-	plugin: GoogleCalendarPlugin,
 	date:  moment.Moment,
 	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
 
 	try {
-		const calendarList = await googleListCalendars(plugin);
+		const calendarList = await googleListCalendars();
 		let eventList: GoogleEvent[] = [];
 
 		for (let i = 0; i < calendarList.length; i++) {
 			const events = await googleListEventsByCalendar(
-				plugin,
 				calendarList[i],
 				date,
 				endDate
@@ -153,44 +154,31 @@ export async function googleListEvents(
             return startA.isBefore(startB, "minute") ? -1 : 1;
         })
 
-		if(plugin.overwriteCache){
-			plugin.overwriteCache = false;
-		}
-
 		return eventList;
 	} catch (error) {
 		console.log(error);
-		createNotice(plugin, "Could not load google events");
+		createNotice("Could not load google events");
 		return [];
 	}
 }
 
-export async function googleListTodayEventsByCalendar(
-	plugin: GoogleCalendarPlugin,
-	googleCalander: GoogleCalander
-): Promise<GoogleEvent[]> {
+export async function googleListTodayEventsByCalendar(googleCalander: GoogleCalander): Promise<GoogleEvent[]> {
 	const list = await googleListEventsByCalendar(
-		plugin,
 		googleCalander,
 		window.moment()
 	);
 	return list;
 }
 
-export async function googleListTodayEvents(
-	plugin: GoogleCalendarPlugin
-): Promise<GoogleEvent[]> {
-	const list = await googleListEvents(plugin, moment());
+export async function googleListTodayEvents(): Promise<GoogleEvent[]> {
+	const list = await googleListEvents(window.moment());
 	return list;
 }
 
-export async function googleListEventsByMonth(
-	plugin: GoogleCalendarPlugin,
-	dateInMonth: moment.Moment
-): Promise<GoogleEvent[]> {
+export async function googleListEventsByMonth(dateInMonth: moment.Moment): Promise<GoogleEvent[]> {
 	const monthStartDate = dateInMonth.clone().startOf("month")
 	const monthEndDate   = dateInMonth.clone().endOf("month")
 
-	const list = await googleListEvents(plugin, monthStartDate, monthEndDate);
+	const list = await googleListEvents(monthStartDate, monthEndDate);
 	return list;
 }

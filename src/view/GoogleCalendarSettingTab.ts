@@ -1,5 +1,4 @@
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import {
 	PluginSettingTab,
@@ -71,7 +70,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 		const createLogOutButton = (button: ButtonComponent) => {
 			button.setButtonText("Logout");
-			button.onClick(async (event) => {
+			button.onClick(async () => {
 				setRT("");
 				setAT("");
 				setET(0);
@@ -81,9 +80,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				AuthSetting.setDesc("Login to your Google Account");
 				AuthSetting.addButton((button: ButtonComponent) => {
 					button.setButtonText("Login");
-					button.onClick(async (event) => {
-						if (settingsAreCorret(this.plugin)) {
-							LoginGoogle(this.plugin);
+					button.onClick(async () => {
+						if (settingsAreCorret()) {
+							LoginGoogle();
 						}
 					});
 				});
@@ -100,9 +99,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				AuthSetting.setDesc("Login to your Google Account");
 				AuthSetting.addButton((button: ButtonComponent) => {
 					button.setButtonText("Login");
-					button.onClick(async (event) => {
-						if (settingsAreCorret(this.plugin)) {
-							LoginGoogle(this.plugin);
+					button.onClick(async () => {
+						if (settingsAreCorret()) {
+							LoginGoogle();
 
 							let count = 0;
 							const intId = setInterval(() => {
@@ -214,7 +213,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			await this.plugin.saveSettings();
 		});
 
-		if(settingsAreCompleteAndLoggedIn(this.plugin)){
+		if(settingsAreCompleteAndLoggedIn()){
 			containerEl.createEl("h3", "Calendar Blacklist");
 			const calendarBlackList = this.plugin.settings.calendarBlackList;
 
@@ -222,7 +221,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setName("Add Item to BlackList")
 				.addDropdown(async (dropdown) => {
 					dropdown.addOption("Default", "Select Option to add");
-					const calendars = await googleListCalendars(this.plugin);
+					const calendars = await googleListCalendars();
 
 					calendars.forEach((calendar) => {
 						dropdown.addOption(
@@ -246,7 +245,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							.setName(summery)
 							.addButton((button) => {
 								button.setButtonText("Remove");
-								button.onClick(async (state) => {
+								button.onClick(async () => {
 									this.plugin.settings.calendarBlackList.remove([
 										id,
 										summery,
@@ -263,7 +262,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					.setName(calendar[1])
 					.addButton((button) => {
 						button.setButtonText("Remove");
-						button.onClick(async (state) => {
+						button.onClick(async () => {
 							this.plugin.settings.calendarBlackList.remove(calendar);
 							setting.settingEl.remove();
 							await this.plugin.saveSettings();
@@ -274,22 +273,21 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 	}
 }
 
-export function settingsAreComplete(
-	plugin: GoogleCalendarPlugin,
-	showNotice = true
-): boolean {
+export function settingsAreComplete(showNotice = true): boolean {
+	const plugin = GoogleCalendarPlugin.getInstance();
 	if (
 		plugin.settings.googleApiToken == "" ||
 		plugin.settings.googleClientId == "" ||
 		plugin.settings.googleClientSecret == ""
 	) {
-		createNotice(plugin, "Google Calendar missing settings", showNotice);
+		createNotice("Google Calendar missing settings", showNotice);
 		return false;
 	}
 	return true;
 }
 
-export function settingsAreCorret(plugin: GoogleCalendarPlugin): boolean {
+export function settingsAreCorret(): boolean {
+	const plugin = GoogleCalendarPlugin.getInstance();
 	if (
 		/^AIza[0-9A-Za-z-_]{35}$/.test(plugin.settings.googleApiToken) == false
 	) {
@@ -311,17 +309,12 @@ export function settingsAreCorret(plugin: GoogleCalendarPlugin): boolean {
 	return true;
 }
 
-export function settingsAreCompleteAndLoggedIn(
-	plugin: GoogleCalendarPlugin,
-	showNotice = true
-): boolean {
-	if (!settingsAreComplete(plugin, false) || getRT() == "") {
+export function settingsAreCompleteAndLoggedIn(showNotice = true): boolean {
+	if (!settingsAreComplete(false) || getRT() == "") {
 		createNotice(
-			plugin,
 			"Google Calendar missing settings or not logged in",
 			showNotice
 		);
-
 		return false;
 	}
 	return true;

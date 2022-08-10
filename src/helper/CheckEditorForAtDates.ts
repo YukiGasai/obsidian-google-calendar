@@ -4,27 +4,24 @@
  */
 
 import type { Editor } from "obsidian";
-import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 import { EventSelectReplaceModal } from "../modal/EventSelectReplaceModal";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 
 export function checkEditorForAtDates(
 	editor: Editor,
-	plugin: GoogleCalendarPlugin
 ): void {
 	// Run functions until one of the functions returns true to stop the chain.
-	check4Word("@today", editor, plugin) ||
-	check4Word("@tomorrow", editor, plugin) ||
-	check4Word("@yesterday", editor, plugin) ||
-	check4Word("@REGEX", editor, plugin) ||
-	check4Word("@YYYY-MM-DD", editor, plugin);
+	check4Word("@today", editor) ||
+	check4Word("@tomorrow", editor) ||
+	check4Word("@yesterday", editor) ||
+	check4Word("@REGEX", editor) ||
+	check4Word("@YYYY-MM-DD", editor);
 }
 
 function check4Word(
 	word: string,
-	editor: Editor,
-	plugin: GoogleCalendarPlugin
+	editor: Editor
 ): boolean {
 
 	const endPos = editor.getCursor();
@@ -95,9 +92,8 @@ function check4Word(
 
 	}
 
-	googleListEvents(plugin, date).then((events) => {
+	googleListEvents(date).then((events) => {
 		new EventSelectReplaceModal(
-			plugin,
 			events,
 			editor,
 			startPos,

@@ -1,24 +1,22 @@
-import { Modal } from "obsidian";
 import type { GoogleCalander, GoogleEvent } from "../helper/types";
-import type GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
+
+import { Modal } from "obsidian";
+import GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
 import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
 
 export class ViewEventEntry extends Modal {
-	plugin: GoogleCalendarPlugin;
 	selectedEvent: GoogleEvent;
 	currentDate: moment.Moment;
 	calendarList: GoogleCalander[];
-	closeFunction: (id:string) => void;
+	closeFunction: () => void;
 
-	onSubmit: (event: GoogleEvent) => void;
+	onSubmit: () => void;
 	constructor(
-		plugin: GoogleCalendarPlugin,
 		selectedEvent: GoogleEvent,
 		currentDate: moment.Moment,
-		closeFunction?: (id:string) => void
+		closeFunction?: () => void
 	) {
-		super(plugin.app);
-		this.plugin = plugin;
+		super(GoogleCalendarPlugin.getInstance().app);
 		this.selectedEvent = selectedEvent;
 		this.currentDate = currentDate;
 		if(closeFunction){
@@ -31,12 +29,11 @@ export class ViewEventEntry extends Modal {
 		new EventDetailsComp({
 			target: contentEl,
 			props: {
-				plugin: this.plugin,
 				event: this.selectedEvent,
 				currentDate: this.currentDate,
 				closeFunction: () => {
 					if(this.closeFunction){
-						this.closeFunction(this.selectedEvent.id);
+						this.closeFunction();
 					}
 					this.close()
 				} 

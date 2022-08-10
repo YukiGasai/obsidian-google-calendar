@@ -6,9 +6,10 @@
 	and refresh the access token if needed 
 */
 
-import type GoogleCalendarPlugin from './../GoogleCalendarPlugin';
+
 import type { IncomingMessage, ServerResponse } from 'http';
 
+import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
 import {
 	settingsAreComplete,
 	settingsAreCompleteAndLoggedIn,
@@ -33,18 +34,18 @@ const PORT = 42813
  * Function will check if a accses token exists and if its still valid
  * if not it will request a new access token using the refersh token
  * 
- * @param plugin Refrence to the main plugin to acess the settings
  * @returns A valid access Token
  */
-export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<string> {
-	if (!settingsAreCompleteAndLoggedIn(plugin)) return;
+export async function getGoogleAuthToken(): Promise<string> {
+	const plugin = GoogleCalendarPlugin.getInstance();
+	if (!settingsAreCompleteAndLoggedIn()) return;
 
 	//Check if the Access token is still valid
 	if (
-		getET(plugin) == 0 ||
-		getET(plugin) == undefined ||
-		isNaN(getET(plugin)) ||
-		getET(plugin) < +new Date()
+		getET() == 0 ||
+		getET() == undefined ||
+		isNaN(getET()) ||
+		getET() < +new Date()
 	) {
 		//Acceess token is no loger valid have to create a new one
 		if (getRT() != "") {
@@ -81,11 +82,14 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
  * Server will read the tokens and save it to local storage
  * Local server will shut down
  * 
- * @param plugin Refrence to the main plugin to acess the settings
  */
-export async function LoginGoogle(plugin: GoogleCalendarPlugin): Promise<void> {
+export async function LoginGoogle(): Promise<void> {
+
+
+
+	const plugin = GoogleCalendarPlugin.getInstance();
 	if (Platform.isDesktop) {
-		if (!settingsAreComplete(plugin)) return;
+		if (!settingsAreComplete()) return;
 		const { OAuth2Client } = require("google-auth-library");
 		const http = require("http");
 		const open = require("open");

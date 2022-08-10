@@ -1,5 +1,5 @@
 import type { GoogleCalendarPluginSettings } from "./helper/types";
-import { Editor, MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import { Editor, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -18,6 +18,7 @@ import { getRT } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 
+
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
 	googleClientSecret: "",
@@ -32,8 +33,16 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
+
+	private static instance: GoogleCalendarPlugin;
+	
+	public static getInstance(): GoogleCalendarPlugin {
+        return GoogleCalendarPlugin.instance;
+    }
+
+	public plugin: GoogleCalendarPlugin = this;
+
 	settings: GoogleCalendarPluginSettings;
-	overwriteCache = false;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	coreTemplatePlugin:any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,33 +82,36 @@ export default class GoogleCalendarPlugin extends Plugin {
 	}
 
 	async onload(): Promise<void> {
+
+		GoogleCalendarPlugin.instance = this;
+
 		await this.loadSettings();
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
-			checkEditorForCodeBlocks(text, el, this)
+			checkEditorForCodeBlocks(text, el)
 		);
 
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_DAY,
-			(leaf: WorkspaceLeaf) => new DayCalendarView(leaf, this)
+			(leaf: WorkspaceLeaf) => new DayCalendarView(leaf)
 		);
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_MONTH,
-			(leaf: WorkspaceLeaf) => new MonthCalendarView(leaf, this)
+			(leaf: WorkspaceLeaf) => new MonthCalendarView(leaf)
 		);
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_WEB,
-			(leaf: WorkspaceLeaf) => new WebCalendarView(leaf, this)
+			(leaf: WorkspaceLeaf) => new WebCalendarView(leaf)
 		);
 
 
 		this.registerEvent(
 			this.app.workspace.on(
 				"editor-change",
-				(editor: Editor, markdownView: MarkdownView) =>
-					checkEditorForAtDates(editor, this)
+				(editor: Editor) =>
+					checkEditorForAtDates(editor)
 			)
 		);
 
@@ -133,7 +145,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "List Google Calendars",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(this, false);
+				const canRun = settingsAreCompleteAndLoggedIn(false);
 
 				if (checking) {
 					return canRun;
@@ -143,8 +155,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListCalendars(this).then((calendars) => {
-					new CalendarsListModal(this, calendars).open();
+				googleListCalendars().then((calendars) => {
+					new CalendarsListModal(calendars).open();
 				});
 			},
 		});
@@ -155,7 +167,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "List Google Events",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(this, false);
+				const canRun = settingsAreCompleteAndLoggedIn(false);
 
 				if (checking) {
 					return canRun;
@@ -165,8 +177,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListTodayEvents(this).then((events) => {
-					new EventListModal(this, events).open()
+				googleListTodayEvents().then((events) => {
+					new EventListModal(events).open()
 				});
 			},
 		});
@@ -190,10 +202,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Insert todays Google events",
 			editorCheckCallback: (
 				checking: boolean,
-				editor: Editor,
-				view: MarkdownView
+				editor: Editor
 			): boolean => {
-				const canRun = settingsAreCompleteAndLoggedIn(this, false);
+				const canRun = settingsAreCompleteAndLoggedIn(false);
 
 				if (checking) {
 					return canRun;
@@ -203,7 +214,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				insertTodayEventsIntoFile(this, editor);
+				insertTodayEventsIntoFile(editor);
 			},
 		});
 

@@ -8,12 +8,14 @@
  */
 
 import type { GoogleEvent } from "../helper/types";
-import type GoogleCalendarPlugin from './../GoogleCalendarPlugin';
+import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
 
 const calendarColors = new Map<string, string>();
 const eventColors    = new Map<string, string>();
 
-export async function getGoogleColors(plugin:GoogleCalendarPlugin):Promise<void> {
+export async function getGoogleColors():Promise<void> {
+
+	const plugin = GoogleCalendarPlugin.getInstance();
 
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append("Content-Type", "application/json");

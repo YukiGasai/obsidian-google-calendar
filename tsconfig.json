@@ -9,6 +9,7 @@
 		"allowJs": true,
 		"moduleResolution": "node",
 		"importHelpers": true,
+		"removeComments": true,
 		"paths": {
 			"src": ["src/*"]
 		},

@@ -12,7 +12,7 @@
 		"sourceType": "module"
 	},
 	"rules": {
-		"no-unused-vars": "off",
+		"no-unused-vars": "warn",
 		"@typescript-eslint/no-unused-vars": ["error", { "args": "none" }],
 		"@typescript-eslint/ban-ts-comment": "off",
 		"no-prototype-builtins": "off",

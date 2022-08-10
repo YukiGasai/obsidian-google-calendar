@@ -1,8 +1,8 @@
 <script lang="ts">
     //TODO clean up date dateTime 
     import type { GoogleCalander, GoogleEvent } from "../helper/types";
-    import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     
+    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
     import { googleListCalendars } from "../googleApi/GoogleListCalendars";
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
@@ -10,7 +10,6 @@
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
     import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 
-    export let plugin: GoogleCalendarPlugin;
     export let event: GoogleEvent;
     export let currentDate: moment.Moment;
     export let closeFunction :() => void;
@@ -19,12 +18,13 @@
     let loading = true;
     let fullDay;
 
+    let plugin = GoogleCalendarPlugin.getInstance();
     let startDateTime;
     let endDateTime;
     let startDate;
 
     onMount(async () => {
-        calendars = await googleListCalendars(plugin);
+        calendars = await googleListCalendars();
         loading = false;
 
         fullDay = event?.start?.dateTime == undefined
@@ -114,7 +114,7 @@
             delete event.end.date;
         }
 
-        const newEvent = googleCreateEvent(plugin, event);
+        const newEvent = googleCreateEvent(event);
     
         if(newEvent){
             closeFunction();
@@ -125,9 +125,9 @@
     const deleteEvent = async(e) => {
         let wasSucessfull = false;
         if(event.recurringEventId){
-            wasSucessfull = await googleRemoveEvent(plugin, event , true)
+            wasSucessfull = await googleRemoveEvent(event , true)
         }else{
-            wasSucessfull = await googleRemoveEvent(plugin, event)
+            wasSucessfull = await googleRemoveEvent(event)
         }
         if(wasSucessfull){
             closeFunction();
@@ -136,7 +136,7 @@
 
     const deleteAllEvents = async() => {
         
-        const wasSucessfull = await googleRemoveEvent(plugin, event)
+        const wasSucessfull = await googleRemoveEvent(event)
         if(wasSucessfull){
             closeFunction();
         }
@@ -166,9 +166,9 @@
 
         let updatedEvent;
         if(event.recurringEventId){
-            updatedEvent = await googleUpdateEvent(plugin, event , true)
+            updatedEvent = await googleUpdateEvent(event , true)
         }else{
-            updatedEvent = await googleUpdateEvent(plugin, event)
+            updatedEvent = await googleUpdateEvent(event)
         }
         if(updatedEvent.id){
             closeFunction(); 
@@ -193,7 +193,7 @@
             delete event.end.date;
         }
 
-        const updatedEvent = await googleUpdateEvent(plugin, event)
+        const updatedEvent = await googleUpdateEvent(event)
         if(updatedEvent.id){
             closeFunction();
         }
@@ -205,7 +205,7 @@
         if(file){
             plugin.app.workspace.getLeaf(true).openFile(file);
         }else{
-            await createNoteFromEvent (plugin, event.summary);
+            await createNoteFromEvent (event.summary);
         }
     }
 

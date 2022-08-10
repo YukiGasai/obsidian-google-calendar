@@ -1,5 +1,3 @@
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-
 //===================
 //GETTER
 //===================
@@ -24,7 +22,7 @@ export const getRT = (): string => {
  * getExpirationTime from LocalStorage
  * @returns googleExpirationTime
  */
-export const getET = (plugin: GoogleCalendarPlugin): number => {
+export const getET = (): number => {
 	const expirationTimeString =
 		window.localStorage.getItem("googleCalendarExpirationTime") ?? "0";
 	return parseInt(expirationTimeString, 10);

@@ -1,16 +1,12 @@
-import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_WEB = "google-calendar-view-web";
 export class WebCalendarView extends ItemView {
 	calendar: WebFrameComp;
-	plugin: GoogleCalendarPlugin;
 
-	constructor(leaf: WorkspaceLeaf, plugin: GoogleCalendarPlugin) {
+	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
-		this.plugin = plugin;
 	}
 	getViewType(): string {
 		return VIEW_TYPE_GOOGLE_CALENDAR_WEB;

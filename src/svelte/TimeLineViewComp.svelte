@@ -1,11 +1,8 @@
 <script lang="ts" >
 
-import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import TimeLine from "./TimeLineComp.svelte";
 import {ViewEventEntry} from "../modal/ViewEventEntry"
-import { moment } from "obsidian";
 
-export let plugin: GoogleCalendarPlugin;
 export let height:number = undefined;
 export let width:number = undefined;
 export let date:moment.Moment = undefined;
@@ -20,12 +17,12 @@ const plusOneDay   = () => dateOffset+= 1;
 
 const openNewEventDialog = (event) => {  
 
-    new ViewEventEntry(plugin, {start:{}, end:{}}, window.moment(), (id:string) =>{
+    new ViewEventEntry({start:{}, end:{}}, window.moment(), () =>{
         date=date;
     }).open()
 }
 
-$: date = navigation ? moment().local().add(dateOffset, "days") : date;
+$: date = navigation ? window.moment().local().add(dateOffset, "days") : date;
 
 </script>
 <div style="padding-left: 10px;">
@@ -42,7 +39,7 @@ $: date = navigation ? moment().local().add(dateOffset, "days") : date;
         <button class="fixedSizeButton" on:click={plusOneWeek}>&gt;&gt;</button>
     </div>
     {/if}
-    <TimeLine plugin={plugin} bind:date height={height} width={width}/>
+    <TimeLine bind:date height={height} width={width}/>
 </div>
 
 <style>

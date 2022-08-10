@@ -1,6 +1,6 @@
 import type { GoogleCalander, GoogleCalanderList } from "./../helper/types";
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { getGoogleColors } from "./GoogleColors";
@@ -22,13 +22,11 @@ function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:Googl
 
 /**
  * This functions get all google calendars from the user that were not Black listed by him
- * @param plugin Refrence to the main plugin to acess the settings 
  * @returns A List of Google Calendars
  */
-export async function googleListCalendars(
-	plugin: GoogleCalendarPlugin
-): Promise<GoogleCalander[]> {
+export async function googleListCalendars(): Promise<GoogleCalander[]> {
 
+	const plugin = GoogleCalendarPlugin.getInstance();
 
 	if(cachedCalendars.length){
 		//Filter for every request instead of caching the filtered result to allow hot swap settings
@@ -36,12 +34,12 @@ export async function googleListCalendars(
 	}
 
 	//Make sure the colors for calendar and events are loaded before getting the first calendar
-	await getGoogleColors(plugin);
+	await getGoogleColors();
 
 	const requestHeaders: HeadersInit = new Headers();
 	requestHeaders.append(
 		"Authorization",
-		"Bearer " + (await getGoogleAuthToken(plugin))
+		"Bearer " + (await getGoogleAuthToken())
 	);
 	requestHeaders.append("Content-Type", "application/json");
 
@@ -61,7 +59,7 @@ export async function googleListCalendars(
 
 		return calendars;
 	} catch (error) {
-		createNotice(plugin, "Could not load google calendars");
+		createNotice("Could not load google calendars");
 		return [];
 	}
 }

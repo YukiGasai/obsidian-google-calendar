@@ -4,8 +4,7 @@
  * from svelte components
  */
 
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-import { Platform, moment } from "obsidian";
+import { Platform } from "obsidian";
 import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
@@ -47,12 +46,10 @@ function getKeyValueList(codeBlock: string): Map<string, string> {
  *  
  * @param text the text of the codeblock
  * @param el the container element for the codeblock widget
- * @param plugin Refrence to the main plugin to acess the settings 
  */
 export async function checkEditorForCodeBlocks(
 	text: string,
 	el: HTMLElement,
-	plugin: GoogleCalendarPlugin
 ): Promise<void> {
 	const options = getKeyValueList(text);
 
@@ -84,28 +81,28 @@ export async function checkEditorForCodeBlocks(
 		blockDateString == "today" ||
 		blockDateString == "tomorrow" ||
 		blockDateString == "yesterday" ||
-		moment(blockDateString, "YYYY-MM-DD", true).isValid() ||
-		moment(blockDateString, "YYYY.MM.DD", true).isValid() ||
-		moment(blockDateString, "YYYY/MM/DD", true).isValid() ||
-		moment(blockDateString, "MM-DD-YYYY", true).isValid() ||
-		moment(blockDateString, "MM.DD.YYYY", true).isValid() ||
-		moment(blockDateString, "MM/DD/YYYY", true).isValid() ||
-		moment(blockDateString, "DD-MM-YYYY", true).isValid() ||
-		moment(blockDateString, "DD.MM.YYYY", true).isValid() ||
-		moment(blockDateString, "DD/MM/YYYY", true).isValid()
+		window.moment(blockDateString, "YYYY-MM-DD", true).isValid() ||
+		window.moment(blockDateString, "YYYY.MM.DD", true).isValid() ||
+		window.moment(blockDateString, "YYYY/MM/DD", true).isValid() ||
+		window.moment(blockDateString, "MM-DD-YYYY", true).isValid() ||
+		window.moment(blockDateString, "MM.DD.YYYY", true).isValid() ||
+		window.moment(blockDateString, "MM/DD/YYYY", true).isValid() ||
+		window.moment(blockDateString, "DD-MM-YYYY", true).isValid() ||
+		window.moment(blockDateString, "DD.MM.YYYY", true).isValid() ||
+		window.moment(blockDateString, "DD/MM/YYYY", true).isValid()
 	) {
 		let blockDate:moment.Moment;
 
 		if(blockDateString == undefined){
 			blockDate = undefined
 		}else if(blockDateString == "today"){
-			blockDate = moment();
+			blockDate = window.moment();
 		}else if (blockDateString == "tomorrow"){
-			blockDate = moment().add(1, "day");
+			blockDate = window.moment().add(1, "day");
 		}else if (blockDateString == "yesterday"){
-			blockDate = moment().subtract(1, "day");
+			blockDate = window.moment().subtract(1, "day");
 		}else{
-			blockDate = moment(blockDateString);
+			blockDate = window.moment(blockDateString);
 		}
 
 
@@ -126,7 +123,6 @@ export async function checkEditorForCodeBlocks(
 			new TimeLineViewComp({
 				target: el,
 				props: {
-					plugin: plugin,
 					height: blockHeight,
 					width: blockWidth,
 					date: blockDate,
@@ -137,7 +133,6 @@ export async function checkEditorForCodeBlocks(
 			new CalendarComp({
 				target: el,
 				props: {
-					plugin: plugin,
 					height: blockHeight,
 					width: blockWidth,
 					displayedMonth: blockDate,

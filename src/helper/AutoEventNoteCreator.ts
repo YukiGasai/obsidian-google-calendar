@@ -1,5 +1,4 @@
-import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
@@ -23,7 +22,7 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
 export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<void> => {
 
     //Don't run if disabled in the settings
-    if(!plugin.settings.autoCreateEventNotes || !settingsAreCompleteAndLoggedIn(plugin)){
+    if(!plugin.settings.autoCreateEventNotes || !settingsAreCompleteAndLoggedIn()){
         return;
     }
 
@@ -35,7 +34,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
     const endDate = window.moment().local().add(endOffset, "day")
 
     //get all events in the import time range
-    const events = await googleListEvents(plugin, startDate, endDate);
+    const events = await googleListEvents(startDate, endDate);
 
     // check every event from the trigger text :obsidian:
     events.forEach(event => {
@@ -45,7 +44,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
         if(match.length == 3){
             //the trigger text was found and a new note will be created
             const filename = event.summary;
-            createNoteFromEvent(plugin, filename, match[1], match[2]);
+            createNoteFromEvent(filename, match[1], match[2]);
         }
     })
 }
@@ -54,11 +53,11 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
  * This function will create a new Note in the vault of the user if a template name is given the plugin will access the 
  * Templates plugin to try and include the selected Template into the newly created file
  * 
- * @param plugin Refrence to the main plugin to acess the settings
  * @param fileName The name of the new Note
  * @param templateName  The used Template to fill the file
  */
-export const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName: string, folderName?:string, templateName?:string): Promise<void> => {
+export const createNoteFromEvent = async (fileName: string, folderName?:string, templateName?:string): Promise<void> => {
+    const plugin = GoogleCalendarPlugin.getInstance();
     const { vault } = plugin.app;
     const { adapter } = vault;
 
@@ -86,7 +85,7 @@ export const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName:
 
     //Create file with no content
     const File = await vault.create(filePath, '');
-    createNotice(plugin, `EventNote ${fileName} created.`)
+    createNotice(`EventNote ${fileName} created.`)
 
     //check if the template plugin is active
     if((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName){
@@ -105,16 +104,16 @@ export const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName:
     if(plugin.templaterPlugin && plugin.coreTemplatePlugin){
         if(!(await insertTemplaterTemplate())){
             if(!(await insertCoreTemplate())){
-                createNotice(plugin, "Template not compatable")
+                createNotice("Template not compatable")
             }
         }       
     }else if(plugin.templaterPlugin){
         if(!(await insertTemplaterTemplate())){
-            createNotice(plugin, "Template not compatable")
+            createNotice("Template not compatable")
         }
     }else if(plugin.coreTemplatePlugin){
         if(!(await insertCoreTemplate())){
-            createNotice(plugin, "Template not compatable")
+            createNotice("Template not compatable")
         }
     }
 
@@ -125,7 +124,7 @@ export const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName:
         //Get Path to template file and check if it exists
         const templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
         if(!await adapter.exists(templateFilePath)){
-            createNotice(plugin, `Template ${templateName} doesn't exit.`)
+            createNotice(`Template ${templateName} doesn't exit.`)
             return false;
         }
 
@@ -155,7 +154,7 @@ export const createNoteFromEvent = async (plugin:GoogleCalendarPlugin, fileName:
         //Get Path to template file and check if it exists
         const templateFilePath = `${templaterFolderPath}/${templateName}`;
         if(!await adapter.exists(templateFilePath)){
-            createNotice(plugin, `Template ${templateName} doesn't exit.`)
+            createNotice(`Template ${templateName} doesn't exit.`)
             return false;
         }
     

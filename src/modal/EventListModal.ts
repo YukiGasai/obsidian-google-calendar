@@ -1,18 +1,16 @@
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import type { GoogleEvent } from "../helper/types";
 
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
 import { ViewEventEntry } from './ViewEventEntry';
 
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
-	plugin: GoogleCalendarPlugin;
 	eventList: GoogleEvent[];
 	eventsChanged: boolean;
 	closeFunction?: () => void;
 
-	constructor(plugin: GoogleCalendarPlugin, eventList: GoogleEvent[], eventsChanged = false, closeFunction?: () => void) {
-		super(plugin.app);
-		this.plugin = plugin;
+	constructor(eventList: GoogleEvent[], eventsChanged = false, closeFunction?: () => void) {
+		super(GoogleCalendarPlugin.getInstance().app);
 		this.eventList = eventList;
 		this.setPlaceholder("Select a event to view it");
 		this.emptyStateText = "No events found enter to create a new one"
@@ -39,12 +37,9 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		}
 	}
 
-	async onChooseItem(
-		item: GoogleEvent,
-		_: MouseEvent | KeyboardEvent
-	): Promise<void> {
+	async onChooseItem(item: GoogleEvent): Promise<void> {
 		this.open();
-		new ViewEventEntry(this.plugin, item, window.moment(), () => this.eventsChanged = true).open();
+		new ViewEventEntry(item, window.moment(), () => this.eventsChanged = true).open();
 	}
 
 	onClose(): void {

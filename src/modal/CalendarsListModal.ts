@@ -1,16 +1,15 @@
-import type GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import type { GoogleCalander } from "../helper/types";
+
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
 import { googleListTodayEventsByCalendar } from "../googleApi/GoogleListEvents";
 import { EventListModal } from "./EventListModal";
 
 export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
-	plugin: GoogleCalendarPlugin;
 	calendarList: GoogleCalander[];
 
-	constructor(plugin: GoogleCalendarPlugin, calendarList: GoogleCalander[]) {
-		super(plugin.app);
-		this.plugin = plugin;
+	constructor(calendarList: GoogleCalander[]) {
+		super(GoogleCalendarPlugin.getInstance().app);
 		this.calendarList = calendarList;
 		this.setPlaceholder("Select a calendar to view it");
 	}
@@ -24,10 +23,9 @@ export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
 	}
 
 	async onChooseItem(
-		item: GoogleCalander,
-		_: MouseEvent | KeyboardEvent
+		item: GoogleCalander
 	): Promise<void> {
-		const events = await googleListTodayEventsByCalendar(this.plugin, item);
-		new EventListModal(this.plugin, events).open();
+		const events = await googleListTodayEventsByCalendar(item);
+		new EventListModal(events).open();
 	}
 }
