@@ -140,17 +140,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		}
 
 		new Setting(containerEl)
-			.setName("Notifications")
-			.setDesc("Show notifications of info and errors")
-			.addToggle((toggle) => {
-				toggle.setValue(this.plugin.settings.showNotice);
-				toggle.onChange(async (state) => {
-					this.plugin.settings.showNotice = state;
-					await this.plugin.saveSettings();
-				});
-			});
-
-		new Setting(containerEl)
 		.setName("Auto create Event Notes")
 		.setDesc("Will create new notes from a event if the description contains :obsidian:")
 		.addToggle((toggle) => {
@@ -164,7 +153,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		const ImportStartSetting = customSetting(
 			containerEl,
 			"Import Start Offset",
-			"Days in the past from events to import"
+			"Days in the past from events to import",
+			"SubSettings"
 		).createEl("input", {
 			type: "number",
 		});
@@ -182,7 +172,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		const ImportEndSetting = customSetting(
 			containerEl,
 			"Import End Offset",
-			"Days in the future from events to import"
+			"Days in the future from events to import",
+			"SubSettings"
 		).createEl("input", {
 			type: "number",
 		});
@@ -194,6 +185,18 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				ImportEndSetting.value
 			);
 			await this.plugin.saveSettings();
+		});
+
+
+		new Setting(containerEl)
+		.setName("Notifications")
+		.setDesc("Show notifications of info and errors")
+		.addToggle((toggle) => {
+			toggle.setValue(this.plugin.settings.showNotice);
+			toggle.onChange(async (state) => {
+				this.plugin.settings.showNotice = state;
+				await this.plugin.saveSettings();
+			});
 		});
 
 		const RefreshIntervalInput = customSetting(
@@ -242,6 +245,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							await this.plugin.saveSettings();
 						}
 						const setting = new Setting(containerEl)
+							.setClass("SubSettings")
 							.setName(summery)
 							.addButton((button) => {
 								button.setButtonText("Remove");
@@ -259,6 +263,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 			calendarBlackList.forEach((calendar) => {
 				const setting = new Setting(containerEl)
+					.setClass("SubSettings")
 					.setName(calendar[1])
 					.addButton((button) => {
 						button.setButtonText("Remove");

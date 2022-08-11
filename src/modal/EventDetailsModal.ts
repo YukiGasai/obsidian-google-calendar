@@ -1,10 +1,10 @@
 import type { GoogleCalander, GoogleEvent } from "../helper/types";
 
 import { Modal } from "obsidian";
-import GoogleCalendarPlugin from "./../GoogleCalendarPlugin";
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
 
-export class ViewEventEntry extends Modal {
+export class EventDetailsModal extends Modal {
 	selectedEvent: GoogleEvent;
 	currentDate: moment.Moment;
 	calendarList: GoogleCalander[];

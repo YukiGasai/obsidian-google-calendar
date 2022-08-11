@@ -7,7 +7,7 @@
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
     import { googleClearCachedEvents, googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
-    import {ViewEventEntry} from '../modal/ViewEventEntry'
+    import {EventDetailsModal} from '../modal/EventDetailsModal'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
 
     interface Location {
@@ -114,7 +114,7 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new ViewEventEntry(event, date, () => {
+            new EventDetailsModal(event, date, () => {
                 googleClearCachedEvents();
                 date = date
             }).open();

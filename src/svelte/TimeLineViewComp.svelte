@@ -1,7 +1,7 @@
 <script lang="ts" >
 
 import TimeLine from "./TimeLineComp.svelte";
-import {ViewEventEntry} from "../modal/ViewEventEntry"
+import {EventDetailsModal} from "../modal/EventDetailsModal"
 import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
 
 export let height:number = undefined;
@@ -18,7 +18,7 @@ const plusOneDay   = () => dateOffset+= 1;
 
 const openNewEventDialog = (event) => {  
 
-    new ViewEventEntry({start:{}, end:{}}, window.moment(), () =>{
+    new EventDetailsModal({start:{}, end:{}}, window.moment(), () =>{
         googleClearCachedEvents()
         date=date;
     }).open()
@@ -30,15 +30,15 @@ $: date = navigation ? window.moment().local().add(dateOffset, "days") : date;
 <div style="padding-left: 10px;">
     {#if navigation && date}
     <div class="titleContainer">
-        <button on:click={openNewEventDialog}>+</button>
+        <button aria-label="Create Event" on:click={openNewEventDialog}>+</button>
         <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
     </div>
     <div class="navigationContainer">
-        <button class="fixedSizeButton" on:click={minusOneWeek}>&lt;&lt;</button>
-        <button class="fixedSizeButton" on:click={minusOneDay}>&lt;</button>
-        <button class="fixedSizeButton" on:click={backToday}>Today</button>
-        <button class="fixedSizeButton" on:click={plusOneDay}>&gt;</button>
-        <button class="fixedSizeButton" on:click={plusOneWeek}>&gt;&gt;</button>
+        <button class="fixedSizeButton" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
+        <button class="fixedSizeButton" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
+        <button class="fixedSizeButton" aria-label="Jump to today"  on:click={backToday}>Today</button>
+        <button class="fixedSizeButton" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
+        <button class="fixedSizeButton" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
     </div>
     {/if}
     <TimeLine bind:date height={height} width={width}/>

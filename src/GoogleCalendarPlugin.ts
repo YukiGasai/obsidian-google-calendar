@@ -17,7 +17,7 @@ import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
 import { getRT } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
-import { ViewEventEntry } from "./modal/ViewEventEntry";
+import { EventDetailsModal } from "./modal/EventDetailsModal";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -178,7 +178,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 	
-				new ViewEventEntry({start:{}, end:{}}, window.moment(), () => {
+				new EventDetailsModal({start:{}, end:{}}, window.moment(), () => {
 					googleClearCachedEvents()
 				}).open()
 				

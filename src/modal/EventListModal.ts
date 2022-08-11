@@ -2,7 +2,7 @@ import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
-import { ViewEventEntry } from './ViewEventEntry';
+import { EventDetailsModal } from './EventDetailsModal';
 
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	eventList: GoogleEvent[];
@@ -39,7 +39,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
 		this.open();
-		new ViewEventEntry(item, window.moment(), () => this.eventsChanged = true).open();
+		new EventDetailsModal(item, window.moment(), () => this.eventsChanged = true).open();
 	}
 
 	onClose(): void {

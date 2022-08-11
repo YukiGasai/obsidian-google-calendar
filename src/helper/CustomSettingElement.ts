@@ -9,9 +9,10 @@
 export function customSetting(
 	root: HTMLElement,
 	title: string,
-	description: string
+	description: string,
+	extraClass?: string,
 ): HTMLElement {
-	const settingItem = root.createDiv({ cls: "setting-item" });
+	const settingItem = root.createDiv({ cls: `setting-item ${extraClass ?? ""}` });
 
 	const settingIitemInfo = settingItem.createDiv({
 		cls: "setting-item-info",
