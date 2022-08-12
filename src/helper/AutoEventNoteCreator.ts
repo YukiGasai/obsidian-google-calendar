@@ -46,8 +46,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
         
         if(match.length == 3){
             //the trigger text was found and a new note will be created
-            const filename = event.summary;
-            createNoteFromEvent(filename, match[1], match[2]);
+            createNoteFromEvent(event, match[1], match[2]);
         }
     })
 }
@@ -64,8 +63,7 @@ export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<v
     
 
     //the trigger text was found and a new note will be created
-    const filename = event.summary;
-    createNoteFromEvent(filename, match?.[1], match?.[2]);
+    createNoteFromEvent(event, match?.[1], match?.[2]);
       
 }
 
@@ -76,7 +74,7 @@ export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<v
  * @param fileName The name of the new Note
  * @param templateName  The used Template to fill the file
  */
-export const createNoteFromEvent = async (fileName: string, folderName?:string, templateName?:string): Promise<void> => {
+export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string, templateName?:string): Promise<void> => {
     const plugin = GoogleCalendarPlugin.getInstance();
     const { vault } = plugin.app;
     const { adapter } = vault;
@@ -96,7 +94,7 @@ export const createNoteFromEvent = async (fileName: string, folderName?:string, 
         }
     }
 
-    const filePath = normalizePath(`${folderPath}/${fileName}.md`);
+    const filePath = normalizePath(`${folderPath}/${event.summary}.md`);
 
     //check if file already exists
     if(await adapter.exists(filePath)){
@@ -105,7 +103,7 @@ export const createNoteFromEvent = async (fileName: string, folderName?:string, 
 
     //Create file with no content
     const File = await vault.create(filePath, '');
-    createNotice(`EventNote ${fileName} created.`)
+    createNotice(`EventNote ${event.summary} created.`)
 
     //check if the template plugin is active
     if((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName){
@@ -135,6 +133,33 @@ export const createNoteFromEvent = async (fileName: string, folderName?:string, 
         if(!(await insertCoreTemplate())){
             createNotice("Template not compatable")
         }
+    }
+
+    let fileContent = await adapter.read(normalizePath(File.path));
+    const oldContent = fileContent;
+    const regexp = /({{|<%)event\.(.*)(}}|%>)/g;
+    let matches;
+    const output = [];
+    do {
+        matches = regexp.exec(fileContent);
+        output.push(matches);
+    } while(matches);
+
+    output.forEach(match => {
+        if(match){
+            let newContent = match[2].split('.').reduce((o,i)=> o[i], event)
+
+            //Turn objects into json for a better display be more specific in the template
+            if(newContent === Object(newContent)){
+                newContent = JSON.stringify(newContent);
+            }
+            
+            fileContent = fileContent.replace(match[0],newContent??"")
+        }
+    })
+
+    if(fileContent !== oldContent) {
+        await adapter.write(normalizePath(File.path), fileContent);
     }
 
     async function insertCoreTemplate() : Promise<boolean>{
