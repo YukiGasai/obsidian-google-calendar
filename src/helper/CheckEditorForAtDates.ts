@@ -59,7 +59,7 @@ function check4Word(
 		if(realWord.length != "@YYYY-MM-DD".length)return false;
 		if (!realWord.startsWith("@")) return false;
 
-		if(realWord.substring(1).length<100)return false;
+		if(realWord.substring(1).length>100)return false;
 
 		const tmpDate = window.moment(realWord.substring(1));
 		if (tmpDate.isValid()) {
