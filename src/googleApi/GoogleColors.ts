@@ -13,6 +13,10 @@ import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
 const calendarColors = new Map<string, string>();
 const eventColors    = new Map<string, string>();
 
+/**
+ * Get all possible colors from the google API and store them 
+ * Run once on plugin startup
+ */
 export async function getGoogleColors():Promise<void> {
 
 	const plugin = GoogleCalendarPlugin.getInstance();
@@ -56,6 +60,7 @@ export function getColorFromEvent(event: GoogleEvent): string {
 		return calendarColors.get(event.parent.colorId);
 
 	} else {
+		//Default color for any errors
 		return "#a4bdfc"
 	}
 }

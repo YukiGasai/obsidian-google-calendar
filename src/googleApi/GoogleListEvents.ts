@@ -14,22 +14,24 @@ import ct from 'countries-and-timezones'
 
 const cachedEvents = new Map<string, EventCacheValue>();
 
-
 const dateToTimeParam = (date:string, tz:string) :string => {
 	return encodeURIComponent(`${date}T00:00:00${tz}`);
 }
 
-
+/**
+ * Function to clear the complete event cache to force new request
+ */
 export function googleClearCachedEvents():void{
 	cachedEvents.clear()
 }
 
 /**
- * 
- * @param googleCalander 
- * @param date 
- * @param endDate 
- * @returns 
+ * This funcion will return a list of evetn in a timespan from a specific calendar
+ * The function will check for an equal function call in the cache if there is a stored result that is not to old it will return without api request
+ * @param googleCalander  the calendar to get the events from
+ * @param date the startdate of the checking time
+ * @param endDate the endate of the checking time
+ * @returns a list of Google Events
  */
 export async function googleListEventsByCalendar(
 	googleCalander: GoogleCalander,

@@ -8,7 +8,12 @@ import { getGoogleColors } from "./GoogleColors";
 
 let cachedCalendars:GoogleCalander[] = []
 
-
+/**
+ * This function is used to filter out all calendars that are on the users blacklist
+ * @param plugin a refrence to the main plugin object
+ * @param calendars The list of all possible calendars
+ * @returns The filtered list of calendars
+ */
 function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:GoogleCalander[]):GoogleCalander[]{
 	//Remove the calendars contained in the blacklist
 	const filteredCalendars = calendars.filter((calendar) => {
@@ -22,6 +27,7 @@ function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:Googl
 
 /**
  * This functions get all google calendars from the user that were not Black listed by him
+ * The function will check if there are already saved calendars if not it will request them from the google API
  * @returns A List of Google Calendars
  */
 export async function googleListCalendars(): Promise<GoogleCalander[]> {

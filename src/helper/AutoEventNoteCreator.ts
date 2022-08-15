@@ -137,7 +137,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
     let fileContent = await adapter.read(normalizePath(File.path));
     const oldContent = fileContent;
-    const regexp = /({{|<%)event\.(.*)(}}|%>)/g;
+    const regexp = /({{|<%)gEvent\.(.*)(}}|%>)/g;
     let matches;
     const output = [];
     do {
@@ -153,7 +153,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
             if(newContent === Object(newContent)){
                 newContent = JSON.stringify(newContent);
             }
-            
+
             fileContent = fileContent.replace(match[0],newContent??"")
         }
     })

@@ -85,8 +85,6 @@ export async function getGoogleAuthToken(): Promise<string> {
  */
 export async function LoginGoogle(): Promise<void> {
 
-
-
 	const plugin = GoogleCalendarPlugin.getInstance();
 	if (Platform.isDesktop) {
 		if (!settingsAreComplete()) return;

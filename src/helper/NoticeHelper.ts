@@ -1,4 +1,3 @@
-
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { Notice } from "obsidian";
 

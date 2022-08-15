@@ -5,6 +5,9 @@ import { FuzzySuggestModal } from "obsidian";
 import { googleListTodayEventsByCalendar } from "../googleApi/GoogleListEvents";
 import { EventListModal } from "./EventListModal";
 
+/**
+ * This class is used to diplay a select modal in which the user can select a calendar to see its events
+ */
 export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
 	calendarList: GoogleCalander[];
 

@@ -4,6 +4,9 @@ import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
 
+/**
+ * This class is used to diplay a select modal in which the user can select an event
+*/
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	eventList: GoogleEvent[];
 	eventsChanged: boolean;

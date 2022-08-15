@@ -3,6 +3,9 @@ import type { GoogleEvent } from "../helper/types";
 
 import { Editor, EditorPosition, FuzzySuggestModal } from "obsidian";
 
+/**
+ * This class is used to create a selection modal. When the user selects an event the event will be inserted into the active document
+ */
 export class EventSelectReplaceModal extends FuzzySuggestModal<GoogleEvent> {
 	eventList: GoogleEvent[];
 	editor: Editor;

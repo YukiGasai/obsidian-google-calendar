@@ -41,7 +41,6 @@ export default class GoogleCalendarPlugin extends Plugin {
         return GoogleCalendarPlugin.instance;
     }
 
-	public plugin: GoogleCalendarPlugin = this;
 
 	settings: GoogleCalendarPluginSettings;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
