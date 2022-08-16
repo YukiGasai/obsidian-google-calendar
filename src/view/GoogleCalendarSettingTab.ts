@@ -217,6 +217,27 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		});
 
 		if(settingsAreCompleteAndLoggedIn()){
+
+			new Setting(containerEl)
+				.setName("Default Calendar")
+				.addDropdown(async (dropdown) => {
+					dropdown.addOption("Default", "Select a calendar");
+					const calendars = await googleListCalendars();
+
+					calendars.forEach((calendar) => {
+						dropdown.addOption(
+							calendar.id,
+							calendar.summary
+						);
+					});
+					dropdown.setValue(this.plugin.settings.defaultCalendar);
+					dropdown.onChange(async (value) => {
+						this.plugin.settings.defaultCalendar = value;
+						await this.plugin.saveSettings();			
+					});
+				});
+
+
 			containerEl.createEl("h3", "Calendar Blacklist");
 			const calendarBlackList = this.plugin.settings.calendarBlackList;
 

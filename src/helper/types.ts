@@ -14,6 +14,7 @@ export interface GoogleCalendarPluginSettings {
 	autoCreateEventNotes: boolean,
 	importStartOffset: number,
 	importEndOffset: number,
+	defaultCalendar: string,
 	calendarBlackList: [string, string][];
 }
 

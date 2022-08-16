@@ -23,6 +23,14 @@
     let endDateTime;
     let startDate;
 
+
+    function roundToNearest15(date = new Date()) {
+        const minutes = 15;
+        const ms = 1000 * 60 * minutes;
+
+        return window.moment(new Date(Math.round(date.getTime() / ms) * ms));
+    }
+
     onMount(async () => {
         calendars = await googleListCalendars();
         loading = false;
@@ -33,10 +41,19 @@
         if(event.id == undefined){
             event.summary = ""
             event.description = ""
-            event.parent = calendars[calendars.length - 1];
+
+            event.parent = calendars.find(calendar => calendar.id === plugin.settings.defaultCalendar);
+            if(!event.parent) {
+                event.parent = calendars[calendars.length - 1];
+            }
+       
             fullDay = false
-            event.start.dateTime = window.moment().format();
-            event.end.dateTime = window.moment().add(1, "hour").format();
+
+            const startTime = roundToNearest15();
+
+            event.start.dateTime = startTime.format();
+          
+            event.end.dateTime = startTime.add(1, "hour").format();
         }
 
         //Add the missing time to the object for a better user expirince
@@ -44,6 +61,14 @@
             startDate = window.moment(event.start.date).format()
             startDateTime = currentDate.format()
             endDateTime   = currentDate.add(1, "hour").format()
+ 
+            const startTime = roundToNearest15();
+
+            startDateTime = startTime.format();
+          
+            endDateTime = startTime.add(1, "hour").format();
+
+
         }else{
             startDate = currentDate.format("YYYY-MM-DD")
             startDateTime = window.moment(event.start.dateTime).format()
@@ -77,7 +102,11 @@
         }
     }
 
-    const dateToLocal = (date:any) => {
+    const dateToLocalStart = (date:any) => {
+        return window.moment(date).local().format("YYYY-MM-DDTHH:mm")
+    }
+
+    const dateToLocalEnd = (date:any) => {
         return window.moment(date).local().format("YYYY-MM-DDTHH:mm")
     }
 
@@ -242,7 +271,8 @@
 
     <label for="calendar">Calendar</label>
     
-    <select name="calendar" class="dropdown" on:change="{changeCalendar}">
+    <select name="calendar" class="dropdown" on:change="{changeCalendar}" disabled={event.id !== undefined}>
+        
         {#each calendars as calendar}
             <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id == event.parent.id}">{calendar.summary}</option>
         {/each}
@@ -261,10 +291,10 @@
         <input type="date" name="eventDate" value="{dateToInput(startDate)}" on:change="{changeDate}">
     {:else}
         <label for="eventStartDate">Start Date</label>
-        <input type="datetime-local" name="eventStartDate" value="{dateToLocal(startDateTime)}" on:change="{changeStartDateTime}">
+        <input type="datetime-local" name="eventStartDate" value="{dateToLocalStart(startDateTime)}" on:change="{changeStartDateTime}">
 
         <label for="eventEndDate">End Date</label>
-        <input type="datetime-local" name="eventEndDate" value="{dateToLocal(endDateTime)}"  on:change="{changeEndDateTime}" >
+        <input type="datetime-local" name="eventEndDate" value="{dateToLocalEnd(endDateTime)}"  on:change="{changeEndDateTime}" >
     {/if}
 
     <div class="googleEventButtonContainer">

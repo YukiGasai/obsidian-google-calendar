@@ -30,6 +30,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	autoCreateEventNotes: true,
 	importStartOffset: 1,
 	importEndOffset: 1,
+	defaultCalendar: "",
 	calendarBlackList: [],
 };
 
