@@ -42,7 +42,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
 		this.open();
-		new EventDetailsModal(item, window.moment(), () => this.eventsChanged = true).open();
+		new EventDetailsModal(item, () => this.eventsChanged = true).open();
 	}
 
 	onClose(): void {

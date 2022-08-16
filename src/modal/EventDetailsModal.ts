@@ -9,19 +9,16 @@ import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
  */
 export class EventDetailsModal extends Modal {
 	selectedEvent: GoogleEvent;
-	currentDate: moment.Moment;
 	calendarList: GoogleCalander[];
 	closeFunction: () => void;
 
 	onSubmit: () => void;
 	constructor(
 		selectedEvent: GoogleEvent,
-		currentDate: moment.Moment,
 		closeFunction?: () => void
 	) {
 		super(GoogleCalendarPlugin.getInstance().app);
 		this.selectedEvent = selectedEvent;
-		this.currentDate = currentDate;
 		if(closeFunction){
 			this.closeFunction = closeFunction;
 		}
@@ -33,7 +30,6 @@ export class EventDetailsModal extends Modal {
 			target: contentEl,
 			props: {
 				event: this.selectedEvent,
-				currentDate: this.currentDate,
 				closeFunction: () => {
 					if(this.closeFunction){
 						this.closeFunction();

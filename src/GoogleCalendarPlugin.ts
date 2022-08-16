@@ -178,7 +178,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 	
-				new EventDetailsModal({start:{}, end:{}}, window.moment(), () => {
+				new EventDetailsModal({start:{}, end:{}}, () => {
 					googleClearCachedEvents()
 				}).open()
 				

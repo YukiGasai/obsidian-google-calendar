@@ -18,7 +18,7 @@ const plusOneDay   = () => dateOffset+= 1;
 
 const openNewEventDialog = (event) => {  
 
-    new EventDetailsModal({start:{}, end:{}}, window.moment(), () =>{
+    new EventDetailsModal({start:{}, end:{}}, () =>{
         googleClearCachedEvents()
         date=date;
     }).open()

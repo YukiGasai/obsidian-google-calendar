@@ -1,5 +1,4 @@
 <script lang="ts">
-    //TODO clean up date dateTime 
     import type { GoogleCalander, GoogleEvent } from "../helper/types";
     
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
@@ -11,24 +10,42 @@
     import { manuallyCreateNoteFromEvent } from "../helper/AutoEventNoteCreator";
 
     export let event: GoogleEvent;
-    export let currentDate: moment.Moment;
     export let closeFunction :() => void;
 
     let calendars: GoogleCalander[];
     let loading = true;
-    let fullDay;
+    let fullDay:boolean;
 
     let plugin = GoogleCalendarPlugin.getInstance();
-    let startDateTime;
-    let endDateTime;
-    let startDate;
+
+    let inputStartDateTime:string;
+    let inputEndDateTime:string;
+    let inputStartDate:string;
 
 
-    function roundToNearest15(date = new Date()) {
+    function getEmptyDate() {
         const minutes = 15;
         const ms = 1000 * 60 * minutes;
 
-        return window.moment(new Date(Math.round(date.getTime() / ms) * ms));
+        return window.moment(new Date(Math.round(new Date().getTime() / ms) * ms));
+    }
+
+
+    function addEventDate(event: GoogleEvent) : GoogleEvent {
+
+        if(fullDay){
+            event.start.date = window.moment(inputStartDate).format("YYYY-MM-DD");
+            event.end.date = window.moment(inputStartDate).format("YYYY-MM-DD");
+            delete event.start.dateTime;
+            delete event.end.dateTime;
+        }else{
+            event.start.dateTime = window.moment(inputStartDateTime).format();
+            event.end.dateTime = window.moment(inputEndDateTime).format();
+            delete event.start.date;
+            delete event.end.date;
+        }
+
+        return event;
     }
 
     onMount(async () => {
@@ -37,7 +54,7 @@
 
         fullDay = event?.start?.dateTime == undefined
 
-
+        //New event all blank
         if(event.id == undefined){
             event.summary = ""
             event.description = ""
@@ -49,32 +66,26 @@
        
             fullDay = false
 
-            const startTime = roundToNearest15();
+            const startTime = getEmptyDate();
+            inputStartDateTime = startTime.format("YYYY-MM-DDTHH:mm");
+            inputEndDateTime = startTime.add(1, "hour").format("YYYY-MM-DDTHH:mm");
+            inputStartDate = startTime.format("YYYY-MM-DD");
 
-            event.start.dateTime = startTime.format();
-          
-            event.end.dateTime = startTime.add(1, "hour").format();
+        }else {
+            //Add the missing time to the object for a better user expirince
+            if(fullDay){
+            
+                const startTime     = getEmptyDate();
+                inputStartDateTime  = startTime.format("YYYY-MM-DDTHH:mm");
+                inputEndDateTime    = startTime.add(1, "hour").format("YYYY-MM-DDTHH:mm");
+                inputStartDate      = window.moment(event.start.date).format("YYYY-MM-DD")
+
+            }else{
+                inputStartDateTime  = window.moment(event.start.dateTime).format("YYYY-MM-DDTHH:mm")
+                inputEndDateTime    = window.moment(event.end.dateTime).format("YYYY-MM-DDTHH:mm")
+                inputStartDate      = window.moment().format("YYYY-MM-DD")
+            }
         }
-
-        //Add the missing time to the object for a better user expirince
-        if(fullDay){
-            startDate = window.moment(event.start.date).format()
-            startDateTime = currentDate.format()
-            endDateTime   = currentDate.add(1, "hour").format()
- 
-            const startTime = roundToNearest15();
-
-            startDateTime = startTime.format();
-          
-            endDateTime = startTime.add(1, "hour").format();
-
-
-        }else{
-            startDate = currentDate.format("YYYY-MM-DD")
-            startDateTime = window.moment(event.start.dateTime).format()
-            endDateTime = window.moment(event.end.dateTime).format()
-        }
-
 	});
 
     const getDescription = () => {
@@ -84,6 +95,7 @@
         return ""
     }
 
+    //Event Handler
 
     const changeDescription = (e:Event) => {
        if(e.target instanceof HTMLTextAreaElement){
@@ -102,63 +114,12 @@
         }
     }
 
-    const dateToLocalStart = (date:any) => {
-        return window.moment(date).local().format("YYYY-MM-DDTHH:mm")
-    }
-
-    const dateToLocalEnd = (date:any) => {
-        return window.moment(date).local().format("YYYY-MM-DDTHH:mm")
-    }
-
-    const dateToInput = (date:any) => {
-        return window.moment(date).local().format("YYYY-MM-DD")
-    }
-
-
-    const changeStartDateTime = (e:Event) => {
-        if(e.target instanceof HTMLInputElement){
-           startDateTime = window.moment(e.target.value).format()
-        } 
-    }
-
-
-    const changeEndDateTime = (e:Event) => {
-        if(e.target instanceof HTMLInputElement){
-            endDateTime = window.moment(e.target.value).format()
-        } 
-    }
-
-    const changeDate = (e:Event) => {
-        if(e.target instanceof HTMLInputElement){
-            startDate = window.moment(e.target.value).format("YYYY-MM-DD")
-        } 
-    }
-
     const createEvent = async () => {
-
-        if(fullDay){
-            event.start.date = startDate;
-            event.end.date = startDate;
-        }else{
-            event.start.dateTime = startDateTime;
-            event.end.dateTime = endDateTime;
-        }
-
-        if(fullDay){
-            delete event.start.dateTime;
-            delete event.end.dateTime;
-
-        }else{
-            delete event.start.date;
-            delete event.end.date;
-        }
-
-        googleCreateEvent(event).then(newEvent =>{
+        const newEvent = await googleCreateEvent(addEventDate(event))
+            
+        if(newEvent.id){
             closeFunction();
-        });
-    
-
-    
+        }
     }
 
     const deleteEvent = async(e) => {
@@ -175,39 +136,20 @@
 
     const deleteAllEvents = async() => {
         
-        const wasSucessfull = await googleRemoveEvent(event)
+        const wasSucessfull = await googleRemoveEvent(addEventDate(event))
         if(wasSucessfull){
             closeFunction();
         }
-        
     }
-
 
     const updateEvent = async () => {
 
-        if(fullDay){
-            event.start.date = startDate;
-            event.end.date = startDate;
-        }else{
-            event.start.dateTime = startDateTime;
-            event.end.dateTime = endDateTime;
-        }
-
-        if(fullDay){
-            delete event.start.dateTime;
-            delete event.end.dateTime;
-
-        }else{
-            delete event.start.date;
-            delete event.end.date;
-        }
-
-
+        const cleanEvent = addEventDate(event);
         let updatedEvent;
-        if(event.recurringEventId){
-            updatedEvent = await googleUpdateEvent(event , true)
+        if(cleanEvent.recurringEventId){
+            updatedEvent = await googleUpdateEvent(cleanEvent , true)
         }else{
-            updatedEvent = await googleUpdateEvent(event)
+            updatedEvent = await googleUpdateEvent(cleanEvent)
         }
         if(updatedEvent.id){
             closeFunction(); 
@@ -215,24 +157,8 @@
     }
 
     const updateAllEvents = async () => {
-        if(fullDay){
-            event.start.date = startDate;
-            event.end.date = startDate;
-        }else{
-            event.start.dateTime = startDateTime;
-            event.end.dateTime = endDateTime;
-        }
-
-        if(fullDay){
-            delete event.start.dateTime;
-            delete event.end.dateTime;
-
-        }else{
-            delete event.start.date;
-            delete event.end.date;
-        }
-
-        const updatedEvent = await googleUpdateEvent(event)
+        
+        const updatedEvent = await googleUpdateEvent(addEventDate(event))
         if(updatedEvent.id){
             closeFunction();
         }
@@ -253,6 +179,17 @@
         window.open(event.htmlLink);
     }
 
+$: {
+
+    //Update End Date if start date is before End Date
+    const start = window.moment(inputStartDateTime);
+    const end = window.moment(inputEndDateTime);
+
+    if(end.isBefore(start)){
+        inputEndDateTime = start.add(1, 'hour').format("YYYY-MM-DDTHH:mm");
+    }
+
+}
 
 </script>
 
@@ -288,13 +225,13 @@
 
     {#if fullDay}
         <label for="eventDate">Date</label>
-        <input type="date" name="eventDate" value="{dateToInput(startDate)}" on:change="{changeDate}">
+        <input type="date" name="eventDate" bind:value="{inputStartDate}">
     {:else}
         <label for="eventStartDate">Start Date</label>
-        <input type="datetime-local" name="eventStartDate" value="{dateToLocalStart(startDateTime)}" on:change="{changeStartDateTime}">
+        <input type="datetime-local" name="eventStartDate" bind:value="{inputStartDateTime}">
 
         <label for="eventEndDate">End Date</label>
-        <input type="datetime-local" name="eventEndDate" value="{dateToLocalEnd(endDateTime)}"  on:change="{changeEndDateTime}" >
+        <input type="datetime-local" name="eventEndDate" bind:value="{inputEndDateTime}" min="{window.moment(inputStartDateTime).format('YYYY-MM-DDThh:mm')}">
     {/if}
 
     <div class="googleEventButtonContainer">

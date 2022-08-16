@@ -114,7 +114,7 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new EventDetailsModal(event, date, () => {
+            new EventDetailsModal(event, () => {
                 googleClearCachedEvents();
                 date = date
             }).open();
