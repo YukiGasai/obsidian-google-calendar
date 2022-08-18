@@ -8,13 +8,20 @@
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
     import { manuallyCreateNoteFromEvent } from "../helper/AutoEventNoteCreator";
-
+    import { Frequency, RRule, RRuleSet, Weekday } from "rrule";
+    import type { Options } from "rrule"
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
     let calendars: GoogleCalander[];
     let loading = true;
     let fullDay:boolean;
+    let recurring: boolean;
+    let recurringType: Frequency;
+    let recurringInterval = 1;
+    let recurringEndType: string;
+    let recurringCount:number;
+    let recurringEndDate: string;
 
     let plugin = GoogleCalendarPlugin.getInstance();
 
@@ -22,6 +29,9 @@
     let inputEndDateTime:string;
     let inputStartDate:string;
 
+    let listofWeekState:[Weekday,boolean][] = [[RRule.MO, true],[RRule.TU, true],[RRule.WE, true],[RRule.TH, true],[RRule.FR, true],[RRule.SA, true],[RRule.SU, true]]
+
+   
 
     function getEmptyDate() {
         const minutes = 15;
@@ -53,6 +63,7 @@
         loading = false;
 
         fullDay = event?.start?.dateTime == undefined
+        recurring = event?.recurringEventId !== undefined; 
 
         //New event all blank
         if(event.id == undefined){
@@ -64,7 +75,8 @@
                 event.parent = calendars[calendars.length - 1];
             }
        
-            fullDay = false
+            fullDay = false;
+            recurring = false;
 
             const startTime = getEmptyDate();
             inputStartDateTime = startTime.format("YYYY-MM-DDTHH:mm");
@@ -115,6 +127,49 @@
     }
 
     const createEvent = async () => {
+
+        if(recurring){
+
+        let weekDays = listofWeekState.map((state) => {
+            if(state[1]){
+                return state[0]
+            }
+        })
+
+        weekDays = weekDays.filter(day => day !== undefined)
+
+	    const rruleSet = new RRuleSet();
+
+
+        let options:Partial<Options>= {
+            freq: recurringType,
+            interval: recurringInterval,
+        }
+
+        if(recurringEndType === "For"){
+            options.count = recurringCount;
+        }else if(recurringEndType === "Until"){
+            options.until = new Date(recurringEndDate);
+        }
+
+        console.log(weekDays)
+
+        if(recurringType === RRule.WEEKLY && weekDays.length){
+            options.byweekday = weekDays;
+        }
+
+        const rule = new RRule(options);
+
+        rruleSet.rrule(rule);
+
+        console.log(rruleSet)
+
+        event.recurrence = rruleSet.valueOf()
+
+
+
+        }
+
         const newEvent = await googleCreateEvent(addEventDate(event))
             
         if(newEvent.id){
@@ -188,7 +243,6 @@ $: {
     if(end.isBefore(start)){
         inputEndDateTime = start.add(1, 'hour').format("YYYY-MM-DDTHH:mm");
     }
-
 }
 
 </script>
@@ -234,11 +288,71 @@ $: {
         <input type="datetime-local" name="eventEndDate" bind:value="{inputEndDateTime}" min="{window.moment(inputStartDateTime).format('YYYY-MM-DDThh:mm')}">
     {/if}
 
+
+    {#if !event.id}
+
+    <div class="googleFullDayContainer">
+        <label for="reaccuring">Reccuring</label>
+        <input type="checkbox" name="reaccuring" bind:checked="{recurring}" >
+    </div>
+
+
+
+    {#if recurring}
+
+        <div>
+            <span>Repeat every</span>
+            <input type="number" name="recurringInterval" step="1" min="1" bind:value="{recurringInterval}">
+            <select bind:value={recurringType}>
+                <option value="{Frequency.DAILY}">Days</option>
+                <option default value="{Frequency.WEEKLY}">Weeks</option>
+                <option value="{Frequency.MONTHLY}">Months</option>
+                <option value="{Frequency.YEARLY}">Years</option>
+            </select>
+            
+            <select bind:value={recurringEndType}>
+                <option default value="Forever">Forever</option>
+                <option value="Until">Until</option>
+                <option value="For">For</option>
+            </select>
+
+            {#if recurringEndType == 'Until'}
+
+                <input type="date" name="recurringEndDate" required bind:value="{recurringEndDate}">
+            {:else if recurringEndType == 'For'}
+
+                <input type="number" name="recurringCount" step="1" min="1" required bind:value="{recurringCount}">
+                <span>times</span>
+            {/if}
+            <br>
+            {#if recurringType === Frequency.WEEKLY}
+
+                {#each listofWeekState as state}
+                    <button 
+                    
+                    class="{state[1] ? 'weekActive' : 'weekInActive'}"
+                    on:click="{() => {
+                        state[1] = !state[1];
+                        }
+                    }"
+                    >
+                        {state[0].toString()}
+                    </button>
+                {/each}
+
+            {/if}
+     
+
+        </div>
+
+    {/if}
+    {/if}
+
     <div class="googleEventButtonContainer">
         {#if event.id}
 
             <div class="buttonRow">
-                {#if event.recurringEventId }
+                {#if recurring }
                     <button on:click="{openInBrowser}">Recurring Event</button>
                 {:else}
                     <button on:click="{openInBrowser}">Single Event</button>
@@ -253,7 +367,7 @@ $: {
     
                 <button on:click="{deleteEvent}">Delete</button>
             </div>
-            {#if event.recurringEventId }
+            {#if recurring }
                 <div class="buttonRow">
                     <button disabled class="disabled" on:click="{updateAllEvents}">Update All</button>
                     
@@ -271,6 +385,14 @@ $: {
 
 
 <style>
+
+    .weekActive{
+        background-color: rgb(61, 102, 214) !important;
+    }
+
+    .weekInActive {
+        background-color: #2a2a2a !important;
+    }
 
     .buttonRow{
         display: flex;

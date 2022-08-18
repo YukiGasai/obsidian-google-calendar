@@ -4,6 +4,8 @@ import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
+
+
 /**
  * 	Function to create a simple event for recurrence events the browser is needed 
  * This could be changed TODO
@@ -21,6 +23,10 @@ export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent
 	requestHeaders.append("Content-Type", "application/json");
 
 	const calenderId = event.parent.id;
+
+
+	event.start.timeZone = event.parent.timeZone;
+	event.end.timeZone = event.parent.timeZone;
 
 	delete event.parent;
 
