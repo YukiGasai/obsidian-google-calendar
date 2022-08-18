@@ -223,7 +223,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     
         const templateFile = plugin.app.vault.getAbstractFileByPath(templateFilePath);
 
-        const result = await adapter.read(normalizePath(templateFilePath));
+        if(!(templateFile instanceof TFile))return false;
+
+        const result = await vault.read(templateFile);
 
         if(result.contains("{{") && result.contains("}}")){
             return false;
