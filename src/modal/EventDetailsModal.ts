@@ -1,4 +1,4 @@
-import type { GoogleCalander, GoogleEvent } from "../helper/types";
+import type { GoogleCalendar, GoogleEvent } from "../helper/types";
 
 import { Modal } from "obsidian";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
@@ -9,7 +9,7 @@ import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
  */
 export class EventDetailsModal extends Modal {
 	selectedEvent: GoogleEvent;
-	calendarList: GoogleCalander[];
+	calendarList: GoogleCalendar[];
 	closeFunction: () => void;
 
 	onSubmit: () => void;

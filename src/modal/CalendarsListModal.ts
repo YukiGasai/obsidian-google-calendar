@@ -1,4 +1,4 @@
-import type { GoogleCalander } from "../helper/types";
+import type { GoogleCalendar } from "../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
@@ -8,25 +8,25 @@ import { EventListModal } from "./EventListModal";
 /**
  * This class is used to diplay a select modal in which the user can select a calendar to see its events
  */
-export class CalendarsListModal extends FuzzySuggestModal<GoogleCalander> {
-	calendarList: GoogleCalander[];
+export class CalendarsListModal extends FuzzySuggestModal<GoogleCalendar> {
+	calendarList: GoogleCalendar[];
 
-	constructor(calendarList: GoogleCalander[]) {
+	constructor(calendarList: GoogleCalendar[]) {
 		super(GoogleCalendarPlugin.getInstance().app);
 		this.calendarList = calendarList;
 		this.setPlaceholder("Select a calendar to view it");
 	}
 
-	getItems(): GoogleCalander[] {
+	getItems(): GoogleCalendar[] {
 		return this.calendarList;
 	}
 
-	getItemText(item: GoogleCalander): string {
+	getItemText(item: GoogleCalendar): string {
 		return `${item.summary}\t`;
 	}
 
 	async onChooseItem(
-		item: GoogleCalander
+		item: GoogleCalendar
 	): Promise<void> {
 		const events = await googleListTodayEventsByCalendar(item);
 		new EventListModal(events).open();

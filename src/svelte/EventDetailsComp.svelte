@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { GoogleCalander, GoogleEvent } from "../helper/types";
+    import type { GoogleCalendar, GoogleEvent } from "../helper/types";
     
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
@@ -13,7 +13,7 @@
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
-    let calendars: GoogleCalander[];
+    let calendars: GoogleCalendar[];
     let loading = true;
     let fullDay:boolean;
     let recurring: boolean;

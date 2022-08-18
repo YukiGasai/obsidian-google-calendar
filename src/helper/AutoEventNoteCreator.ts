@@ -2,11 +2,9 @@ import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
-import { normalizePath, TFile } from "obsidian";
+import { MarkdownView, normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
-
-
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -40,15 +38,16 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
     const events = await googleListEvents(startDate, endDate);
 
     // check every event from the trigger text :obsidian:
-    events.forEach(event => {
+
+    for(let i = 0; i < events.length; i++){
         //regex will check for text and extract a template name if it exists
-        const match = event.description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
-        
+        const match = events[i].description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
+           
         if(match.length == 3){
             //the trigger text was found and a new note will be created
-            createNoteFromEvent(event, match[1], match[2]);
+            await createNoteFromEvent(events[i], match[1], match[2])
         }
-    })
+    }
 }
 
 
@@ -63,7 +62,7 @@ export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<v
     
 
     //the trigger text was found and a new note will be created
-    createNoteFromEvent(event, match?.[1], match?.[2]);
+    await createNoteFromEvent(event, match?.[1], match?.[2]);
       
 }
 
@@ -113,54 +112,71 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     //Check if the template name has a file extension
     if(!templateName.match(/.*\.md/)){
         templateName = templateName + ".md";
-    
     }
 
     //Open file in active panel needed to insert template
-    await plugin.app.workspace.activeLeaf.openFile(File);
+    await app.workspace.getLeaf(true).setViewState({type: "MarkdownView", active: true})
+    const allLeaves = app.workspace.getLeavesOfType("MarkdownView");
+    await allLeaves[0].openFile(File);
 
+    
     if(plugin.templaterPlugin && plugin.coreTemplatePlugin){
-        if(!(await insertTemplaterTemplate())){
-            if(!(await insertCoreTemplate())){
+        const wasInserted = await insertTemplaterTemplate();
+        if(!wasInserted){
+            const wasInsertedAgain = await insertCoreTemplate()
+            if(!wasInsertedAgain){
                 createNotice("Template not compatable")
             }
         }       
     }else if(plugin.templaterPlugin){
-        if(!(await insertTemplaterTemplate())){
+        const wasInserted = await insertTemplaterTemplate();
+        if(!wasInserted){
             createNotice("Template not compatable")
         }
     }else if(plugin.coreTemplatePlugin){
-        if(!(await insertCoreTemplate())){
+        const wasInserted = await insertCoreTemplate();
+        if(!wasInserted){
             createNotice("Template not compatable")
         }
     }
 
-    let fileContent = await adapter.read(normalizePath(File.path));
-    const oldContent = fileContent;
-    const regexp = /({{|<%)gEvent\.(.*)(}}|%>)/g;
-    let matches;
-    const output = [];
-    do {
-        matches = regexp.exec(fileContent);
-        output.push(matches);
-    } while(matches);
 
-    output.forEach(match => {
-        if(match){
-            let newContent = match[2].split('.').reduce((o,i)=> o[i], event)
+    if(allLeaves[0].view instanceof MarkdownView){
 
-            //Turn objects into json for a better display be more specific in the template
-            if(newContent === Object(newContent)){
-                newContent = JSON.stringify(newContent);
+        let fileContent = allLeaves[0].view.editor.getValue()
+        console.log(fileContent);
+        const oldContent = fileContent;
+        const regexp = /({{|<%)gEvent\.(.*)(}}|%>)/g;
+        let matches;
+        const output = [];
+        do {
+            matches = regexp.exec(fileContent);
+            output.push(matches);
+        } while(matches);
+
+        output.forEach(match => {
+            if(match){
+                let newContent = match[2].split('.').reduce((o,i)=> o[i], event)
+
+                //Turn objects into json for a better display be more specific in the template
+                if(newContent === Object(newContent)){
+                    newContent = JSON.stringify(newContent);
+                }
+
+                fileContent = fileContent.replace(match[0],newContent??"")
             }
+        })
 
-            fileContent = fileContent.replace(match[0],newContent??"")
+        if(fileContent !== oldContent) {
+            allLeaves[0].view.editor.setValue(fileContent)
         }
-    })
 
-    if(fileContent !== oldContent) {
-        await adapter.write(normalizePath(File.path), fileContent);
     }
+    
+    if(!plugin.settings.autoCreateEventKeepOpen){
+        allLeaves[0].detach();
+    }
+    
 
     async function insertCoreTemplate() : Promise<boolean>{
         //Get the folder where the templates are stored from the template plugin
@@ -176,7 +192,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         //Get the file from the path
         const templateFile = vault.getAbstractFileByPath((templateFilePath));
 
-        const result = await adapter.read(normalizePath(templateFilePath));
+        if(!(templateFile instanceof TFile))return false;
+
+        const result = await vault.read(templateFile);
 
         if(result.contains("<%") && result.contains("%>")){
             return false;
@@ -184,12 +202,12 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
         //Insert the template by calling the command from the plugin
         try{
-            await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);            
+            await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);    
+    
         }catch{
             return false
         }
-        //Close the file to allow multiples inserts
-        await plugin.app.workspace.activeLeaf.detach();
+
         return true;
     }
 

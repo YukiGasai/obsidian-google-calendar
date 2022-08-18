@@ -15,18 +15,32 @@ import {
 	settingsAreCompleteAndLoggedIn,
 } from "../view/GoogleCalendarSettingTab";
 import {
-	getAT,
-	getET,
-	getRT,
-	setAT,
-	setET,
-	setRT,
+	getAccessToken,
+	getExpirationTime,
+	getRefreshToken,
+	setAccessToken,
+	setExpirationTime,
+	setRefreshToken,
 } from "../helper/LocalStorage";
-import { Notice, Platform } from "obsidian";
+import { Notice, Platform, requestUrl } from "obsidian";
 
 
 
 const PORT = 42813
+
+
+function checkAccessTokenValid(): boolean {
+	//Check if Expiration time is not set or deafault 0
+	if(!getExpirationTime())return false;
+
+	//Check if Expiration time is set to text
+	if(isNaN(getExpirationTime()))return false
+	
+	//Check if Expiration time is in the past so the token is expired
+	if(getExpirationTime() < +new Date())return false;
+
+	return true;
+}
 
 /**
  * Function the get the acces token used in every request to the Google Calendar API
@@ -42,35 +56,32 @@ export async function getGoogleAuthToken(): Promise<string> {
 
 	//Check if the Access token is still valid
 	if (
-		getET() == 0 ||
-		getET() == undefined ||
-		isNaN(getET()) ||
-		getET() < +new Date()
+		checkAccessTokenValid() == false
 	) {
 		//Acceess token is no loger valid have to create a new one
-		if (getRT() != "") {
+		if (getRefreshToken() != "") {
 			const refreshBody = {
 				client_id: plugin.settings.googleClientId,
 				client_secret: plugin.settings.googleClientSecret,
 				grant_type: "refresh_token",
-				refresh_token: getRT(),
+				refresh_token: getRefreshToken(),
 			};
-			const response = await fetch(
-				"https://oauth2.googleapis.com/token",
-				{
-					method: "POST",
-					body: JSON.stringify(refreshBody),
-				}
-			);
+
+			const response = await requestUrl({
+				url: "https://oauth2.googleapis.com/token",
+				method: "POST",
+				contentType: "application/json",
+				body: JSON.stringify(refreshBody)
+			});
 
 			//Save new Access token and Expiration Time
-			const tokenData = await response.json();
-			setAT(tokenData.access_token);
-			setET(+new Date() + tokenData.expires_in*1000);
+			const tokenData = await response.json;
+			setAccessToken(tokenData.access_token);
+			setExpirationTime(+new Date() + tokenData.expires_in*1000);
 		}
 	}
 
-	return getAT();
+	return getAccessToken();
 }
 
 /**
@@ -124,9 +135,9 @@ export async function LoginGoogle(): Promise<void> {
 						// Now that we have the code, use that to acquire tokens.
 						const r = await oAuth2Client.getToken(code);
 
-						setRT(r.tokens.refresh_token);
-						setAT(r.tokens.access_token);
-						setET(r.tokens.expiry_date);
+						setRefreshToken(r.tokens.refresh_token);
+						setAccessToken(r.tokens.access_token);
+						setExpirationTime(r.tokens.expiry_date);
 
 						console.info("Tokens acquired.");
 					}

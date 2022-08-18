@@ -3,6 +3,7 @@ import type { GoogleEvent } from "../helper/types";
 import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { requestUrl } from 'obsidian';
 
 
 
@@ -15,15 +16,7 @@ import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent> {
 	const plugin = GoogleCalendarPlugin.getInstance();
 
-	const requestHeaders: HeadersInit = new Headers();
-	requestHeaders.append(
-		"Authorization",
-		"Bearer " + (await getGoogleAuthToken())
-	);
-	requestHeaders.append("Content-Type", "application/json");
-
 	const calenderId = event.parent.id;
-
 
 	event.start.timeZone = event.parent.timeZone;
 	event.end.timeZone = event.parent.timeZone;
@@ -31,16 +24,14 @@ export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent
 	delete event.parent;
 
 	try {
-		const updateResponse = await fetch(
-			`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events?key=${plugin.settings.googleApiToken}`,
-			{
-				method: "POST",
-				headers: requestHeaders,
-				body: JSON.stringify(event),
-			}
-		);
+		const updateResponse = await requestUrl({
+			url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events?key=${plugin.settings.googleApiToken}`,
+			method: "POST",
+			headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+			body: JSON.stringify(event),
+		});
 
-		const createdEvent = await updateResponse.json();
+		const createdEvent = await updateResponse.json;
 
 		return createdEvent;
 	} catch (error) {

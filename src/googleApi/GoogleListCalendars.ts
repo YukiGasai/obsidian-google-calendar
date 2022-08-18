@@ -1,12 +1,13 @@
-import type { GoogleCalander, GoogleCalanderList } from "./../helper/types";
+import type { GoogleCalendar, GoogleCalendarList } from "./../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { getGoogleColors } from "./GoogleColors";
+import { requestUrl } from 'obsidian';
 
 
-let cachedCalendars:GoogleCalander[] = []
+let cachedCalendars:GoogleCalendar[] = []
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
@@ -14,7 +15,7 @@ let cachedCalendars:GoogleCalander[] = []
  * @param calendars The list of all possible calendars
  * @returns The filtered list of calendars
  */
-function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:GoogleCalander[]):GoogleCalander[]{
+function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:GoogleCalendar[]):GoogleCalendar[]{
 	//Remove the calendars contained in the blacklist
 	const filteredCalendars = calendars.filter((calendar) => {
 		const foundIndex = plugin.settings.calendarBlackList.findIndex(
@@ -30,7 +31,7 @@ function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:Googl
  * The function will check if there are already saved calendars if not it will request them from the google API
  * @returns A List of Google Calendars
  */
-export async function googleListCalendars(): Promise<GoogleCalander[]> {
+export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 
@@ -42,22 +43,14 @@ export async function googleListCalendars(): Promise<GoogleCalander[]> {
 	//Make sure the colors for calendar and events are loaded before getting the first calendar
 	await getGoogleColors();
 
-	const requestHeaders: HeadersInit = new Headers();
-	requestHeaders.append(
-		"Authorization",
-		"Bearer " + (await getGoogleAuthToken())
-	);
-	requestHeaders.append("Content-Type", "application/json");
-
 	try {
-		const response = await fetch(
-			`https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${plugin.settings.googleApiToken}`,
-			{
-				method: "GET",
-				headers: requestHeaders,
-			}
-		);
-		const calendarList: GoogleCalanderList = await response.json();
+		const response = await requestUrl({
+			url: `https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${plugin.settings.googleApiToken}`,
+			method: "GET",
+			contentType: "application/json",
+			headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+		});
+		const calendarList: GoogleCalendarList = await response.json;
 
 		cachedCalendars = calendarList.items;
 

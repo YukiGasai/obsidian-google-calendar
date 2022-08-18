@@ -2,6 +2,7 @@ import type { GoogleEvent } from "../helper/types";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
+import { requestUrl } from 'obsidian';
 
 /**
  * This function can update simple properties of an event at the api.
@@ -17,13 +18,6 @@ export async function googleUpdateEvent(
 ): Promise<GoogleEvent> {
 	const plugin = GoogleCalendarPlugin.getInstance();
 
-	const requestHeaders: HeadersInit = new Headers();
-	requestHeaders.append(
-		"Authorization",
-		"Bearer " + (await getGoogleAuthToken())
-	);
-	requestHeaders.append("Content-Type", "application/json");
-
 	// Use the reacurance id to update all events from a reacuring task
 	let id = event.recurringEventId ?? event.id;
 
@@ -37,16 +31,15 @@ export async function googleUpdateEvent(
 	delete event.parent;
 
 	try {
-		const updateResponse = await fetch(
-			`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}?key=${plugin.settings.googleApiToken}`,
-			{
-				method: "PUT",
-				headers: requestHeaders,
-				body: JSON.stringify(event),
-			}
-		);
+		const updateResponse = await requestUrl({
+			url:`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}?key=${plugin.settings.googleApiToken}`,
+			method: "PUT",
+			contentType: "application/json",
+			headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+			body: JSON.stringify(event),
+		});
 
-		const updatedEvent = await updateResponse.json();
+		const updatedEvent = await updateResponse.json;
 
 		return updatedEvent;
 	} catch (error) {

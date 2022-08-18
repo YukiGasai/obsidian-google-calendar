@@ -12,13 +12,14 @@ export interface GoogleCalendarPluginSettings {
 	refreshInterval: number;
 	showNotice: boolean;
 	autoCreateEventNotes: boolean,
+	autoCreateEventKeepOpen: boolean,
 	importStartOffset: number,
 	importEndOffset: number,
 	defaultCalendar: string,
 	calendarBlackList: [string, string][];
 }
 
-export interface GoogleCalander {
+export interface GoogleCalendar {
 	kind: "calendar#calendarListEntry";
 	etag: string;
 	id: string;
@@ -54,16 +55,16 @@ export interface GoogleCalander {
 	};
 }
 
-export interface GoogleCalanderList {
+export interface GoogleCalendarList {
 	kind: "calendar#calendarList";
 	etag: string;
 	nextPageToken: string;
 	nextSyncToken: string;
-	items: [GoogleCalander];
+	items: [GoogleCalendar];
 }
 
 export interface GoogleEvent {
-	parent?: GoogleCalander;
+	parent?: GoogleCalendar;
 	kind?: "calendar#event";
 	etag?: string;
 	id?: string;

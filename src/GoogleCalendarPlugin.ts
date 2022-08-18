@@ -14,7 +14,7 @@ import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/Month
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
-import { getRT } from "./helper/LocalStorage";
+import { getRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -28,6 +28,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	refreshInterval: 10,
 	showNotice: true,
 	autoCreateEventNotes: true,
+	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,
 	defaultCalendar: "",
@@ -292,7 +293,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Copy Google Calendar Refresh Token to Clipboard",
 
 			callback: () => {
-				const token = getRT();
+				const token = getRefreshToken();
 				if(token == undefined || token == ''){
 					new Notice("No Refresh Token. Please Login.")
 					return;

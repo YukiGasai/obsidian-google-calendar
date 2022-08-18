@@ -9,6 +9,7 @@
 
 import type { GoogleEvent } from "../helper/types";
 import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
+import { requestUrl } from 'obsidian';
 
 const calendarColors = new Map<string, string>();
 const eventColors    = new Map<string, string>();
@@ -21,15 +22,13 @@ export async function getGoogleColors():Promise<void> {
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 
-	const requestHeaders: HeadersInit = new Headers();
-	requestHeaders.append("Content-Type", "application/json");
-
-	const response = await fetch(`https://www.googleapis.com/calendar/v3/colors?key=${plugin.settings.googleApiToken}`, {
+	const response = await requestUrl({
+		url: `https://www.googleapis.com/calendar/v3/colors?key=${plugin.settings.googleApiToken}`,
 		method: "GET",
-		headers: requestHeaders
-	});
+		contentType: "application/json",
+	})
 
-	const colorData = await response.json();
+	const colorData = response.json;
 
 	for (let i = 1; ; i++) {
 		const color = colorData.calendar[i+""]?.background;

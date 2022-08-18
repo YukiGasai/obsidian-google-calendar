@@ -2,6 +2,7 @@ import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
+import { requestUrl } from 'obsidian';
 
 /**
  * This function will remove the event from the google api
@@ -17,13 +18,6 @@ export async function googleRemoveEvent(
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 
-	const requestHeaders: HeadersInit = new Headers();
-	requestHeaders.append(
-		"Authorization",
-		"Bearer " + (await getGoogleAuthToken())
-	);
-	requestHeaders.append("Content-Type", "application/json");
-
 	// Use the reacurance id to delete all events from a reacuring task
 	let id = event.recurringEventId ?? event.id;
 
@@ -31,13 +25,11 @@ export async function googleRemoveEvent(
 		id = event.id;
 	}
 
-	const response = await fetch(
-		`https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}?key=${plugin.settings.googleApiToken}`,
-		{
-			method: "DELETE",
-			headers: requestHeaders,
-			redirect: "follow",
-		}
-	);
+	const response = await requestUrl({
+		url: `https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}?key=${plugin.settings.googleApiToken}`,
+		method: "DELETE",
+		contentType: "application/json",
+		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+	});
 	return response.status == 204;
 }

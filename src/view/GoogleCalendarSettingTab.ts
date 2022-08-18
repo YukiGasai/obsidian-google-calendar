@@ -9,7 +9,7 @@ import {
 	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import { getRT, setAT, setET, setRT } from "../helper/LocalStorage";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
 import { customSetting } from "src/helper/CustomSettingElement";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 
@@ -71,9 +71,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		const createLogOutButton = (button: ButtonComponent) => {
 			button.setButtonText("Logout");
 			button.onClick(async () => {
-				setRT("");
-				setAT("");
-				setET(0);
+				setRefreshToken("");
+				setAccessToken("");
+				setExpirationTime(0);
 				button.buttonEl.remove();
 
 				AuthSetting.setName("Login");
@@ -90,7 +90,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		};
 
 		if (Platform.isDesktop) {
-			if (getRT()) {
+			if (getRefreshToken()) {
 				AuthSetting.setName("Logout");
 				AuthSetting.setDesc("Logout off your Google Account");
 				AuthSetting.addButton(createLogOutButton);
@@ -109,7 +109,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 								if (count > 900) {
 									clearInterval(intId);
-								} else if (getRT()) {
+								} else if (getRefreshToken()) {
 									clearInterval(intId);
 									button.buttonEl.remove();
 									AuthSetting.setName("Logout");
@@ -134,7 +134,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						.setValue(this.plugin.settings.googleRefreshToken)
 						.onChange(async (value) => {
 							this.plugin.settings.googleRefreshToken = value;
-							setRT(value);
+							setRefreshToken(value);
 						})
 				);
 		}
@@ -146,6 +146,17 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			toggle.setValue(this.plugin.settings.autoCreateEventNotes);
 			toggle.onChange(async (state) => {
 				this.plugin.settings.autoCreateEventNotes = state;
+				await this.plugin.saveSettings();
+			});
+		});
+
+		new Setting(containerEl)
+		.setName("Keep auto created Notes open")
+		.setDesc("When creating a new note should it stay open for direct editing")
+		.addToggle((toggle) => {
+			toggle.setValue(this.plugin.settings.autoCreateEventKeepOpen);
+			toggle.onChange(async (state) => {
+				this.plugin.settings.autoCreateEventKeepOpen = state;
 				await this.plugin.saveSettings();
 			});
 		});
@@ -336,7 +347,7 @@ export function settingsAreCorret(): boolean {
 }
 
 export function settingsAreCompleteAndLoggedIn(showNotice = true): boolean {
-	if (!settingsAreComplete(false) || getRT() == "") {
+	if (!settingsAreComplete(false) || getRefreshToken() == "") {
 		createNotice(
 			"Google Calendar missing settings or not logged in",
 			showNotice

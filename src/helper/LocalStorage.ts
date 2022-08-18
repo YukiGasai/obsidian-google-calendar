@@ -6,7 +6,7 @@
  * getAccessToken from LocalStorage
  * @returns googleAccessToken
  */
-export const getAT = (): string => {
+export const getAccessToken = (): string => {
 	return window.localStorage.getItem("googleCalendarAccessToken") ?? "";
 };
 
@@ -14,7 +14,7 @@ export const getAT = (): string => {
  * getRefreshToken from LocalStorage
  * @returns googleRefreshToken
  */
-export const getRT = (): string => {
+export const getRefreshToken = (): string => {
 	return window.localStorage.getItem("googleCalendarRefreshToken") ?? "";
 };
 
@@ -22,7 +22,7 @@ export const getRT = (): string => {
  * getExpirationTime from LocalStorage
  * @returns googleExpirationTime
  */
-export const getET = (): number => {
+export const getExpirationTime = (): number => {
 	const expirationTimeString =
 		window.localStorage.getItem("googleCalendarExpirationTime") ?? "0";
 	return parseInt(expirationTimeString, 10);
@@ -37,7 +37,7 @@ export const getET = (): number => {
  * @param googleAccessToken googleAccessToken
  * @returns googleAccessToken
  */
-export const setAT = (googleAccessToken: string): void => {
+export const setAccessToken = (googleAccessToken: string): void => {
 	window.localStorage.setItem("googleCalendarAccessToken", googleAccessToken);
 };
 
@@ -46,7 +46,7 @@ export const setAT = (googleAccessToken: string): void => {
  * @param googleRefreshToken googleRefreshToken
  * @returns googleRefreshToken
  */
-export const setRT = (googleRefreshToken: string): void => {
+export const setRefreshToken = (googleRefreshToken: string): void => {
 	window.localStorage.setItem("googleCalendarRefreshToken", googleRefreshToken);
 };
 
@@ -55,7 +55,7 @@ export const setRT = (googleRefreshToken: string): void => {
  * @param googleExpirationTime googleExpirationTime
  * @returns googleExpirationTime
  */
-export const setET = (googleExpirationTime: number): void => {
+export const setExpirationTime = (googleExpirationTime: number): void => {
 	window.localStorage.setItem(
 		"googleCalendarExpirationTime",
 		googleExpirationTime + ""
