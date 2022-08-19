@@ -10,14 +10,21 @@ import { EventDetailsModal } from './EventDetailsModal';
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	eventList: GoogleEvent[];
 	eventsChanged: boolean;
+	currentDate: moment.Moment;
 	closeFunction?: () => void;
 
-	constructor(eventList: GoogleEvent[], eventsChanged = false, closeFunction?: () => void) {
+	constructor(
+		eventList: GoogleEvent[], 
+		currentDate:moment.Moment = window.moment(), 
+		eventsChanged = false, 
+		closeFunction?: () => void
+		) {
 		super(GoogleCalendarPlugin.getInstance().app);
 		this.eventList = eventList;
 		this.setPlaceholder("Select a event to view it");
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
+		this.currentDate = currentDate;
 		if(closeFunction){
 			this.closeFunction = closeFunction
 		}
@@ -25,8 +32,13 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.inputEl.addEventListener("keyup", (ev)=>{
 			const list = this.getSuggestions(this.inputEl.value);
 			if(!list.length && ev.key == "Enter"){
-				new EventDetailsModal({summary: this.inputEl.value, start:{}, end:{}}).open()
-				this.close();
+				new EventDetailsModal({
+					summary: this.inputEl.value,
+					start: {
+						date:currentDate.format()
+					}, 
+					end:{}
+				},  () => {this.eventsChanged = true; this.close()}).open()
 			}
 		})
 	}

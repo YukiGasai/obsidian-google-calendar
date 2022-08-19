@@ -62,7 +62,7 @@
         calendars = await googleListCalendars();
         loading = false;
 
-        fullDay = event?.start?.dateTime == undefined
+        fullDay = event?.start?.dateTime == undefined && event?.start?.date
         recurring = event?.recurringEventId !== undefined; 
 
         //New event all blank
@@ -75,13 +75,23 @@
                 event.parent = calendars[calendars.length - 1];
             }
        
-            fullDay = false;
             recurring = false;
 
             const startTime = getEmptyDate();
             inputStartDateTime = startTime.format("YYYY-MM-DDTHH:mm");
             inputEndDateTime = startTime.add(1, "hour").format("YYYY-MM-DDTHH:mm");
             inputStartDate = startTime.format("YYYY-MM-DD");
+
+            
+
+            if(event.start.date){
+                inputStartDate = window.moment(event.start.date).format("YYYY-MM-DD");
+            }
+
+            if(event.start.dateTime && event.end.dateTime){
+                inputStartDateTime  = window.moment(event.start.dateTime).format("YYYY-MM-DDTHH:mm")
+                inputEndDateTime    = window.moment(event.end.dateTime).format("YYYY-MM-DDTHH:mm")
+            }
 
         }else {
             //Add the missing time to the object for a better user expirince
@@ -168,7 +178,7 @@
         }
 
         const newEvent = await googleCreateEvent(addEventDate(event))
-            
+   
         if(newEvent.id){
             closeFunction();
         }

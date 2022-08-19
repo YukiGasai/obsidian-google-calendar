@@ -49,10 +49,12 @@
 
 
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
-        new EventListModal(getEventsOfDay(events, date), false, () => {
+
+        new EventListModal(getEventsOfDay(events, date), date, false, () => {
             googleClearCachedEvents();
             displayedMonth = displayedMonth
         }).open();
+    
     }
 
 
