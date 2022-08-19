@@ -5,6 +5,7 @@ import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { MarkdownView, normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
+import _ from "lodash";
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -146,22 +147,20 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         let fileContent = allLeaves[0].view.editor.getValue()
   
         const oldContent = fileContent;
-        const regexp = /({{|<%)gEvent\.(.*)(}}|%>)/g;
+        const regexp = /({{|<%)gEvent\.([^}>]*)(}}|%>)/gm;
         let matches;
         const output = [];
         do {
             matches = regexp.exec(fileContent);
             output.push(matches);
         } while(matches);
-
+   
         output.forEach(match => {
             if(match){
-                let newContent;
-                try{
-                    newContent = match[2].split('.').reduce((o,i)=> o[i], event)
-                }catch{
-                    newContent = "";
-                }
+
+                console.log(match)
+                let newContent = _.get(event, match[2], "");
+                
                 //Turn objects into json for a better display be more specific in the template
                 if(newContent === Object(newContent)){
                     newContent = JSON.stringify(newContent);
