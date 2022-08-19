@@ -158,7 +158,6 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         output.forEach(match => {
             if(match){
 
-                console.log(match)
                 let newContent = _.get(event, match[2], "");
                 
                 //Turn objects into json for a better display be more specific in the template
