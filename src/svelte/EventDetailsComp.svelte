@@ -67,8 +67,8 @@
 
         //New event all blank
         if(event.id == undefined){
-            event.summary = ""
-            event.description = ""
+            event.summary = event.summary ?? "";
+            event.description = event.description ?? "";
 
             event.parent = calendars.find(calendar => calendar.id === plugin.settings.defaultCalendar);
             if(!event.parent) {
@@ -152,7 +152,6 @@
             options.until = new Date(recurringEndDate);
         }
 
-        console.log(weekDays)
 
         if(recurringType === RRule.WEEKLY && weekDays.length){
             options.byweekday = weekDays;
@@ -161,8 +160,6 @@
         const rule = new RRule(options);
 
         rruleSet.rrule(rule);
-
-        console.log(rruleSet)
 
         event.recurrence = rruleSet.valueOf()
 

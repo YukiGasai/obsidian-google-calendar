@@ -144,7 +144,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     if(allLeaves[0].view instanceof MarkdownView){
 
         let fileContent = allLeaves[0].view.editor.getValue()
-        console.log(fileContent);
+  
         const oldContent = fileContent;
         const regexp = /({{|<%)gEvent\.(.*)(}}|%>)/g;
         let matches;
