@@ -21,6 +21,14 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		if(closeFunction){
 			this.closeFunction = closeFunction
 		}
+
+		this.inputEl.addEventListener("keyup", (ev)=>{
+			const list = this.getSuggestions(this.inputEl.value);
+			if(!list.length && ev.key == "Enter"){
+				new EventDetailsModal({summary: this.inputEl.value, start:{}, end:{}}).open()
+				this.close();
+			}
+		})
 	}
 
 

@@ -8,6 +8,7 @@ import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
  * This Class is used to create a modal in which the user can see more informations about an event and can update and delte the event
  */
 export class EventDetailsModal extends Modal {
+
 	selectedEvent: GoogleEvent;
 	calendarList: GoogleCalendar[];
 	closeFunction: () => void;
@@ -23,6 +24,9 @@ export class EventDetailsModal extends Modal {
 			this.closeFunction = closeFunction;
 		}
 	}
+
+	
+	
 
 	async onOpen(): Promise<void> {
 		const { contentEl } = this;
