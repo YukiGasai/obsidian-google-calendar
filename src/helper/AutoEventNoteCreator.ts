@@ -156,8 +156,12 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
         output.forEach(match => {
             if(match){
-                let newContent = match[2].split('.').reduce((o,i)=> o[i], event)
-
+                let newContent;
+                try{
+                    newContent = match[2].split('.').reduce((o,i)=> o[i], event)
+                }catch{
+                    newContent = "";
+                }
                 //Turn objects into json for a better display be more specific in the template
                 if(newContent === Object(newContent)){
                     newContent = JSON.stringify(newContent);

@@ -20,7 +20,7 @@
 	font-weight: bold;
 	color: red;
 }
-
+input[type="date"],
 input[type="datetime-local"] {
 	background: var(--background-modifier-form-field);
 	border: 1px solid var(--background-modifier-border);

@@ -3,6 +3,7 @@ import type { GoogleEvent } from "../helper/types";
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
+import { googleListEvents } from "../googleApi/GoogleListEvents";
 
 /**
  * This class is used to diplay a select modal in which the user can select an event
@@ -21,7 +22,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		) {
 		super(GoogleCalendarPlugin.getInstance().app);
 		this.eventList = eventList;
-		this.setPlaceholder("Select a event to view it");
+		this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left/right to switch day`);
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
 		this.currentDate = currentDate;
@@ -29,7 +30,8 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 			this.closeFunction = closeFunction
 		}
 
-		this.inputEl.addEventListener("keyup", (ev)=>{
+		this.inputEl.addEventListener("keyup", async(ev)=>{
+			let dateUpdated = false;
 			const list = this.getSuggestions(this.inputEl.value);
 			if(!list.length && ev.key == "Enter"){
 				new EventDetailsModal({
@@ -40,9 +42,35 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 					end:{}
 				},  () => {this.eventsChanged = true; this.close()}).open()
 			}
+			
+			if(ev.key == "ArrowRight") {
+				if (ev.ctrlKey){
+					this.currentDate = this.currentDate.add(1, "month");
+				}else if(ev.shiftKey){
+					this.currentDate = this.currentDate.add(1, "week");
+				}else{
+					this.currentDate = this.currentDate.add(1, "day");
+				}
+				dateUpdated = true;
+			}else if(ev.key == "ArrowLeft") {
+				if (ev.ctrlKey){
+					this.currentDate = this.currentDate.subtract(1, "month");
+				}else if(ev.shiftKey){
+					this.currentDate = this.currentDate.subtract(1, "week");
+				}else{
+					this.currentDate = this.currentDate.subtract(1, "day");
+				}
+				dateUpdated = true;
+			}
+
+			if(dateUpdated){
+				this.setPlaceholder("Loading");
+				this.eventList = await googleListEvents(currentDate);
+				this.inputEl.dispatchEvent(new Event('input'));
+				this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left and right to switch day`);
+			}
 		})
 	}
-
 
 	getItems(): GoogleEvent[] {
 		return this.eventList;
@@ -70,6 +98,4 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 			this.closeFunction();
 		}
 	}
-
-
 }

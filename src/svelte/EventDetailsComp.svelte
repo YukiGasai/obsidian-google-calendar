@@ -62,7 +62,7 @@
         calendars = await googleListCalendars();
         loading = false;
 
-        fullDay = event?.start?.dateTime == undefined && event?.start?.date
+        fullDay = event?.start?.dateTime == undefined && event?.start?.date !== undefined;
         recurring = event?.recurringEventId !== undefined; 
 
         //New event all blank
@@ -309,15 +309,15 @@ $: {
 
         <div>
             <span>Repeat every</span>
-            <input type="number" name="recurringInterval" step="1" min="1" bind:value="{recurringInterval}">
-            <select bind:value={recurringType}>
+            <input type="number" name="recurringInterval" style:width="90px" step="1" min="1" bind:value="{recurringInterval}">
+            <select bind:value={recurringType} class="dropdown">
                 <option value="{Frequency.DAILY}">Days</option>
                 <option default value="{Frequency.WEEKLY}">Weeks</option>
                 <option value="{Frequency.MONTHLY}">Months</option>
                 <option value="{Frequency.YEARLY}">Years</option>
             </select>
             
-            <select bind:value={recurringEndType}>
+            <select bind:value={recurringEndType} class="dropdown">
                 <option default value="Forever">Forever</option>
                 <option value="Until">Until</option>
                 <option value="For">For</option>
@@ -328,7 +328,7 @@ $: {
                 <input type="date" name="recurringEndDate" required bind:value="{recurringEndDate}">
             {:else if recurringEndType == 'For'}
 
-                <input type="number" name="recurringCount" step="1" min="1" required bind:value="{recurringCount}">
+                <input type="number" name="recurringCount" style:width="90px" step="1" min="1" required bind:value="{recurringCount}">
                 <span>times</span>
             {/if}
             <br>
