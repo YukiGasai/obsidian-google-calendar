@@ -12,12 +12,14 @@ import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
+import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
 import { getRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
+
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -107,6 +109,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 			VIEW_TYPE_GOOGLE_CALENDAR_WEB,
 			(leaf: WorkspaceLeaf) => new WebCalendarView(leaf)
 		);
+		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE,
+			(leaf: WorkspaceLeaf) => new ScheduleCalendarView(leaf)
+		);
 
 
 		this.registerEvent(
@@ -139,6 +145,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Open Google Calendar web view",
 			callback: () => 
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEB)
+		});
+
+		//Open schedule view
+		this.addCommand({
+			id: "open-google-calendar-schedule-view",
+			name: "Open Google Calendar schedule view",
+			callback: () => 
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE)
 		});
 
 		//List events command
@@ -311,6 +325,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
 	}
 
 	async loadSettings(): Promise<void> {

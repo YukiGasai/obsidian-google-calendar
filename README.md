@@ -59,20 +59,26 @@ A timeline view to see all events over a day
 
 ![](https://i.imgur.com/f9nYmOn.png)
 
+#### Schedule view
+A schedule view to see all your event in a order
+
+![](https://i.imgur.com/HkYQg4Z.png)
+
 
 ### Commands
 
 
 | Name | Description |
 | ---  | --- |
-| Open Google Calendar web view|    Opens the web view |
-| Open Google Calendar month view|  Opens the month/calendar view|
-| Open Google Calendar day view|    Opens the day/timeline view|
-| Insert todays Google Events|      Inserts todays events into the active file as a table |
-| Insert Google Event CodeBlock|    Inserts a codeblock into the active file to display the 3 views  |
-| List Google Events|               Opens a dropdown to view todays events |
-| List Google Calendars|            Opens a dropdown to view all calendars |
-| Create Google Calendar Event|     Opens an empty details view to create a new event |
+| Open Google Calendar web view|       Opens the web view |
+| Open Google Calendar month view|     Opens the month/calendar view|
+| Open Google Calendar day view|       Opens the day/timeline view|
+| Open Google Calendar schedule view|  Opens the schedule view|
+| Insert todays Google Events|         Inserts todays events into the active file as a table |
+| Insert Google Event CodeBlock|       Inserts a codeblock into the active file to display the 3 views  |
+| List Google Events|                  Opens a dropdown to view todays events |
+| List Google Calendars|               Opens a dropdown to view all calendars |
+| Create Google Calendar Event|        Opens an empty details view to create a new event |
 | Google Calendar Trigger Auto Import| Runs the Auto create Notes function again |
 | Copy Google Calendar Refresh Token to Clipboard|  Copies the refresh token (PC only) |
 
@@ -92,7 +98,8 @@ This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day view 
         date: [today, tomorrow, yesterday, A specific date] optional
         width: number optional
         height: number  optional
-        navigation: boolean optional
+        navigation: boolean optional only for timeline view
+        timespan: number optional only for schedule view
     ```
 ```
 

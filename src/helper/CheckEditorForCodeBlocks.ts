@@ -8,6 +8,7 @@ import { Platform } from "obsidian";
 import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
+import ScheduleComp from "../svelte/ScheduleComp.svelte"
 
 /**
  * This functions turns the string of the codeblock into a settings object
@@ -67,11 +68,15 @@ export async function checkEditorForCodeBlocks(
 
 	const blockDateString = options.has("date")
 		? options.get("date")
-		: undefined
+		: undefined;
 
 	const hasNavigation = options.has("navigation")
-	? options.get("navigation")
-	: undefined
+		? options.get("navigation")
+		: undefined;
+
+	const timeSpan = options.has("timespan")
+		? parseInt(options.get("timespan"))
+		: undefined;
 
 	el.style.width = blockWidth + "px";
 	el.style.height = blockHeight + "px";
@@ -136,6 +141,14 @@ export async function checkEditorForCodeBlocks(
 					height: blockHeight,
 					width: blockWidth,
 					displayedMonth: blockDate,
+				},
+			});
+		}else if (blockType == "schedule") {
+			new ScheduleComp({
+				target: el,
+				props: {
+					timeSpan: timeSpan,
+					date: blockDate,
 				},
 			});
 		}
