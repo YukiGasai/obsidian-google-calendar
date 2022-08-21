@@ -7,7 +7,6 @@ import {
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleClearCachedEvents, googleListTodayEvents } from "./googleApi/GoogleListEvents";
-
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
@@ -20,6 +19,7 @@ import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
 import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
+import { TemplateSuggest } from "./helper/TemplateSuggest";
 
 
 
@@ -97,6 +97,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) => 
 			checkEditorForCodeBlocks(text, el, ctx)
 		);
+
+		this.registerEditorSuggest(new TemplateSuggest(this.app));
 
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_DAY,
