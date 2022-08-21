@@ -19,6 +19,7 @@ import { getRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
+import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
 
 
 
@@ -118,9 +119,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on(
 				"editor-change",
-				(editor: Editor) =>
-					checkEditorForAtDates(editor)
-			)
+				(editor: Editor) => {
+					checkEditorForAtDates(editor);
+					checkEditorForInsertedEvents(editor)
+				})
 		);
 
 		//Open Timeline view
