@@ -8,17 +8,22 @@
     import { onDestroy } from "svelte";
     
     
-    export let timeSpan = 4;
+    export let timeSpan = 7;
     export let date = window.moment();
     let interval;
     let days: Map<string, GoogleEvent[]> = new Map();
     let loading = false;
+    let events = [];
 
     const getEvents = async () => {
-        days.clear();
-        loading = true;
-        const events = await googleListEvents(date, date.clone().add(timeSpan, "day"));
+        const newEvents = await googleListEvents(date, date.clone().add(timeSpan, "day"));
 
+        //only reload if events change
+        if(JSON.stringify(newEvents) == JSON.stringify(events)){
+            return;
+        }
+        days.clear();
+        events = newEvents;
         events.forEach(event => {
             const key = event.start.date ? 
                 window.moment(event.start.date).format("DD MMM, ddd") :
@@ -40,7 +45,7 @@
         }else{
             const start = window.moment(event.start.dateTime).format("hh:mma"); 
             const end = window.moment(event.end.dateTime).format("hh:mma"); 
-            return `${start} - ${end}`
+            return `${start}-${end}`
         }
     }
 
@@ -106,12 +111,14 @@
                     <div class="dayEvents">
                         {#each events as event}
                             <div class="dayEvent" on:click="{(e) => goToEvent(event,e)}">
-                                <div class="{event.recurringEventId ? "recurringCircle" : "circle"}" style:background="{getColorFromEvent(event)}"></div>
+                                <div class="{event.recurringEventId ? "recurringCircleContainer" : "circleContainer"}">
+                                    <div  class="circle" style:background="{getColorFromEvent(event)}"></div>
+                                </div>
                                 <div class="timeContainer">
-                                    {getDateString(event)}
+                                    <span>{getDateString(event)}</span>
                                 </div>
                                 <div class="eventTitleContainer">
-                                    {event.summary}
+                                    <span>{event.summary}</span>
                                 </div>
                              
                             </div>
@@ -128,6 +135,7 @@
         .scheduleContainer{
             padding: 10px;
         }
+
 
         .scheduleContent{
             display: flex;
@@ -194,33 +202,34 @@
             background-color: rgba(128, 128, 128, 0.129);
         }
     
+        .recurringCircleContainer,
+        .circleContainer{
+            position: relative;
+            display: flex;
+            width: 30px;
+            min-width: 30px;
+            height: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recurringCircleContainer::after{
+            content: "↺";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            font-size: 30px;
+            color:white;
+            white-space: nowrap;
+        }
+
         .circle{
             width: 10px;
             min-width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .recurringCircle{
-            position: relative;
-            width: 10px;
-            min-width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .recurringCircle::after{
-            content: "↺";
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            left:-100%;
-            line-height: 30px;
-            font-size: 30px;
-            top:-11px;
-            color:white;
         }
     
         .timeContainer{
