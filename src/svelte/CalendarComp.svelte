@@ -5,6 +5,7 @@
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
     import { googleClearCachedEvents, googleListEventsByMonth } from "../googleApi/GoogleListEvents";
+    import { onDestroy } from "svelte";
 
     export let displayedMonth = window.moment();
     export let width:number = 400;
@@ -66,6 +67,9 @@
         getSource(displayedMonth)
 
     }
+    onDestroy(() => {
+        clearInterval(interval);
+    })
 
 </script>
 

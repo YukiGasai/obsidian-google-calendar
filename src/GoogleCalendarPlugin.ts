@@ -93,8 +93,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
-		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el) =>
-			checkEditorForCodeBlocks(text, el)
+		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) => 
+			checkEditorForCodeBlocks(text, el, ctx)
 		);
 
 		this.registerView(

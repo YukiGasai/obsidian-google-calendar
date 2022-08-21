@@ -4,11 +4,12 @@
  * from svelte components
  */
 
-import { Platform } from "obsidian";
+import { MarkdownPostProcessorContext,  Platform } from "obsidian";
 import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
 import ScheduleComp from "../svelte/ScheduleComp.svelte"
+import { SvelteBuilder } from "../helper/SvelteBuilder";
 
 /**
  * This functions turns the string of the codeblock into a settings object
@@ -51,6 +52,7 @@ function getKeyValueList(codeBlock: string): Map<string, string> {
 export async function checkEditorForCodeBlocks(
 	text: string,
 	el: HTMLElement,
+	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
 	const options = getKeyValueList(text);
 
@@ -115,42 +117,41 @@ export async function checkEditorForCodeBlocks(
 
 		if (blockType == "web") {
 			if (Platform.isDesktopApp) {
-				new WebFrameComp({
-					target: el,
-					props: {
+				ctx.addChild(
+					new SvelteBuilder(WebFrameComp, el, {
 						height: blockHeight,
 						width: blockWidth,
 						date: blockDate,
-					},
-				});
+					})
+				);
 			}
 		} else if (blockType == "day") {
-			new TimeLineViewComp({
-				target: el,
-				props: {
+			ctx.addChild(
+				new SvelteBuilder(TimeLineViewComp, el, {
 					height: blockHeight,
 					width: blockWidth,
 					date: blockDate,
 					navigation: hasNavigation=="true"
-				},
-			});
+				})
+			);
+
 		} else if (blockType == "month") {
-			new CalendarComp({
-				target: el,
-				props: {
-					height: blockHeight,
-					width: blockWidth,
-					displayedMonth: blockDate,
-				},
-			});
+			
+			ctx.addChild(
+				new SvelteBuilder(CalendarComp, el, {
+						height: blockHeight,
+						width: blockWidth,
+						displayedMonth: blockDate,
+				})
+			);
+
 		}else if (blockType == "schedule") {
-			new ScheduleComp({
-				target: el,
-				props: {
+			ctx.addChild(
+				new SvelteBuilder(ScheduleComp, el, {
 					timeSpan: timeSpan,
 					date: blockDate,
-				},
-			});
+				})
+			);
 		}
 	}
 }

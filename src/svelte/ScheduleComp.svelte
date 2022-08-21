@@ -5,6 +5,7 @@
     import { getColorFromEvent } from "../googleApi/GoogleColors";
     import { EventDetailsModal } from "../modal/EventDetailsModal";
     import { EventListModal } from "../modal/EventListModal";
+    import { onDestroy } from "svelte";
     
     
     export let timeSpan = 4;
@@ -78,6 +79,10 @@
         interval = setInterval(getEvents, 5000);
         getEvents();
     }
+
+    onDestroy(() => {
+        clearInterval(interval);
+    })
     
     
     </script>

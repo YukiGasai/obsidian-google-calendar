@@ -9,6 +9,7 @@
     import { googleClearCachedEvents, googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
     import {EventDetailsModal} from '../modal/EventDetailsModal'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
+    import { onDestroy } from "svelte";
 
     interface Location {
         event:GoogleEvent;
@@ -121,6 +122,9 @@
         }
     }
 
+    onDestroy(() => {
+        clearInterval(interval);
+    })
     
     </script>
 
