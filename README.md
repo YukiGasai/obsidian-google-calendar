@@ -129,7 +129,9 @@ Event Organizer
 
 <%gEvent.organizer.email%>
 ```
-The fields to use are defined in the [Google Calendar API](https://developers.google.com/calendar/api/v3/reference/events)
+The fields to use are defined in the [Google Calendar API](https://developers.google.com/calendar/api/v3/reference/events) and can be selected from the dropdown menu
+
+Inserting a template strings into a file that already has an inserted event using @Anotation will automatically replace the template with the event information. 
 
 
 ## Thank you to the following plugins: 
