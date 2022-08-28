@@ -98,6 +98,8 @@
             <div class="scheduleContent">
             {#each [...days] as [key, events]}
                 <div class="dayContainer">
+
+
                     <div class="dateDisplay">
                         <div 
                         on:click="{()=>goToDaySelect(events[0])}"
@@ -108,22 +110,29 @@
                         <span class="dayText">{key.slice(2)}</span>
                     </div>
                  
+
                     <div class="dayEvents">
                         {#each events as event}
-                            <div class="dayEvent" on:click="{(e) => goToEvent(event,e)}">
-                                <div class="{event.recurringEventId ? "recurringCircleContainer" : "circleContainer"}">
-                                    <div  class="circle" style:background="{getColorFromEvent(event)}"></div>
-                                </div>
-                                <div class="timeContainer">
-                                    <span>{getDateString(event)}</span>
-                                </div>
-                                <div class="eventTitleContainer">
-                                    <span>{event.summary}</span>
-                                </div>
-                             
+                        <div class="dayEvent" on:click="{(e) => goToEvent(event,e)}">
+                            <div class="circleTime">
+                                    <div class="{event.recurringEventId ? "recurringCircleContainer" : "circleContainer"}">
+                                        <div  class="circle" style:background="{getColorFromEvent(event)}"></div>
+                                    </div>
+                                    <div class="timeContainer">
+                                        <span>{getDateString(event)}</span>
+                                    </div>
                             </div>
+                            <div class="eventTitleContainer">
+                                <span>{event.summary}</span>
+                            </div>
+                             
+                        </div>
                         {/each}
                     </div>
+
+
+
+
                 </div>
             {/each}
             </div>
@@ -131,114 +140,121 @@
     </div>
     
     <style>
-    
-        .scheduleContainer{
-            padding: 10px;
-        }
+    .scheduleContainer {
+		padding: 10px;
+	}
 
+	.scheduleContent {
+		display: flex;
+		flex-direction: column;
+		white-space: nowrap;
+	}
 
-        .scheduleContent{
-            display: flex;
-            flex-direction: column;
-            white-space: nowrap;
-        }
-    
-        .dayContainer{
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            border-bottom: 1px solid white;
-            margin: 2px 0px;
-            padding: 2px 0px;
-        }
-        
-        .dateDisplay{
-            display: flex;
-            flex-direction: row;
-            align-items: flex-end;
-            width: 130px;      
-            min-width: 130px;         
-        }
-        .dayNumber {
-            border-radius: 50%;
-            -moz-border-radius: 50%;
-            -webkit-border-radius: 50%;
-            display: inline-block;
-            font-weight: bold;
-            line-height: 40px;
-            text-align: center;
-            width: 40px;
-            min-width: 40px;
-            cursor: pointer;
-        }
+	.dayContainer {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		border-bottom: 1px solid white;
+		margin: 2px 0px;
+		padding: 2px 0px;
+        flex-wrap: wrap;
+	}
 
-        .today{
-            color: white;
-            background: #4285f4;
-            text-decoration:none;
-        }
-    
-        .dayText{
-            font-size: 15px;
-        }
+	.dateDisplay {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-end;
+		width: 105px;
+		min-width: 105px;
+	}
+	.dayNumber {
+		border-radius: 50%;
+		-moz-border-radius: 50%;
+		-webkit-border-radius: 50%;
+		display: inline-block;
+		font-weight: bold;
+		line-height: 40px;
+		text-align: center;
+		width: 40px;
+		min-width: 40px;
+		cursor: pointer;
+	}
 
-        .dayEvents{
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-    
-        .dayEvent{
-            display: flex;
-            flex: 1;
-            flex-direction: row;
-            align-items: center;
-            padding: 5px;
-            border-radius: 10px;
-            cursor: pointer;
-        }
+	.today {
+		color: white;
+		background: #4285f4;
+		text-decoration: none;
+	}
 
-        .dayEvent:hover{
-            background-color: rgba(128, 128, 128, 0.129);
-        }
-    
-        .recurringCircleContainer,
-        .circleContainer{
-            position: relative;
-            display: flex;
-            width: 30px;
-            min-width: 30px;
-            height: 30px;
-            align-items: center;
-            justify-content: center;
-        }
+	.dayText {
+		font-size: 15px;
+	}
 
-        .recurringCircleContainer::after{
-            content: "↺";
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            line-height: 30px;
-            font-size: 30px;
-            color:white;
-            white-space: nowrap;
-        }
+	.dayEvents {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
 
-        .circle{
-            width: 10px;
-            min-width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-    
-        .timeContainer{
-            width: 215px;
-            min-width: 215px;
-        }
+	.dayEvent {
+		display: flex;
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		padding: 5px;
+		border-radius: 10px;
+		cursor: pointer;
+        flex-wrap: wrap;
+	}
 
-        .eventTitleContainer{
-            white-space: nowrap;
-        }
+	.dayEvent:hover {
+		background-color: rgba(128, 128, 128, 0.129);
+	}
+
+    .circleTime{
+        display: flex;
+        flex-direction: row;
+        width: 220px;
+		min-width: 220px;
+    }
+
+	.recurringCircleContainer,
+	.circleContainer {
+		position: relative;
+		display: flex;
+		width: 30px;
+		min-width: 30px;
+		height: 30px;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.recurringCircleContainer::after {
+		content: "↺";
+		position: absolute;
+		width: 30px;
+		height: 30px;
+		text-align: center;
+		line-height: 30px;
+		font-size: 30px;
+		color: white;
+		white-space: nowrap;
+	}
+
+	.circle {
+		width: 10px;
+		min-width: 10px;
+		height: 10px;
+		border-radius: 50%;
+	}
+
+	.timeContainer {
+		width: 150px;
+		min-width: 150px;
+	}
+
+	.eventTitleContainer {
+		white-space: nowrap;
+	}
     
     </style>

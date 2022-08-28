@@ -42,3 +42,7 @@ input[type="datetime-local"] {
 .SubSettings{
 	margin-left: 40px;
 }
+
+.suggestionText{
+	font-size: 20px;
+}

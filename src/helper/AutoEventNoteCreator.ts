@@ -115,11 +115,17 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         templateName = templateName + ".md";
     }
 
-    //Open file in active panel needed to insert template
-    await app.workspace.getLeaf(true).setViewState({type: "MarkdownView", active: true})
-    const allLeaves = app.workspace.getLeavesOfType("MarkdownView");
-    await allLeaves[0].openFile(File);
+    const editModeState = {
+        state: { mode: "source" },
+        active: true
+    };
 
+    //Open file in active panel needed to insert template
+    const newLeafe = await app.workspace.getLeaf(true)
+    await newLeafe.setViewState({type: "MarkdownView"})
+    await app.workspace.setActiveLeaf(newLeafe, false, true)
+
+    await newLeafe.openFile(File, editModeState);
     
     if(plugin.templaterPlugin && plugin.coreTemplatePlugin){
         const wasInserted = await insertTemplaterTemplate();
@@ -142,9 +148,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     }
 
 
-    if(allLeaves[0].view instanceof MarkdownView){
+    if(newLeafe.view instanceof MarkdownView){
 
-        let fileContent = allLeaves[0].view.editor.getValue()
+        let fileContent = newLeafe.view.editor.getValue()
   
         const oldContent = fileContent;
         const regexp = /({{|<%)gEvent\.([^}>]*)(}}|%>)/gm;
@@ -170,15 +176,15 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         })
 
         if(fileContent !== oldContent) {
-            allLeaves[0].view.editor.setValue(fileContent)
+            newLeafe.view.editor.setValue(fileContent)
         }
 
     }
     
     if(!plugin.settings.autoCreateEventKeepOpen){
-        allLeaves[0].detach();
+        newLeafe.detach();
     }
-    
+
 
     async function insertCoreTemplate() : Promise<boolean>{
         //Get the folder where the templates are stored from the template plugin
@@ -203,17 +209,14 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         }
 
         //Insert the template by calling the command from the plugin
-        try{
-            await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);    
-    
-        }catch{
-            return false
-        }
+
+        await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);    
 
         return true;
     }
 
     async function insertTemplaterTemplate(){
+   
         const templaterFolderPath = normalizePath(plugin.templaterPlugin.settings.templates_folder);
     
         //Get Path to template file and check if it exists
@@ -227,19 +230,20 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
         if(!(templateFile instanceof TFile))return false;
 
-        const result = await vault.read(templateFile);
+        let result = await vault.read(templateFile);
+
+        result = result.replace(/({{|<%)gEvent\.([^}>]*)(}}|%>)/gm, "")
 
         if(result.contains("{{") && result.contains("}}")){
             return false;
         }
 
-        if (templateFile instanceof TFile) {
-            try{
+        try{
             await plugin.templaterPlugin.templater.append_template_to_active_file(templateFile);
-            }catch{
-                return false;
-            }
+        }catch{
+            return false;
         }
+        
         return true;
     }
 }
