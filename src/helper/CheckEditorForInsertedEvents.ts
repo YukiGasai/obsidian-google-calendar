@@ -65,7 +65,11 @@ export async function checkEditorForInsertedEvents(
         fileContent = fileContent.replace(match[0],newContent??"");
 
         editor.setValue(fileContent);
+
+        console.log(editor.getLine(cursorPosition.line).length)
+
+        cursorPosition.ch += (newContent.length - match[0].length);
+
+        editor.setCursor(cursorPosition);
     });
-    cursorPosition.ch = 0;
-    editor.setCursor(cursorPosition);
 }

@@ -117,7 +117,7 @@ You can also deifine a position where the new note should be saved by adding the
 
 Example `:Uni/Math-obsidian-UniTemplate:` Create the node in the folder Math with the Template UniTemplate.
 
-To insert event information into tempates use `{{gEvent.AnyField}}` or `<%gEvent.AnyField%>` for Templater
+To insert event information into tempates use `{{gEvent.AnyField}}` for both plugins
 
 Example
 ```
@@ -125,9 +125,6 @@ Event Description
 
 {{gEvent.description}}
 
-Event Organizer
-
-<%gEvent.organizer.email%>
 ```
 The fields to use are defined in the [Google Calendar API](https://developers.google.com/calendar/api/v3/reference/events) and can be selected from the dropdown menu
 

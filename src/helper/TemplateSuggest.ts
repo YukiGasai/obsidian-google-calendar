@@ -35,17 +35,38 @@ export class TemplateSuggest extends EditorSuggest<string>{
           });
     }
 
-
     renderSuggestion(value: string, el: HTMLElement): void {
         el.createEl("span",{
             text:value,
             cls:"suggestionText"
-        })
-    
+        })    
     }
+
     selectSuggestion(value: string): void {
         if(!this.context)return;
 
-        this.context.editor.replaceRange(value, this.context.start, this.context.end);
+        const {editor} = this.context;
+
+        editor.replaceRange(value, this.context.start, this.context.end);
+
+        const remainingOptions = GoogleEventSuggestionList.filter((option) => {
+            return option.startsWith(`${value}.`);
+        });
+
+        if(remainingOptions.length == 0){
+            const oldCursor = editor.getCursor();
+
+            const newCursor:EditorPosition = structuredClone(oldCursor);
+            newCursor.ch += 2;
+
+            if(editor.getLine(newCursor.line).length < newCursor.ch|| 
+               editor.getRange(oldCursor, newCursor) != "}}")
+            {
+                editor.replaceRange("}}", oldCursor)
+            }
+            
+            editor.setCursor(newCursor);
+            
+        }
     }
 }
