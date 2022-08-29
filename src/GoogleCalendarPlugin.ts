@@ -280,6 +280,22 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "insert-google-event-template",
+			name: "Insert Google Event Template",
+			editorCallback: (editor: Editor) => {
+				editor.replaceRange(
+					"{{gEvent.}}",
+					editor.getCursor()
+				);
+
+				//Move cursor behind .
+				const cursor = editor.getCursor();
+				cursor.ch += "{{gEvent.".length;
+				editor.setCursor(cursor);
+
+			},
+		});
 		
 
 		// This adds an editor command that can perform some operation on the current editor instance

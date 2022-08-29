@@ -1,4 +1,4 @@
-import type { Editor } from "obsidian";
+import type { Editor, EditorPosition } from "obsidian";
 import type { GoogleEvent } from "./types";
 import { googleGetEvent } from "../googleApi/GoogleGetEvent";
 import _ from "lodash";
@@ -56,6 +56,14 @@ export async function checkEditorForInsertedEvents(
 
         const index = match[1] ? parseInt(match[1]) : 0;
 
+        const startCursor:EditorPosition = editor.getCursor(); 
+        startCursor.ch -= 3;
+
+        //Check that the final whitespace was just typed to trigger the insert
+        if(editor.getRange(startCursor, editor.getCursor()) != "}} "){
+			return false;
+		}
+
         let newContent = _.get(events[index], match[2], "");
         //Turn objects into json for a better display be more specific in the template
         if(newContent === Object(newContent)){
@@ -65,8 +73,6 @@ export async function checkEditorForInsertedEvents(
         fileContent = fileContent.replace(match[0],newContent??"");
 
         editor.setValue(fileContent);
-
-        console.log(editor.getLine(cursorPosition.line).length)
 
         cursorPosition.ch += (newContent.length - match[0].length);
 

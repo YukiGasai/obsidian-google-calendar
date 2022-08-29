@@ -34,11 +34,14 @@ function check4Word(
 		//Lag prevention
 		if(realLine.length >50)return false;
 
-		const match = realLine.match(/.*@([+,-])(\d+).*/) ?? [];
+		const match = realLine.match(/.*@([+,-])(\d+) /) ?? [];
 
 		if (match.length != 3) return false;
 
-		
+		//Check that the final whitespace was just typed to trigger the modal
+		if(editor.getCursor().ch != match.index + match[0].length){
+			return false;
+		}
 
 		startPos = { ...endPos, ch: endPos.ch - match[1].length - match[2].length - 1 };
 
