@@ -192,13 +192,14 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
         //Get Path to template file and check if it exists
         const templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
+ 
         if(!await adapter.exists(templateFilePath)){
-            createNotice(`Template ${templateName} doesn't exit.`)
+            createNotice(`Core Template: ${templateName} doesn't exit.`)
             return false;
         }
 
         //Get the file from the path
-        const templateFile = vault.getAbstractFileByPath((templateFilePath));
+        const templateFile = vault.getAbstractFileByPath(templateFilePath);
 
         if(!(templateFile instanceof TFile))return false;
 
@@ -207,12 +208,14 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         if(result.contains("<%") && result.contains("%>")){
             return false;
         }
-
+        
         //Insert the template by calling the command from the plugin
-
-        await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);    
-
-        return true;
+        try{
+            await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);   
+        return true; 
+        }catch{
+            return false;
+        }
     }
 
     async function insertTemplaterTemplate(){
@@ -221,30 +224,30 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     
         //Get Path to template file and check if it exists
         const templateFilePath = `${templaterFolderPath}/${templateName}`;
+  
         if(!await adapter.exists(templateFilePath)){
-            createNotice(`Template ${templateName} doesn't exit.`)
+            createNotice(`Templater Template: ${templateName} doesn't exit.`)
             return false;
         }
-    
+
         const templateFile = plugin.app.vault.getAbstractFileByPath(templateFilePath);
 
         if(!(templateFile instanceof TFile))return false;
 
         let result = await vault.read(templateFile);
 
-        result = result.replace(/({{|<%)gEvent\.([^}>]*)(}}|%>)/gm, "")
-
+        result = result.replace(/{{gEvent\.([^}>]*)}}/gm, "")
+ 
         if(result.contains("{{") && result.contains("}}")){
             return false;
         }
 
         try{
             await plugin.templaterPlugin.templater.append_template_to_active_file(templateFile);
+            return true;
         }catch{
             return false;
         }
-        
-        return true;
     }
 }
 
