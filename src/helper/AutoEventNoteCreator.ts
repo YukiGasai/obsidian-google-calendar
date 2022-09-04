@@ -153,7 +153,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         let fileContent = newLeafe.view.editor.getValue()
   
         const oldContent = fileContent;
-        const regexp = /({{|<%)gEvent\.([^}>]*)(}}|%>)/gm;
+        const regexp = /{{gEvent\.([^}>]*)}}/gm;
         let matches;
         const output = [];
         do {
@@ -164,7 +164,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         output.forEach(match => {
             if(match){
 
-                let newContent = _.get(event, match[2], "");
+                let newContent = _.get(event, match[1], "");
                 
                 //Turn objects into json for a better display be more specific in the template
                 if(newContent === Object(newContent)){
@@ -178,7 +178,6 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         if(fileContent !== oldContent) {
             newLeafe.view.editor.setValue(fileContent)
         }
-
     }
     
     if(!plugin.settings.autoCreateEventKeepOpen){
@@ -191,8 +190,11 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         const coreTemplateFolderPath = normalizePath(plugin.coreTemplatePlugin.instance.options.folder);
 
         //Get Path to template file and check if it exists
-        const templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
- 
+        let templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
+        if(coreTemplateFolderPath === "/"){
+            templateFilePath = templateName;
+        }
+
         if(!await adapter.exists(templateFilePath)){
             createNotice(`Core Template: ${templateName} doesn't exit.`)
             return false;
@@ -219,12 +221,14 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     }
 
     async function insertTemplaterTemplate(){
-   
+        //Get the folder where the templates are stored from the template plugin
         const templaterFolderPath = normalizePath(plugin.templaterPlugin.settings.templates_folder);
-    
+
         //Get Path to template file and check if it exists
-        const templateFilePath = `${templaterFolderPath}/${templateName}`;
-  
+        let templateFilePath = `${templaterFolderPath}/${templateName}`;
+        if(templaterFolderPath === "/"){
+            templateFilePath = templateName;
+        }
         if(!await adapter.exists(templateFilePath)){
             createNotice(`Templater Template: ${templateName} doesn't exit.`)
             return false;
