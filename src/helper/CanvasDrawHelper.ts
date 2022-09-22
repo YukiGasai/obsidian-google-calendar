@@ -5,7 +5,7 @@ import type { GoogleEvent } from "./types";
  * @param date to convert
  * @returns time of day as a number between 0 and 1
  */
- export function DateToPercent(date: Date): number {
+ export function dateToPercent(date: Date): number {
 	return date.getHours() / 24 + date.getMinutes() / (60 * 24);
 }
 
@@ -28,7 +28,7 @@ export function getEventStartPosition(
 		return 0;
 	}
 	
-	const startPercentage = DateToPercent(new Date(event.start.dateTime));
+	const startPercentage = dateToPercent(new Date(event.start.dateTime));
 	return timeLineHeight * startPercentage;
 }
 
@@ -49,7 +49,7 @@ export function getEventHeight(
 		return 25;
 	}
 
-	const startPercentage = DateToPercent(new Date(event.start.dateTime));
-	const endPercentage = DateToPercent(new Date(event.end.dateTime));
+	const startPercentage = dateToPercent(new Date(event.start.dateTime));
+	const endPercentage = dateToPercent(new Date(event.end.dateTime));
 	return timeLineHeight * (endPercentage - startPercentage);
 }

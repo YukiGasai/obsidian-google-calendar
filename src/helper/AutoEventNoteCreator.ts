@@ -102,7 +102,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     }
 
     //Create file with no content
-    const File = await vault.create(filePath, '');
+    const file = await vault.create(filePath, '');
     createNotice(`EventNote ${event.summary} created.`)
 
     //check if the template plugin is active
@@ -121,11 +121,11 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     };
 
     //Open file in active panel needed to insert template
-    const newLeafe = await app.workspace.getLeaf(true)
-    await newLeafe.setViewState({type: "MarkdownView"})
-    await app.workspace.setActiveLeaf(newLeafe, false, true)
+    const newLeaf = await app.workspace.getLeaf(true)
+    await newLeaf.setViewState({type: "MarkdownView"})
+    await app.workspace.setActiveLeaf(newLeaf, false, true)
 
-    await newLeafe.openFile(File, editModeState);
+    await newLeaf.openFile(file, editModeState);
     
     if(plugin.templaterPlugin && plugin.coreTemplatePlugin){
         const wasInserted = await insertTemplaterTemplate();
@@ -148,9 +148,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     }
 
 
-    if(newLeafe.view instanceof MarkdownView){
+    if(newLeaf.view instanceof MarkdownView){
 
-        let fileContent = newLeafe.view.editor.getValue()
+        let fileContent = newLeaf.view.editor.getValue()
   
         const oldContent = fileContent;
         const regexp = /{{gEvent\.([^}>]*)}}/gm;
@@ -176,12 +176,12 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         })
 
         if(fileContent !== oldContent) {
-            newLeafe.view.editor.setValue(fileContent)
+            newLeaf.view.editor.setValue(fileContent)
         }
     }
     
     if(!plugin.settings.autoCreateEventKeepOpen){
-        newLeafe.detach();
+        newLeaf.detach();
     }
 
 
@@ -205,7 +205,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
         if(!(templateFile instanceof TFile))return false;
 
-        const result = await vault.read(templateFile);
+        const result = await vault.cachedRead(templateFile);
 
         if(result.contains("<%") && result.contains("%>")){
             return false;
@@ -238,7 +238,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
         if(!(templateFile instanceof TFile))return false;
 
-        let result = await vault.read(templateFile);
+        let result = await vault.cachedRead(templateFile);
 
         result = result.replace(/{{gEvent\.([^}>]*)}}/gm, "")
  

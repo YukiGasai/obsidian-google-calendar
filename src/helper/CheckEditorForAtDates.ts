@@ -12,14 +12,14 @@ export function checkEditorForAtDates(
 	editor: Editor,
 ): void {
 	// Run functions until one of the functions returns true to stop the chain.
-	check4Word("@today", editor) ||
-	check4Word("@tomorrow", editor) ||
-	check4Word("@yesterday", editor) ||
-	check4Word("@REGEX", editor) ||
-	check4Word("@YYYY-MM-DD", editor);
+	checkForWord("@today", editor) ||
+	checkForWord("@tomorrow", editor) ||
+	checkForWord("@yesterday", editor) ||
+	checkForWord("@REGEX", editor) ||
+	checkForWord("@YYYY-MM-DD", editor);
 }
 
-function check4Word(
+function checkForWord(
 	word: string,
 	editor: Editor
 ): boolean {

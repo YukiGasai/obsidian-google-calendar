@@ -3,7 +3,7 @@
     import type { GoogleEvent } from "../helper/types";
 
     import TreeMap from 'ts-treemap'
-    import { DateToPercent } from "../helper/CanvasDrawHelper";
+    import { dateToPercent } from "../helper/CanvasDrawHelper";
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
     import { googleClearCachedEvents, googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
@@ -32,7 +32,7 @@
 
     const refeshData = async () => {
         await getEvents()
-        const dayPercentage = DateToPercent(new Date());
+        const dayPercentage = dateToPercent(new Date());
         timeDisplayPosition = Math.floor(height * dayPercentage);
     } 
 

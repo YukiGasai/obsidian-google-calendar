@@ -17,15 +17,11 @@ if(!date.isValid()){
 
 const domReady = () => {
   frame.insertCSS(`
-    .K36rb .QQYuzf {
-      margin-left: -256px;
-    }
-    .KMkTad .QQYuzf {
-      display: none;
+    html body div div div div {
+        margin-left: -256px;
     }
   `);
 }
-
 
 </script>
 

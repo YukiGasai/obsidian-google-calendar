@@ -83,20 +83,25 @@ export async function checkEditorForCodeBlocks(
 	el.style.width = blockWidth + "px";
 	el.style.height = blockHeight + "px";
 
+
+	const momentFormatArray = [
+		"YYYY-MM-DD",
+		"YYYY.MM.DD",
+		"YYYY/MM/DD",
+		"MM-DD-YYYY",
+		"MM.DD.YYYY",
+		"MM/DD/YYYY",
+		"DD-MM-YYYY",
+		"DD.MM.YYYY",
+		"DD/MM/YYYY"
+	]
+
 	if (
 		blockDateString == undefined ||
 		blockDateString == "today" ||
-		blockDateString == "tomorrow" ||
+		blockDateString == "tomorrow" || 
 		blockDateString == "yesterday" ||
-		window.moment(blockDateString, "YYYY-MM-DD", true).isValid() ||
-		window.moment(blockDateString, "YYYY.MM.DD", true).isValid() ||
-		window.moment(blockDateString, "YYYY/MM/DD", true).isValid() ||
-		window.moment(blockDateString, "MM-DD-YYYY", true).isValid() ||
-		window.moment(blockDateString, "MM.DD.YYYY", true).isValid() ||
-		window.moment(blockDateString, "MM/DD/YYYY", true).isValid() ||
-		window.moment(blockDateString, "DD-MM-YYYY", true).isValid() ||
-		window.moment(blockDateString, "DD.MM.YYYY", true).isValid() ||
-		window.moment(blockDateString, "DD/MM/YYYY", true).isValid()
+		window.moment(blockDateString, momentFormatArray, true).isValid()
 	) {
 		let blockDate:moment.Moment;
 
