@@ -1,5 +1,5 @@
 
-# Obsidian Google Calendar
+# Google Calendar
 
 Manage your Google Calendar from inside Obsidian
 
@@ -14,7 +14,7 @@ Manage your Google Calendar from inside Obsidian
 
 ## Installation
 
--   Download obsidian-google-calendar from the latest [release](https://github.com/YukiGasai/obsidian-google-calendar/releases/)
+-   Download google-calendar from the latest [release](https://github.com/YukiGasai/obsidian-google-calendar/releases/)
 -   Extract zip into `.obsidian/plugins` folder
 -   Restart Obsidian
 -   Activate inside the obsidian settings page
