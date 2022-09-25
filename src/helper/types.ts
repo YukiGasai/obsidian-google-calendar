@@ -17,6 +17,14 @@ export interface GoogleCalendarPluginSettings {
 	importEndOffset: number,
 	defaultCalendar: string,
 	calendarBlackList: [string, string][];
+	insertTemplates: Template[];
+}
+
+export interface Template {
+	name: string,
+	insertType: string,
+	calendarList: string[], //Ids of calendars
+	tableOptions: string[], //Object paths from event
 }
 
 export interface GoogleCalendar {

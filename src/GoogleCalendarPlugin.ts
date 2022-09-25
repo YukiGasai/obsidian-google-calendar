@@ -37,6 +37,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	importEndOffset: 1,
 	defaultCalendar: "",
 	calendarBlackList: [],
+	insertTemplates: [],
 };
 
 export default class GoogleCalendarPlugin extends Plugin {

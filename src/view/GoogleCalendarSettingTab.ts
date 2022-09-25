@@ -1,3 +1,4 @@
+import type { Template } from "../helper/types";
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import {
@@ -226,6 +227,29 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			);
 			await this.plugin.saveSettings();
 		});
+
+		const templateList:Template[] = this.plugin.settings.insertTemplates;
+		if(templateList.length) {
+			new Setting(containerEl).setName("Saved Templates");
+			
+
+			templateList.forEach((template:Template) => {
+				const setting = new Setting(containerEl)
+					.setClass("SubSettings")
+					.setName(template.name)
+					.addButton((button) => {
+						button.setButtonText("Remove");
+						button.onClick(async () => {
+							this.plugin.settings.insertTemplates.remove(template);
+							setting.settingEl.remove();
+							await this.plugin.saveSettings();
+						});
+					});
+			});
+		}
+
+
+
 
 		if(settingsAreCompleteAndLoggedIn()){
 
