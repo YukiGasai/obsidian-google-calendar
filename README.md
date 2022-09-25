@@ -74,7 +74,7 @@ A schedule view to see all your event in a order
 | Open Google Calendar month view|     Opens the month/calendar view|
 | Open Google Calendar day view|       Opens the day/timeline view|
 | Open Google Calendar schedule view|  Opens the schedule view|
-| Insert todays Google Events|         Inserts todays events into the active file as a table |
+| Insert Google Events|                Inserts events into the active file as a table or list |
 | Insert Google Event CodeBlock|       Inserts a codeblock into the active file to display the 3 views  |
 | Insert Google Event Template|        Inserst a template string into the active file to insert event information |
 | List Google Events|                  Opens a dropdown to view todays events |

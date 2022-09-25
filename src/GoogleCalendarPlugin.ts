@@ -20,6 +20,7 @@ import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
 import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
 import { TemplateSuggest } from "./helper/TemplateSuggest";
+import { InsertEventsModal } from "./modal/InsertEventsModal";
 
 
 
@@ -297,11 +298,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 		
-
-		// This adds an editor command that can perform some operation on the current editor instance
+		/**
+		* This function will list all events of a day you can choose eventst to insert and decide if you want a list or a table
+		* as a table and inset the table into the currently open editor using the markdown format
+		* This functions is used to save your events into a static field creating a backup of the day independent from the API
+		*/	
 		this.addCommand({
-			id: "insert-todays-google-events",
-			name: "Insert todays Google events",
+			id: "insert-google-events",
+			name: "Insert Google events",
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor
@@ -315,8 +319,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 				if (!canRun) {
 					return;
 				}
-
-				insertTodayEventsIntoFile(editor);
+			
+				new InsertEventsModal(editor).open();
+			
 			},
 		});
 
