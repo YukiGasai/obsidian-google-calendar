@@ -147,6 +147,7 @@
 	.scheduleContent {
 		display: flex;
 		flex-direction: column;
+        align-items: flex-start;
 		white-space: nowrap;
 	}
 
@@ -154,6 +155,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: flex-start;
+        justify-content: flex-start;
 		border-bottom: 1px solid white;
 		margin: 2px 0px;
 		padding: 2px 0px;
@@ -237,7 +239,7 @@
 		text-align: center;
 		line-height: 30px;
 		font-size: 30px;
-		color: white;
+		color: rgb(164, 164, 164);
 		white-space: nowrap;
 	}
 
