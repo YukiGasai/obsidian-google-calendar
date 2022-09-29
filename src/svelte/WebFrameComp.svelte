@@ -50,26 +50,9 @@ const domReady = () => {
 
 
 <style>
-    .box {
-        position: relative;
-        width:    100%;
-    }
-
-    .box:before {
-        content:     "";
-        display:     block;
-        padding-top: 100%;
-    }
-
-    .content {
-        position: absolute;
-        top:      0;
-        left:     0;
-        bottom:   0;
-        right:    0;
-    }
-
-    .fullSize{
+    .fullSize,
+    .content,
+    .box{
         width:100%;
         height: 100%;
         overflow: scoll !important;

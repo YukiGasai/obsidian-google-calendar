@@ -8,8 +8,8 @@
     import { onDestroy } from "svelte";
 
     export let displayedMonth = window.moment();
-    export let width:number = 400;
-    export let height:number = 400;
+    export let width:number = 0;
+    export let height:number = 0;
 
     let interval;
     let events: GoogleEvent[];
@@ -73,27 +73,43 @@
 
 </script>
 
+{#if width==0 || height == 0}
+    <div class="calendarContainer" >
+        {#if loading}
+            <p>Loading...</p>
+        {:else} 
 
-<div 
-    class="calendarContainer" 
-    style:width="{width}px" 
-    style:height="{height}px">
+            <div>
+                <CalendarBase
+                    showWeekNums={false}
+                    {onClickDay}
+                    bind:sources
+                    bind:displayedMonth
+                />
+            </div>
+        {/if}
+    </div>
+{:else}
+    <div 
+        class="calendarContainer" 
+        style:width="{width}px" 
+        style:height="{height}px"
+        >
+        {#if loading}
+            <p>Loading...</p>
+        {:else} 
     
-    {#if loading}
-        <p>Loading...</p>
-    {:else} 
-   
-        <div>
-            <CalendarBase
-                showWeekNums={false}
-                {onClickDay}
-                bind:sources
-                bind:displayedMonth
-            />
-        </div>
-    {/if}
-</div>
-
+            <div>
+                <CalendarBase
+                    showWeekNums={false}
+                    {onClickDay}
+                    bind:sources
+                    bind:displayedMonth
+                />
+            </div>
+        {/if}
+    </div>
+{/if}
 
 <style>
 

@@ -98,8 +98,6 @@
             <div class="scheduleContent">
             {#each [...days] as [key, events]}
                 <div class="dayContainer">
-
-
                     <div class="dateDisplay">
                         <div 
                         on:click="{()=>goToDaySelect(events[0])}"
@@ -129,10 +127,6 @@
                         </div>
                         {/each}
                     </div>
-
-
-
-
                 </div>
             {/each}
             </div>

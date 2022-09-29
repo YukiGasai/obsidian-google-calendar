@@ -124,8 +124,8 @@ export async function checkEditorForCodeBlocks(
 			if (Platform.isDesktopApp) {
 				ctx.addChild(
 					new SvelteBuilder(WebFrameComp, el, {
-						height: blockHeight,
-						width: blockWidth,
+						height: blockHeight ?? 500,
+						width: blockWidth ?? 500,
 						date: blockDate,
 					})
 				);

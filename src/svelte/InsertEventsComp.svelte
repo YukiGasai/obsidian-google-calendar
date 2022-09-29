@@ -5,7 +5,6 @@
 	import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 	import { GoogleEventSuggestionList } from "../helper/GoogleEventSuggestionList";
 	import { googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
-	import { settings } from "cluster";
 	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 	import { AskNameModal } from "../modal/AskNameModal";
 	import { createNotice } from "../helper/NoticeHelper";
