@@ -1,4 +1,4 @@
-import type { GoogleCalendarPluginSettings } from "./helper/types";
+import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
 import { Editor, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
@@ -6,14 +6,13 @@ import {
 } from "./view/GoogleCalendarSettingTab";
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
-import { googleClearCachedEvents, googleListTodayEvents } from "./googleApi/GoogleListEvents";
+import { googleClearCachedEvents, googleListEvents } from "./googleApi/GoogleListEvents";
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { insertTodayEventsIntoFile } from "./helper/InsertTodayEventsIntoFile";
 import { getRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
@@ -21,6 +20,7 @@ import { EventDetailsModal } from "./modal/EventDetailsModal";
 import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
 import { TemplateSuggest } from "./helper/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
+import { GoogleCalendarPluginApi } from "./helper/GoogleCalendarPluginApi";
 
 
 
@@ -48,6 +48,7 @@ export default class GoogleCalendarPlugin extends Plugin {
         return GoogleCalendarPlugin.instance;
     }
 
+	api: IGoogleCalendarPluginApi;
 
 	settings: GoogleCalendarPluginSettings;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,7 +92,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 	async onload(): Promise<void> {
 
 		GoogleCalendarPlugin.instance = this;
-
+		this.api = new GoogleCalendarPluginApi().make();
 		await this.loadSettings();
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
@@ -245,7 +246,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListTodayEvents().then((events) => {
+				googleListEvents().then((events) => {
 					new EventListModal(events).open()
 				});
 			},

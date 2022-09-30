@@ -272,3 +272,10 @@ export interface EventCacheValue {
 	events: GoogleEvent[];
 	updated: moment.Moment;
 }
+
+export interface IGoogleCalendarPluginApi {
+	getEvent: (id:string, calendarId:string) => Promise<GoogleEvent>,
+	getEvents: (start?:moment.Moment, end?:moment.Moment) => Promise<GoogleEvent[]>,
+	getCalendars: () => Promise<GoogleCalendar[]>,
+	getEventsFromCalendar: (calendar:GoogleCalendar, start?:moment.Moment, end?:moment.Moment) => Promise<GoogleEvent[]>,
+}

@@ -9,7 +9,7 @@ import type { GoogleEvent } from "../helper/types";
  * @param calendarId The id of the calendar the event is in
  * @returns The found Event
  */
- export async function googleGetEvent(eventId: string, calendarId: string): Promise<GoogleEvent> {
+ export async function googleGetEvent(eventId: string, calendarId?: string): Promise<GoogleEvent> {
 	const plugin = GoogleCalendarPlugin.getInstance();
 
 	const updateResponse = await requestUrl({

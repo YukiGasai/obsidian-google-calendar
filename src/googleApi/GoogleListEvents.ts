@@ -36,11 +36,15 @@ export function googleClearCachedEvents():void{
  */
 export async function googleListEventsByCalendar(
 	GoogleCalendar: GoogleCalendar,
-	date: moment.Moment,
+	date?: moment.Moment,
 	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
 	
 	const plugin = GoogleCalendarPlugin.getInstance();
+
+	if(!date){
+		date = window.moment();
+	}
 
 	//Turn dates into strings for request and caching
 	const timezone = ct.getTimezone(GoogleCalendar.timeZone);
@@ -125,10 +129,12 @@ export async function googleListEventsByCalendar(
 }
 
 export async function googleListEvents(
-	date:  moment.Moment,
+	date?:  moment.Moment,
 	endDate?: moment.Moment
 ): Promise<GoogleEvent[]> {
-
+	if(!date){
+		date = window.moment()
+	}
 	try {
 		const calendarList = await googleListCalendars();
 		let eventList: GoogleEvent[] = [];
@@ -156,19 +162,6 @@ export async function googleListEvents(
 		createNotice("Could not load google events");
 		return [];
 	}
-}
-
-export async function googleListTodayEventsByCalendar(GoogleCalendar: GoogleCalendar): Promise<GoogleEvent[]> {
-	const list = await googleListEventsByCalendar(
-		GoogleCalendar,
-		window.moment()
-	);
-	return list;
-}
-
-export async function googleListTodayEvents(): Promise<GoogleEvent[]> {
-	const list = await googleListEvents(window.moment());
-	return list;
 }
 
 export async function googleListEventsByMonth(dateInMonth: moment.Moment): Promise<GoogleEvent[]> {

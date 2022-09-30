@@ -4,7 +4,7 @@
 	import { onMount } from "svelte";
 	import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 	import { GoogleEventSuggestionList } from "../helper/GoogleEventSuggestionList";
-	import { googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
+	import { googleListEvents } from "../googleApi/GoogleListEvents";
 	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 	import { AskNameModal } from "../modal/AskNameModal";
 	import { createNotice } from "../helper/NoticeHelper";
@@ -25,7 +25,7 @@
         const totalCalendarList = await googleListCalendars();
         calendarList = totalCalendarList.map(calendar => {return [calendar, true]});
 
-        const totalEventList = await googleListTodayEvents();
+        const totalEventList = await googleListEvents();
         eventList = totalEventList.map(event => {return [event, true]});		
 
         let a = "export const GoogleEventSuggestionList = [\n";
@@ -34,7 +34,6 @@
         });
         a += "]"
 
-        console.log(a);
 	});
 
     let handleSubmit = () => {

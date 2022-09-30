@@ -2,7 +2,7 @@ import type { GoogleCalendar } from "../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
-import { googleListTodayEventsByCalendar } from "../googleApi/GoogleListEvents";
+import { googleListEventsByCalendar } from "../googleApi/GoogleListEvents";
 import { EventListModal } from "./EventListModal";
 
 /**
@@ -28,7 +28,7 @@ export class CalendarsListModal extends FuzzySuggestModal<GoogleCalendar> {
 	async onChooseItem(
 		item: GoogleCalendar
 	): Promise<void> {
-		const events = await googleListTodayEventsByCalendar(item);
+		const events = await googleListEventsByCalendar(item);
 		new EventListModal(events).open();
 	}
 }

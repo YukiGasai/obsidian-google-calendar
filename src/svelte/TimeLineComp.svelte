@@ -6,7 +6,7 @@
     import { dateToPercent } from "../helper/CanvasDrawHelper";
     import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
     
-    import { googleClearCachedEvents, googleListEvents, googleListTodayEvents } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
     import {EventDetailsModal} from '../modal/EventDetailsModal'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
     import { onDestroy } from "svelte";
