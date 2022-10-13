@@ -77,6 +77,7 @@ async function getAllEventsHelper(
 		createNotice("Could not load google events");
 		return [];
 	}
+	return totalEventList;
 }
 
 function resolveMultiDayEventsHelper(
@@ -176,6 +177,7 @@ export async function googleListEventsByCalendar(
 	}
 
 	let totalEventList: GoogleEvent[] = await getAllEventsHelper(plugin, GoogleCalendar, startString, endString);	
+
 
 
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, date, endDate); 
