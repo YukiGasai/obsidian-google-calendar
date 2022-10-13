@@ -28,12 +28,6 @@
         const totalEventList = await googleListEvents();
         eventList = totalEventList.map(event => {return [event, true]});		
 
-        let a = "export const GoogleEventSuggestionList = [\n";
-        GoogleEventSuggestionList.sort().forEach(r => {
-            a += `, "${r}"\n`
-        });
-        a += "]"
-
 	});
 
     let handleSubmit = () => {

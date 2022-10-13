@@ -24,7 +24,7 @@ export function getEventStartPosition(
 	event: GoogleEvent,
 	timeLineHeight: number
 ): number {
-	if(event.start.date){
+	if(event.start.date || event?.eventType == "multiDay"){
 		return 0;
 	}
 	
@@ -45,7 +45,7 @@ export function getEventHeight(
 	event: GoogleEvent,
 	timeLineHeight: number
 ): number {
-	if(event.start.date){
+	if(event.start.date || event?.eventType == "multiDay"){
 		return 25;
 	}
 
