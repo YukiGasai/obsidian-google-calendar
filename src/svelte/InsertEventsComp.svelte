@@ -73,7 +73,7 @@
         const totalCalendarList = await googleListCalendars();
         calendarList = totalCalendarList.map(calendar => {return [calendar, true]});
 
-        const totalEventList = await googleListEvents(window.moment(e.target.value).local());
+        const totalEventList = await googleListEvents({startDate:window.moment(e.target.value).local()});
         eventList = totalEventList.map(event => {return [event, true]});	
         eventList = eventList;
     }

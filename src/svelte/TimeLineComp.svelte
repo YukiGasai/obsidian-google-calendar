@@ -101,7 +101,7 @@
             return;
         }
    
-        const newEvents = await googleListEvents(date); 
+        const newEvents = await googleListEvents({startDate:date}); 
 
         if(JSON.stringify(newEvents) != JSON.stringify(events)){
             events = newEvents;

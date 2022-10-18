@@ -80,6 +80,15 @@ export async function checkEditorForCodeBlocks(
 		? parseInt(options.get("timespan"))
 		: undefined;
 
+	const include = options.has("include")
+		? JSON.parse(options.get("include"))
+		: undefined;
+
+	const exclude = options.has("exclude")
+		? JSON.parse(options.get("exclude"))
+		: undefined;
+
+
 	el.style.width = blockWidth + "px";
 	el.style.height = blockHeight + "px";
 
@@ -155,6 +164,8 @@ export async function checkEditorForCodeBlocks(
 				new SvelteBuilder(ScheduleComp, el, {
 					timeSpan: timeSpan,
 					date: blockDate,
+					include: include,
+					exclude: exclude
 				})
 			);
 		}

@@ -10,13 +10,21 @@
     
     export let timeSpan = 7;
     export let date = window.moment();
+    export let include;
+    export let exclude;
+    
     let interval;
     let days: Map<string, GoogleEvent[]> = new Map();
     let loading = false;
     let events = [];
-
+    console.log(include);
     const getEvents = async () => {
-        const newEvents = await googleListEvents(date, date.clone().add(timeSpan, "day"));
+        const newEvents = await googleListEvents({
+                startDate:date,
+                endDate:date.clone().add(timeSpan, "day"),
+                include,
+                exclude
+            });
 
         //only reload if events change
         if(JSON.stringify(newEvents) == JSON.stringify(events)){
@@ -62,7 +70,7 @@
 
     const goToDaySelect = async (event:GoogleEvent) => {
         const clickedDate = window.moment(event.start.date || event.start.dateTime);
-        const events = await googleListEvents(clickedDate);
+        const events = await googleListEvents({startDate:clickedDate});
         new EventListModal(events, clickedDate, false, () => {
             googleClearCachedEvents();
             date = date;

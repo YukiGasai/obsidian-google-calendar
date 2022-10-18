@@ -65,7 +65,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 			if(dateUpdated){
 				this.setPlaceholder("Loading");
-				this.eventList = await googleListEvents(currentDate);
+				this.eventList = await googleListEvents({startDate:currentDate});
 				this.inputEl.dispatchEvent(new Event('input'));
 				this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left and right to switch day`);
 			}

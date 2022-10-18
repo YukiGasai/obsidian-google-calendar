@@ -95,7 +95,7 @@ function checkForWord(
 
 	}
 
-	googleListEvents(date).then((events) => {
+	googleListEvents({startDate:date}).then((events) => {
 		new EventSelectReplaceModal(
 			events,
 			editor,

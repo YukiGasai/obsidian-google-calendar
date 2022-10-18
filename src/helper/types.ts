@@ -15,7 +15,7 @@ export interface GoogleCalendarPluginSettings {
 	autoCreateEventKeepOpen: boolean,
 	importStartOffset: number,
 	importEndOffset: number,
-	defaultCalendar: string,
+defaultCalendar: string,
 	calendarBlackList: [string, string][];
 	insertTemplates: Template[];
 }
@@ -273,9 +273,16 @@ export interface EventCacheValue {
 	updated: moment.Moment;
 }
 
+export interface ListOptions {
+	startDate?: moment.Moment;
+	endDate?: moment.Moment;
+	singleCalendar?: GoogleCalendar;
+	exclude?: string[];
+	include?: string[];
+}
+
 export interface IGoogleCalendarPluginApi {
 	getEvent: (id:string, calendarId:string) => Promise<GoogleEvent>,
-	getEvents: (start?:moment.Moment, end?:moment.Moment) => Promise<GoogleEvent[]>,
+	getEvents: (input:ListOptions) => Promise<GoogleEvent[]>,
 	getCalendars: () => Promise<GoogleCalendar[]>,
-	getEventsFromCalendar: (calendar:GoogleCalendar, start?:moment.Moment, end?:moment.Moment) => Promise<GoogleEvent[]>,
 }

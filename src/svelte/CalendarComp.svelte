@@ -4,7 +4,7 @@
     
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
-    import { googleClearCachedEvents, googleListEvents, googleListEventsByMonth } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
 
     export let displayedMonth = window.moment();
@@ -23,7 +23,7 @@
         const nextMonthDate = month.clone().add(1, "month").endOf("month");
 
 
-        const eventsInMonth = await googleListEvents(prevMonthDate, nextMonthDate);    
+        const eventsInMonth = await googleListEvents({startDate:prevMonthDate, endDate:nextMonthDate});    
 
 
 

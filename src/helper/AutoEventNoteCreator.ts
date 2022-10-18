@@ -36,7 +36,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
     const endDate = window.moment().local().add(endOffset, "day")
 
     //get all events in the import time range
-    const events = await googleListEvents(startDate, endDate);
+    const events = await googleListEvents({startDate, endDate});
 
     // check every event from the trigger text :obsidian:
 
