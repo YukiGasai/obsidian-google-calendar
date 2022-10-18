@@ -4,7 +4,7 @@
     
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
-    import { googleClearCachedEvents, googleListEventsByMonth } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, googleListEvents, googleListEventsByMonth } from "../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
 
     export let displayedMonth = window.moment();
@@ -17,9 +17,18 @@
     let sources:ICalendarSource[];
     
     async function getSource(month:moment.Moment) {
-          const eventsInMonth = await googleListEventsByMonth(month);    
-          events = eventsInMonth;
-          const customTagsSource: ICalendarSource = {
+
+        
+        const prevMonthDate = month.clone().subtract(1, "month").startOf("month");
+        const nextMonthDate = month.clone().add(1, "month").endOf("month");
+
+
+        const eventsInMonth = await googleListEvents(prevMonthDate, nextMonthDate);    
+
+
+
+        events = eventsInMonth;
+        const customTagsSource: ICalendarSource = {
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
               
                 const eventsOfTheDay = getEventsOfDay(eventsInMonth, day);
