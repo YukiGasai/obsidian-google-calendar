@@ -286,3 +286,21 @@ export interface IGoogleCalendarPluginApi {
 	getEvents: (input:ListOptions) => Promise<GoogleEvent[]>,
 	getCalendars: () => Promise<GoogleCalendar[]>,
 }
+
+export enum CodeBlockTypes {
+	web = "web",
+	month = "month",
+	day = "day",
+	schedule = "schedule",
+}
+
+export interface CodeBlockOptions {
+	type?: CodeBlockTypes;
+	date?: string;
+	width?: number;
+	height?: number;
+	navigation?: boolean;
+	timespan?: number;
+	include?: string[];
+	exclude?: string[];
+}

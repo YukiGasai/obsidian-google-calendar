@@ -10,6 +10,8 @@
     export let displayedMonth = window.moment();
     export let width:number = 0;
     export let height:number = 0;
+    export let include;
+    export let exclude;
 
     let interval;
     let events: GoogleEvent[];
@@ -23,8 +25,12 @@
         const nextMonthDate = month.clone().add(1, "month").endOf("month");
 
 
-        const eventsInMonth = await googleListEvents({startDate:prevMonthDate, endDate:nextMonthDate});    
-
+        const eventsInMonth = await googleListEvents({
+            startDate:prevMonthDate,
+            endDate:nextMonthDate,
+            include,
+            exclude
+        });    
 
 
         events = eventsInMonth;

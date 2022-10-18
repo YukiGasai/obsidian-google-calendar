@@ -53,20 +53,17 @@ export async function googleListEvents(
 
 	//Get all calendars not on the black list
 	let calendarList = await googleListCalendars();
-
+	
 	//Get the list of calendars that should be querried
 	if(includedCalendars && includedCalendars.length){
 		calendarList = calendarList.filter((calendar:GoogleCalendar) => 
-			(includedCalendars.some((calendarId:string) => calendarId == calendar.id.toLowerCase() ) ||
-			 includedCalendars.some((calendarId:string) => calendarId == calendar.summary.toLowerCase() ) )
+			(includedCalendars.contains(calendar.id) || includedCalendars.contains(calendar.summary))
 		);		
 	}else if(excludedCalendars && excludedCalendars.length){
 		calendarList = calendarList.filter((calendar:GoogleCalendar) => 
-			!(excludedCalendars.some((calendarId:string) => calendarId == calendar.id.toLowerCase() ) ||
-			  excludedCalendars.some((calendarId:string) => calendarId == calendar.summary.toLowerCase() ) )
+			!(excludedCalendars.contains(calendar.id) || excludedCalendars.contains(calendar.summary))
 		);		
 	}
-
 
 	//Get Events from calendars
 	let eventList:GoogleEvent[] = []

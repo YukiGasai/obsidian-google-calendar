@@ -17,14 +17,14 @@
     let days: Map<string, GoogleEvent[]> = new Map();
     let loading = false;
     let events = [];
-    console.log(include);
+
     const getEvents = async () => {
         const newEvents = await googleListEvents({
-                startDate:date,
-                endDate:date.clone().add(timeSpan, "day"),
-                include,
-                exclude
-            });
+            startDate:date,
+            endDate:date.clone().add(timeSpan, "day"),
+            include,
+            exclude
+        });
 
         //only reload if events change
         if(JSON.stringify(newEvents) == JSON.stringify(events)){

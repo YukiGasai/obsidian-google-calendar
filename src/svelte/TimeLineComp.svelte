@@ -23,6 +23,8 @@
     export let height = 700;
     export let width = 300;
     export let date = window.moment();
+    export let include;
+    export let exclude;
 
     let loading = true;
     let timeDisplayPosition = 0;
@@ -101,7 +103,11 @@
             return;
         }
    
-        const newEvents = await googleListEvents({startDate:date}); 
+        const newEvents = await googleListEvents({
+            startDate:date,
+            include,
+            exclude
+        }); 
 
         if(JSON.stringify(newEvents) != JSON.stringify(events)){
             events = newEvents;

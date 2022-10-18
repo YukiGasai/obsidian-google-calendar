@@ -277,7 +277,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Insert Google Event CodeBlock",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
-					"```gEvent\ndate:"+window.moment().format("YYYY-MM-DD")+"\ntype:day\n```",
+					"```gEvent\ndate: "+window.moment().format("YYYY-MM-DD")+"\ntype: day\n```",
 					editor.getCursor()
 				);
 			},

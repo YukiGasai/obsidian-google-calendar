@@ -59,6 +59,7 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 		return calendars;
 	} catch (error) {
 		createNotice("Could not load google calendars");
+		console.log(error)
 		return [];
 	}
 }
