@@ -17,9 +17,11 @@
     let events: GoogleEvent[];
     let loading: boolean = true;
     let sources:ICalendarSource[];
+    let today = window.moment();
     
     async function getSource(month:moment.Moment) {
 
+        today = window.moment();
         
         const prevMonthDate = month.clone().subtract(1, "month").startOf("month");
         const nextMonthDate = month.clone().add(1, "month").endOf("month");
@@ -78,7 +80,7 @@
         if(interval){
             clearInterval(interval);
         }
-        interval = setInterval(() => getSource(displayedMonth), 5000)
+        interval = setInterval(() => getSource(displayedMonth), 10000)
         getSource(displayedMonth)
 
     }
@@ -100,6 +102,7 @@
                     {onClickDay}
                     bind:sources
                     bind:displayedMonth
+                    bind:today
                 />
             </div>
         {/if}
@@ -120,6 +123,7 @@
                     {onClickDay}
                     bind:sources
                     bind:displayedMonth
+                    bind:today
                 />
             </div>
         {/if}

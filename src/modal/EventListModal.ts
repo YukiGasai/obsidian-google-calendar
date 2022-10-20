@@ -21,11 +21,11 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		closeFunction?: () => void
 		) {
 		super(GoogleCalendarPlugin.getInstance().app);
-		this.eventList = eventList;
+		this.eventList = [...eventList];
 		this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left/right to switch day`);
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
-		this.currentDate = currentDate;
+		this.currentDate = currentDate.clone();
 		if(closeFunction){
 			this.closeFunction = closeFunction
 		}
@@ -65,9 +65,9 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 			if(dateUpdated){
 				this.setPlaceholder("Loading");
-				this.eventList = await googleListEvents({startDate:currentDate});
+				this.eventList = await googleListEvents({startDate:this.currentDate});
 				this.inputEl.dispatchEvent(new Event('input'));
-				this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left and right to switch day`);
+				this.setPlaceholder(`${this.currentDate.format("MM/DD/YYYY")} Arrow left and right to switch day`);
 			}
 		})
 	}
