@@ -14,10 +14,17 @@ Manage your Google Calendar from inside Obsidian
 
 ## Installation
 
--   Download google-calendar from the latest [release](https://github.com/YukiGasai/obsidian-google-calendar/releases/)
--   Extract zip into `.obsidian/plugins` folder
--   Restart Obsidian
--   Activate inside the obsidian settings page
+-   One click install from [comunity plugin store](obsidian://show-plugin?id=google-calendar)
+-   Go to settigns and activate plugin
+-   Go into plugin settings
+-   To *test* the plugin set `Use own authentication client` to false
+-   Press Login and authenticate with google
+
+
+The function to use a public OAuth client is in beta and could be removed at any time.
+
+
+### Create a own OAuth client (its easy)
 -   [Create Google Cloud Project](https://console.cloud.google.com/projectcreate?)
 -   [Activate Google Calendar API](https://console.cloud.google.com/marketplace/product/google/calendar-json.googleapis.com)
 -   [Configure OAUTH screen](https://console.cloud.google.com/apis/credentials/consent?)
@@ -29,11 +36,11 @@ Manage your Google Calendar from inside Obsidian
     -   select Webclient
     -   add `http://127.0.0.1:42813` as Javascript origin
     -   add `http://127.0.0.1:42813/callback` as redirect URI
+-   Switch on `Use own authentication client` in the settings tab
 -   add the keys into the fields under the plugin settings
 -   Press Login
 
-
-### Using the plugin on Mobile (work around)
+### Using the plugin on Mobile with own client (work around)
 
 -   Login on a desktop device
 -   Use the `Copy Google Refresh Token to Clipboard` command on that device
@@ -90,7 +97,7 @@ Refrence Google Calendar events inside text by typing @today or @01.01.2022 then
 Other Options are @tomorrow, @yesterday, @+1 @-1 
 
 ### CodeBlock
-This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day view inside file
+This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day and schedule view inside file. To options are parsed with yaml. 
 
 #### Parameters
 ```
@@ -101,6 +108,8 @@ This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day view 
         height: number  optional
         navigation: boolean optional only for timeline view
         timespan: number optional only for schedule view
+        include: [list of calendar ids or names]
+        exclude: [list of calendar ids or names]
     ```
 ```
 

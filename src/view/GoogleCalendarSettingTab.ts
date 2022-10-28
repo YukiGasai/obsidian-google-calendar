@@ -10,9 +10,10 @@ import {
 	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
+import { getAccessToken, getRefreshToken, getToken, setAccessToken, setExpirationTime, setRefreshToken, setToken } from "../helper/LocalStorage";
 import { customSetting } from "src/helper/CustomSettingElement";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+import { settings } from "cluster";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -29,6 +30,24 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 		containerEl.createEl("h2", { text: "Settings for Google Calendar" });
 		containerEl.createEl("h4", { text: "Please restart Obsidian to let changes take effect"})
+
+
+		
+		new Setting(containerEl)
+			.setName("Use own authentication client")
+			.setDesc("Please create your own client.")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.useCustomClient)
+					.onChange(async (value) => {
+						this.plugin.settings.useCustomClient = value;
+						await this.plugin.saveSettings();
+						this.display();
+					})
+			);
+
+	if(this.plugin.settings.useCustomClient){
+
 		new Setting(containerEl)
 			.setName("ClientId")
 			.setDesc("Google client id")
@@ -139,7 +158,50 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						})
 				);
 		}
+	}else{
 
+		new Setting(containerEl)
+		.setName("Serverurl")
+		.setDesc("The url to the server where the oauth takes place")
+		.addText(text => {
+			text
+			.setValue(this.plugin.settings.googleOAuthServer)
+			.onChange(async (value) => {
+				this.plugin.settings.googleOAuthServer = value;
+				await this.plugin.saveSettings();
+			})
+		})
+
+
+		if(getRefreshToken()){
+		new Setting(containerEl)
+			.setName("Login with testclient")
+			.setDesc("This is only a testing client please create your own client")
+			.addButton(button => {
+				button
+				.setButtonText("Logout")
+				.onClick(value => {
+					setRefreshToken("");
+					setAccessToken("");
+					setExpirationTime(0);
+					setToken("");
+					this.display();
+				})
+			})
+		}else{
+		new Setting(containerEl)
+			.setName("Login with testclient")
+			.setDesc("This is only a testing client please create your own client")
+			.addButton(button => {
+				button
+				.setButtonText("Login")
+				.onClick(value => {
+					window.open(`${this.plugin.settings.googleOAuthServer}/api/google`);
+				})
+			})
+		}
+
+	}
 		new Setting(containerEl)
 		.setName("Auto create Event Notes")
 		.setDesc("Will create new notes from a event if the description contains :obsidian:")
@@ -197,18 +259,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				ImportEndSetting.value
 			);
 			await this.plugin.saveSettings();
-		});
-
-
-		new Setting(containerEl)
-		.setName("Notifications")
-		.setDesc("Show notifications of info and errors")
-		.addToggle((toggle) => {
-			toggle.setValue(this.plugin.settings.showNotice);
-			toggle.onChange(async (state) => {
-				this.plugin.settings.showNotice = state;
-				await this.plugin.saveSettings();
-			});
 		});
 
 		const RefreshIntervalInput = customSetting(
@@ -341,7 +391,7 @@ export function settingsAreComplete(showNotice = true): boolean {
 		plugin.settings.googleClientId == "" ||
 		plugin.settings.googleClientSecret == ""
 	) {
-		createNotice("Google Calendar missing settings", showNotice);
+		createNotice("Google Calendar missing settings");
 		return false;
 	}
 	return true;
@@ -371,10 +421,10 @@ export function settingsAreCorret(): boolean {
 }
 
 export function settingsAreCompleteAndLoggedIn(showNotice = true): boolean {
-	if (!settingsAreComplete(false) || getRefreshToken() == "") {
+
+	if(!getRefreshToken() || getRefreshToken() == "" || !getToken()) {
 		createNotice(
-			"Google Calendar missing settings or not logged in",
-			showNotice
+			"Google Calendar missing settings or not logged in"
 		);
 		return false;
 	}

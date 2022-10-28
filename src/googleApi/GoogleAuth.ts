@@ -30,6 +30,9 @@ const PORT = 42813
 
 
 function checkAccessTokenValid(): boolean {
+	//Check if the token exists
+	if(!getAccessToken() || getAccessToken() == "")return false;
+
 	//Check if Expiration time is not set or deafault 0
 	if(!getExpirationTime())return false;
 
@@ -39,6 +42,55 @@ function checkAccessTokenValid(): boolean {
 	//Check if Expiration time is in the past so the token is expired
 	if(getExpirationTime() < +new Date())return false;
 
+	return true;
+}
+
+
+const refreshWithCustomClient = async (plugin:GoogleCalendarPlugin): Promise<boolean>  => {
+	const refreshBody = {
+		client_id: plugin.settings.googleClientId,
+		client_secret: plugin.settings.googleClientSecret,
+		grant_type: "refresh_token",
+		refresh_token: getRefreshToken(),
+	};
+
+	const response = await requestUrl({
+		method: "POST",
+		url: "https://oauth2.googleapis.com/token",
+		body: JSON.stringify(refreshBody)
+	});
+
+	if (response.status != 200) return false;
+
+	//Save new Access token and Expiration Time
+	const tokenData = await response.json;
+	setAccessToken(tokenData.access_token);
+	setExpirationTime(+new Date() + tokenData.expires_in*1000);
+	return true;
+}
+
+
+const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<boolean>  => {
+
+	const refreshBody = {
+		refresh_token: getRefreshToken(),
+	};
+
+	const response = await requestUrl({
+		url:`${plugin.settings.googleOAuthServer}/api/google/refresh`,
+		method: "POST",
+		body: JSON.stringify(refreshBody),
+		throw: true
+	});
+
+
+
+	if (response.status != 200) return false;
+
+	//Save new Access token and Expiration Time
+	const {tokenData} = await response.json;
+	setAccessToken(tokenData.access_token);
+	setExpirationTime(+new Date() + tokenData.expires_in*1000);
 	return true;
 }
 
@@ -52,35 +104,27 @@ function checkAccessTokenValid(): boolean {
  */
 export async function getGoogleAuthToken(): Promise<string> {
 	const plugin = GoogleCalendarPlugin.getInstance();
-	if (!settingsAreCompleteAndLoggedIn()) return;
-
+	if (!settingsAreCompleteAndLoggedIn()) return "";
+	let gotRefreshToken = false;
 	//Check if the Access token is still valid
 	if (
 		checkAccessTokenValid() == false
 	) {
 		//Acceess token is no loger valid have to create a new one
 		if (getRefreshToken() != "") {
-			const refreshBody = {
-				client_id: plugin.settings.googleClientId,
-				client_secret: plugin.settings.googleClientSecret,
-				grant_type: "refresh_token",
-				refresh_token: getRefreshToken(),
-			};
 
-			const response = await requestUrl({
-				url: "https://oauth2.googleapis.com/token",
-				method: "POST",
-				contentType: "application/json",
-				body: JSON.stringify(refreshBody)
-			});
+			if(plugin.settings.useCustomClient){
 
-			//Save new Access token and Expiration Time
-			const tokenData = await response.json;
-			setAccessToken(tokenData.access_token);
-			setExpirationTime(+new Date() + tokenData.expires_in*1000);
+				gotRefreshToken = await refreshWithCustomClient(plugin);
+
+				if(gotRefreshToken == false){
+					gotRefreshToken = await refreshWithDefaultClient(plugin)
+				}
+			}else{
+				gotRefreshToken = await refreshWithDefaultClient(plugin)
+			}
 		}
 	}
-
 	return getAccessToken();
 }
 

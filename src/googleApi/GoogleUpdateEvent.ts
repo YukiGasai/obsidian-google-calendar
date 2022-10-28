@@ -1,9 +1,9 @@
 import type { GoogleEvent } from "../helper/types";
-import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import { requestUrl } from 'obsidian';
-
+import {getToken} from "../helper/LocalStorage"
 /**
  * This function can update simple properties of an event at the api.
  * If the event is recurrent is will update all it's instanced except if updateSingle is set
@@ -16,7 +16,7 @@ export async function googleUpdateEvent(
 	event: GoogleEvent,
 	updateSingle = false
 ): Promise<GoogleEvent> {
-	const plugin = GoogleCalendarPlugin.getInstance();
+	if(!settingsAreCompleteAndLoggedIn())return null;
 
 	// Use the reacurance id to update all events from a reacuring task
 	let id = event.recurringEventId ?? event.id;
@@ -30,20 +30,22 @@ export async function googleUpdateEvent(
 	const calenderId = event.parent.id;
 	delete event.parent;
 
-	try {
-		const updateResponse = await requestUrl({
-			url:`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}?key=${plugin.settings.googleApiToken}`,
-			method: "PUT",
-			contentType: "application/json",
-			headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-			body: JSON.stringify(event),
-		});
+	const updateResponse = await requestUrl({
+		url:`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}?key=${getToken()}`,
+		method: "PUT",
+		contentType: "application/json",
+		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+		body: JSON.stringify(event),
+	});
 
-		const updatedEvent = await updateResponse.json;
-
-		return updatedEvent;
-	} catch (error) {
-		createNotice("Could not delete google event");
-		return;
+	if (updateResponse.status !== 200) {
+		createNotice("Could not create Google Event");
+		return null;
 	}
+
+
+	const updatedEvent = await updateResponse.json;
+
+	return updatedEvent;
+	
 }

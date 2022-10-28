@@ -28,6 +28,7 @@
 
         //only reload if events change
         if(JSON.stringify(newEvents) == JSON.stringify(events)){
+            loading = false;
             return;
         }
         days.clear();

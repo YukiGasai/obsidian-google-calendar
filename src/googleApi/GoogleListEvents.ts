@@ -12,7 +12,8 @@ import { getGoogleAuthToken } from "./GoogleAuth";
 import { googleListCalendars } from "./GoogleListCalendars";
 import ct from 'countries-and-timezones'
 import { requestUrl } from 'obsidian';
-
+import {getToken} from "../helper/LocalStorage"
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 const cachedEvents = new Map<string, EventCacheValue>();
 
@@ -99,11 +100,6 @@ export async function googleListEvents(
 // =================== HELPER Funcitons to make to list events ===================
 // ===============================================================================
 
-
-const dateToTimeParam = (date:string, tz:string) :string => {
-	return encodeURIComponent(`${date}T00:00:00${tz}`);
-}
-
 /**
  * This function is the core of the list event function. It makes the http requests to the api and handels the pagination and error handeling
  * @param plugin 
@@ -113,56 +109,57 @@ const dateToTimeParam = (date:string, tz:string) :string => {
  * @returns 
  */
 async function requestEventsFromApi(
-	plugin: GoogleCalendarPlugin,
 	GoogleCalendar: GoogleCalendar,
 	startString: string,
 	endString: string
 ): Promise<GoogleEvent[]> {
 
+	if(!settingsAreCompleteAndLoggedIn())return [];
+
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
 	let totalEventList: GoogleEvent[] = [];
-	try {
-		do {
-			let url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
-				GoogleCalendar.id
-			)}/events`;
-			url += `?key=${plugin.settings.googleApiToken}`;
-			url += `&maxResults=${resultSizes}`;
-			url += `&singleEvents=True`;
-			url += `&orderBy=startTime`;
-			url += `&timeMin=${startString}`;
-			url += `&timeMax=${endString}`;
+	do {
+		let url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
+			GoogleCalendar.id
+		)}/events`;
+		url += `?key=${getToken()}`;
+		url += `&maxResults=${resultSizes}`;
+		url += `&singleEvents=True`;
+		url += `&orderBy=startTime`;
+		url += `&timeMin=${startString}`;
+		url += `&timeMax=${endString}`;
 
-			if (tmpRequestResult && tmpRequestResult.nextPageToken) {
-				url += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
-			}
+		if (tmpRequestResult && tmpRequestResult.nextPageToken) {
+			url += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
+		}
 
-			const response = await requestUrl({
-				url: url,
-				method: "GET",
-				contentType: "application/json",
-				headers: {
-					Authorization: "Bearer " + (await getGoogleAuthToken()),
-				},
-			});
+		const response = await requestUrl({
+			url:url,
+			method: "GET",
+			headers: {
+				Authorization: "Bearer " + (await getGoogleAuthToken()),
+			},
+		});
 
-			tmpRequestResult = await response.json;
+		if (response.status !== 200) {
+			createNotice("Could not list Google Events");
+			continue;
+		}
 
-			tmpRequestResult.items.forEach((event) => {
-				event.parent = GoogleCalendar;
-			});
 
-			const newList = tmpRequestResult.items.filter(
-				(event) => event.status != "cancelled"
-			);
-			totalEventList = [...totalEventList, ...newList];
-		} while (tmpRequestResult.items.length == resultSizes);
-	} catch (error) {
-		console.log(error);
-		createNotice("Could not load google events");
-		return [];
-	}
+		tmpRequestResult = await response.json;
+
+		tmpRequestResult.items.forEach((event) => {
+			event.parent = GoogleCalendar;
+		});
+
+		const newList = tmpRequestResult.items.filter(
+			(event) => event.status != "cancelled"
+		);
+		totalEventList = [...totalEventList, ...newList];
+	} while (tmpRequestResult.items.length == resultSizes);
+	
 	return totalEventList;
 }
 
@@ -257,7 +254,7 @@ async function googleListEventsByCalendar(
 	}
 
 	//Get the events because cache was no option
-	let totalEventList: GoogleEvent[] = await requestEventsFromApi(plugin, GoogleCalendar, startString, endString);	
+	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startString, endString);	
 
 	//Turn multi day events into multiple events
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate); 

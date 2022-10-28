@@ -1,3 +1,4 @@
+import GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 //===================
 //GETTER
 //===================
@@ -28,6 +29,27 @@ export const getExpirationTime = (): number => {
 	return parseInt(expirationTimeString, 10);
 };
 
+
+/**
+ * getToken from LocalStorage
+ * @returns googleToken
+ */
+ export const getToken = (): string => {
+	const plugin:GoogleCalendarPlugin = GoogleCalendarPlugin.getInstance();
+
+	if(plugin.settings.useCustomClient && plugin.settings.googleApiToken){
+		return plugin.settings.googleApiToken ?? "";
+	}
+
+	if(window.localStorage.getItem("googleCalendarToken") == "") {
+		return plugin.settings.googleApiToken ?? "";
+	}
+
+	return window.localStorage.getItem("googleCalendarToken") ?? "";
+
+};
+
+
 //===================
 //SETTER
 //===================
@@ -38,6 +60,7 @@ export const getExpirationTime = (): number => {
  * @returns googleAccessToken
  */
 export const setAccessToken = (googleAccessToken: string): void => {
+	if(googleAccessToken == "undefined")return;
 	window.localStorage.setItem("googleCalendarAccessToken", googleAccessToken);
 };
 
@@ -47,6 +70,7 @@ export const setAccessToken = (googleAccessToken: string): void => {
  * @returns googleRefreshToken
  */
 export const setRefreshToken = (googleRefreshToken: string): void => {
+	if(googleRefreshToken == "undefined")return;
 	window.localStorage.setItem("googleCalendarRefreshToken", googleRefreshToken);
 };
 
@@ -56,8 +80,21 @@ export const setRefreshToken = (googleRefreshToken: string): void => {
  * @returns googleExpirationTime
  */
 export const setExpirationTime = (googleExpirationTime: number): void => {
+	if(isNaN(googleExpirationTime))return;
 	window.localStorage.setItem(
 		"googleCalendarExpirationTime",
 		googleExpirationTime + ""
 	);
+};
+
+/**
+ * setToken from LocalStorage
+ * @returns googleToken
+ */
+ export const setToken = (googleToken: string): void => {
+	if(googleToken == "undefined")return;
+	window.localStorage.setItem(
+		"googleCalendarToken",
+		googleToken
+	); 
 };

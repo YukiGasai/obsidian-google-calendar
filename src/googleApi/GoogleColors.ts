@@ -8,8 +8,10 @@
  */
 
 import type { GoogleEvent } from "../helper/types";
-import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
+import {getToken} from "../helper/LocalStorage"
 import { requestUrl } from 'obsidian';
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
+import { createNotice } from "../helper/NoticeHelper";
 
 const calendarColors = new Map<string, string>();
 const eventColors    = new Map<string, string>();
@@ -20,13 +22,18 @@ const eventColors    = new Map<string, string>();
  */
 export async function getGoogleColors():Promise<void> {
 
-	const plugin = GoogleCalendarPlugin.getInstance();
+	if(!settingsAreCompleteAndLoggedIn())return;
 
 	const response = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/colors?key=${plugin.settings.googleApiToken}`,
+		url: `https://www.googleapis.com/calendar/v3/colors?key=${getToken()}`,
 		method: "GET",
 		contentType: "application/json",
 	})
+
+	if (response.status !== 200) {
+		createNotice("Could not load Google Colors");
+		return;
+	}
 
 	const colorData = response.json;
 

@@ -2,9 +2,9 @@ import type { GoogleEvent } from "../helper/types";
 
 import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
-import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { requestUrl } from 'obsidian';
-
+import {getToken} from "../helper/LocalStorage"
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 
 /**
@@ -14,7 +14,8 @@ import { requestUrl } from 'obsidian';
  * @returns The created Event
  */
 export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent> {
-	const plugin = GoogleCalendarPlugin.getInstance();
+
+	if(!settingsAreCompleteAndLoggedIn())return null;
 
 	const calenderId = event.parent.id;
 
@@ -23,19 +24,20 @@ export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent
 
 	delete event.parent;
 
-	try {
-		const updateResponse = await requestUrl({
-			url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events?key=${plugin.settings.googleApiToken}`,
-			method: "POST",
-			headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-			body: JSON.stringify(event),
-		});
+	const updateResponse = await requestUrl({
+		url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events?key=${getToken()}`,
+		method: "POST",
+		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+		body: JSON.stringify(event),
+	});
 
-		const createdEvent = await updateResponse.json;
-
-		return createdEvent;
-	} catch (error) {
-		createNotice("Could not create google event");
+	if (updateResponse.status !== 200) {
+		createNotice("Could not create Google Event");
 		return null;
 	}
+
+	const createdEvent = await updateResponse.json;
+
+	return createdEvent;
+
 }

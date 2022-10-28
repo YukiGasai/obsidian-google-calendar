@@ -1,17 +1,30 @@
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { Notice } from "obsidian";
 
+const noticeMap: Map<string, moment.Moment> = new Map();
+
 /**
- * A wrapper function around Notice to make them be able to turn of with a setting except if they are to important
+ * A wrapper function around Notice to make them be able to only show in an intervall
  * @param text The text displayed inside the Notice
- * @param showNotice A boolean to check if notice should be displayed
  */
 export function createNotice(
-	text: string,
-	showNotice = true
+	text: string
 ): void {
-	const plugin = GoogleCalendarPlugin.getInstance();
-	if (plugin.settings.showNotice && showNotice) {
+
+	const now = window.moment();
+
+	if(noticeMap.has(text)){
+
+		const lastDisplay = noticeMap.get(text);
+
+		if(lastDisplay.isBefore(now)) {
+			new Notice(text);
+			noticeMap.set(text, now.add(1, "minute"))
+		}
+		
+	}else{
 		new Notice(text);
+		noticeMap.set(text, now.add(1, "minute"))
 	}
+
 }
+

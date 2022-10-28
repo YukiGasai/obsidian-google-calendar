@@ -1,8 +1,9 @@
 import { requestUrl } from "obsidian";
 import { getGoogleAuthToken } from "./GoogleAuth";
-import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import type { GoogleEvent } from "../helper/types";
-
+import {getToken} from "../helper/LocalStorage"
+import { createNotice } from "../helper/NoticeHelper";
 /**
  * Function to get information of a single event by id
  * @param eventId The id of the event
@@ -10,13 +11,21 @@ import type { GoogleEvent } from "../helper/types";
  * @returns The found Event
  */
  export async function googleGetEvent(eventId: string, calendarId?: string): Promise<GoogleEvent> {
-	const plugin = GoogleCalendarPlugin.getInstance();
+	
+	if(!settingsAreCompleteAndLoggedIn())return null;
 
 	const updateResponse = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}?key=${plugin.settings.googleApiToken}`,
+		url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}?key=${getToken()}`,
 		method: "GET",
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
 	});
+
+	if (updateResponse.status !== 200) {
+		createNotice("Could not get Google Event");
+		return null;
+	}
+
+
 	const createdEvent = await updateResponse.json;
 	return createdEvent;
 }

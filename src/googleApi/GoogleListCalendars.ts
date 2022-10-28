@@ -5,7 +5,8 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { getGoogleColors } from "./GoogleColors";
 import { requestUrl } from 'obsidian';
-
+import {getToken} from "../helper/LocalStorage"
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 let cachedCalendars:GoogleCalendar[] = []
 
@@ -33,6 +34,8 @@ function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:Googl
  */
 export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
+	if(!settingsAreCompleteAndLoggedIn())return [];
+
 	const plugin = GoogleCalendarPlugin.getInstance();
 
 	if(cachedCalendars.length){
@@ -43,23 +46,24 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 	//Make sure the colors for calendar and events are loaded before getting the first calendar
 	await getGoogleColors();
 
-	try {
-		const response = await requestUrl({
-			url: `https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${plugin.settings.googleApiToken}`,
-			method: "GET",
-			contentType: "application/json",
-			headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-		});
-		const calendarList: GoogleCalendarList = await response.json;
 
-		cachedCalendars = calendarList.items;
+	const response = await fetch(`https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${getToken()}`,{
 
-		const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
+		method: "GET",
+	
+		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
+	});
 
-		return calendars;
-	} catch (error) {
-		createNotice("Could not load google calendars");
-		console.log(error)
+	if (response.status !== 200) {
+		createNotice("Could not list Google Calendars");
 		return [];
 	}
+
+	const calendarList: GoogleCalendarList = await response.json();
+
+	cachedCalendars = calendarList.items;
+
+	const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
+
+	return calendars;
 }
