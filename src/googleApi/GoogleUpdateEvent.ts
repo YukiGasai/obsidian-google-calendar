@@ -3,7 +3,6 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
 import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import { requestUrl } from 'obsidian';
-import {getToken} from "../helper/LocalStorage"
 /**
  * This function can update simple properties of an event at the api.
  * If the event is recurrent is will update all it's instanced except if updateSingle is set
@@ -31,7 +30,7 @@ export async function googleUpdateEvent(
 	delete event.parent;
 
 	const updateResponse = await requestUrl({
-		url:`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}?key=${getToken()}`,
+		url:`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}`,
 		method: "PUT",
 		contentType: "application/json",
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},

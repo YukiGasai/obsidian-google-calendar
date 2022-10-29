@@ -12,7 +12,7 @@ import { getGoogleAuthToken } from "./GoogleAuth";
 import { googleListCalendars } from "./GoogleListCalendars";
 import ct from 'countries-and-timezones'
 import { requestUrl } from 'obsidian';
-import {getToken} from "../helper/LocalStorage"
+
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 const cachedEvents = new Map<string, EventCacheValue>();
@@ -122,9 +122,8 @@ async function requestEventsFromApi(
 	do {
 		let url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
 			GoogleCalendar.id
-		)}/events`;
-		url += `?key=${getToken()}`;
-		url += `&maxResults=${resultSizes}`;
+		)}/events?`;
+		url += `maxResults=${resultSizes}`;
 		url += `&singleEvents=True`;
 		url += `&orderBy=startTime`;
 		url += `&timeMin=${startString}`;

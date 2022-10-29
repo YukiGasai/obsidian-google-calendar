@@ -18,6 +18,7 @@ import {
 	getAccessToken,
 	getExpirationTime,
 	getRefreshToken,
+	getUserId,
 	setAccessToken,
 	setExpirationTime,
 	setRefreshToken,
@@ -73,14 +74,14 @@ const refreshWithCustomClient = async (plugin:GoogleCalendarPlugin): Promise<boo
 const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<boolean>  => {
 
 	const refreshBody = {
-		refresh_token: getRefreshToken(),
+		uid: getUserId(),
 	};
 
 	const response = await requestUrl({
 		url:`${plugin.settings.googleOAuthServer}/api/google/refresh`,
 		method: "POST",
 		body: JSON.stringify(refreshBody),
-		throw: true
+		headers: {"Content-Type":"application/json"}
 	});
 
 
@@ -111,7 +112,7 @@ export async function getGoogleAuthToken(): Promise<string> {
 		checkAccessTokenValid() == false
 	) {
 		//Acceess token is no loger valid have to create a new one
-		if (getRefreshToken() != "") {
+		if (getRefreshToken() != "" || getUserId() != "") {
 
 			if(plugin.settings.useCustomClient){
 

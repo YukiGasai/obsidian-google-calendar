@@ -5,7 +5,6 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { getGoogleColors } from "./GoogleColors";
 import { requestUrl } from 'obsidian';
-import {getToken} from "../helper/LocalStorage"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 let cachedCalendars:GoogleCalendar[] = []
@@ -47,10 +46,8 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 	await getGoogleColors();
 
 
-	const response = await fetch(`https://www.googleapis.com/calendar/v3/users/me/calendarList?key=${getToken()}`,{
-
-		method: "GET",
-	
+	const response = await requestUrl({
+		url:`https://www.googleapis.com/calendar/v3/users/me/calendarList`,
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
 	});
 
@@ -59,7 +56,7 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 		return [];
 	}
 
-	const calendarList: GoogleCalendarList = await response.json();
+	const calendarList: GoogleCalendarList = await response.json;
 
 	cachedCalendars = calendarList.items;
 

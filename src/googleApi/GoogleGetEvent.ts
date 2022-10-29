@@ -2,7 +2,6 @@ import { requestUrl } from "obsidian";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import type { GoogleEvent } from "../helper/types";
-import {getToken} from "../helper/LocalStorage"
 import { createNotice } from "../helper/NoticeHelper";
 /**
  * Function to get information of a single event by id
@@ -15,8 +14,7 @@ import { createNotice } from "../helper/NoticeHelper";
 	if(!settingsAreCompleteAndLoggedIn())return null;
 
 	const updateResponse = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}?key=${getToken()}`,
-		method: "GET",
+		url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
 	});
 

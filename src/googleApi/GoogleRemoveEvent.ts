@@ -3,7 +3,7 @@ import type { GoogleEvent } from "../helper/types";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import { requestUrl } from 'obsidian';
-import {getToken} from "../helper/LocalStorage"
+
 /**
  * This function will remove the event from the google api
  * If the event is recurrent is will delete all it's instanced except if deleteSingle is set
@@ -26,7 +26,7 @@ export async function googleRemoveEvent(
 	}
 
 	const response = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}?key=${getToken()}`,
+		url: `https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}`,
 		method: "DELETE",
 		contentType: "application/json",
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},

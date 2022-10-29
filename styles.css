@@ -46,3 +46,8 @@ input[type="datetime-local"] {
 .suggestionText{
 	font-size: 20px;
 }
+
+.GoogleLoginButton{
+	cursor: pointer;
+	height: 42px;
+}

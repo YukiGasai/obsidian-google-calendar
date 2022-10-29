@@ -29,25 +29,14 @@ export const getExpirationTime = (): number => {
 	return parseInt(expirationTimeString, 10);
 };
 
-
 /**
- * getToken from LocalStorage
- * @returns googleToken
+ * get user Id from LocalStorager
+ * @returns googleCalendarUserId
  */
- export const getToken = (): string => {
-	const plugin:GoogleCalendarPlugin = GoogleCalendarPlugin.getInstance();
-
-	if(plugin.settings.useCustomClient && plugin.settings.googleApiToken){
-		return plugin.settings.googleApiToken ?? "";
-	}
-
-	if(window.localStorage.getItem("googleCalendarToken") == "") {
-		return plugin.settings.googleApiToken ?? "";
-	}
-
-	return window.localStorage.getItem("googleCalendarToken") ?? "";
-
+ export const getUserId = (): string => {
+	return window.localStorage.getItem("googleCalendarUserId") ?? "";
 };
+
 
 
 //===================
@@ -62,6 +51,16 @@ export const getExpirationTime = (): number => {
 export const setAccessToken = (googleAccessToken: string): void => {
 	if(googleAccessToken == "undefined")return;
 	window.localStorage.setItem("googleCalendarAccessToken", googleAccessToken);
+};
+
+/**
+ * set user Id into LocalStorage
+ * @param googleAccessToken user Id for OAuth server
+ * @returns googleCalendarUserId
+ */
+ export const setUserId = (userId: string): void => {
+	if(userId == "undefined")return;
+	window.localStorage.setItem("googleCalendarUserId", userId);
 };
 
 /**
@@ -85,16 +84,4 @@ export const setExpirationTime = (googleExpirationTime: number): void => {
 		"googleCalendarExpirationTime",
 		googleExpirationTime + ""
 	);
-};
-
-/**
- * setToken from LocalStorage
- * @returns googleToken
- */
- export const setToken = (googleToken: string): void => {
-	if(googleToken == "undefined")return;
-	window.localStorage.setItem(
-		"googleCalendarToken",
-		googleToken
-	); 
 };

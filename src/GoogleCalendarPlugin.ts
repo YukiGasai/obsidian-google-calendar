@@ -13,7 +13,7 @@ import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/Month
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken, setToken } from "./helper/LocalStorage";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -28,7 +28,6 @@ import { GoogleCalendarPluginApi } from "./helper/GoogleCalendarPluginApi";
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
 	googleClientSecret: "",
-	googleApiToken: "",
 	googleRefreshToken: "",
 	useCustomClient: true,
 	googleOAuthServer: "https://obsidian-google-calendar.vercel.app",
@@ -350,17 +349,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
-			if(this.settings.useCustomClient) return;
-
-			const refreshToken = req['rt'];
-			const accessToken = req['at'];
-			const expirationTime = req['et'];
-			const token = req['t'];
-			if(!refreshToken) return;
-			setRefreshToken(refreshToken);
-			setAccessToken(accessToken);
-			setExpirationTime(+new Date() + parseInt(expirationTime)*1000);
-			setToken(token);
+			if(this.settings.useCustomClient) return;			
+			setUserId(req['uid'])
+			setAccessToken(req['at']);
+			setExpirationTime(+new Date() + 3600000);
 			new Notice("Login successfull!");
 		  });
 

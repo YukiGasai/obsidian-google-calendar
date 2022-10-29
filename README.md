@@ -31,7 +31,6 @@ The function to use a public OAuth client is in beta and could be removed at any
     -   Select Extern
     -   Fill necessary inputs
     -   Add your email as tester if using "@gmail" add gmail and googlemail
--   [Add API Token](https://console.cloud.google.com/apis/credentials)
 -   [Add OAUTH client](https://console.cloud.google.com/apis/credentials/oauthclient)
     -   select Webclient
     -   add `http://127.0.0.1:42813` as Javascript origin

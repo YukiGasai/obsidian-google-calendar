@@ -3,7 +3,6 @@ import type { GoogleEvent } from "../helper/types";
 import { createNotice } from "../helper/NoticeHelper";
 import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import { requestUrl } from 'obsidian';
-import {getToken} from "../helper/LocalStorage"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 
@@ -25,7 +24,7 @@ export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent
 	delete event.parent;
 
 	const updateResponse = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events?key=${getToken()}`,
+		url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,
 		method: "POST",
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
 		body: JSON.stringify(event),

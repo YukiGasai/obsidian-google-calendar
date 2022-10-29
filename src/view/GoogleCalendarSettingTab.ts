@@ -10,10 +10,9 @@ import {
 	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import { getAccessToken, getRefreshToken, getToken, setAccessToken, setExpirationTime, setRefreshToken, setToken } from "../helper/LocalStorage";
+import { getRefreshToken, getUserId, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "../helper/LocalStorage";
 import { customSetting } from "src/helper/CustomSettingElement";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-import { settings } from "cluster";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -74,18 +73,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl)
-			.setName("ApiToken")
-			.setDesc("Google Api Token")
-			.addText((text) =>
-				text
-					.setPlaceholder("Enter your api token")
-					.setValue(this.plugin.settings.googleApiToken)
-					.onChange(async (value) => {
-						this.plugin.settings.googleApiToken = value;
-						await this.plugin.saveSettings();
-					})
-			);
 		const AuthSetting = new Setting(containerEl);
 
 		const createLogOutButton = (button: ButtonComponent) => {
@@ -173,7 +160,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		})
 
 
-		if(getRefreshToken()){
+		if(getUserId()){
 		new Setting(containerEl)
 			.setName("Login with testclient")
 			.setDesc("This is only a testing client please create your own client")
@@ -182,23 +169,23 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setButtonText("Logout")
 				.onClick(value => {
 					setRefreshToken("");
+					setUserId("");
 					setAccessToken("");
 					setExpirationTime(0);
-					setToken("");
 					this.display();
 				})
 			})
 		}else{
-		new Setting(containerEl)
-			.setName("Login with testclient")
-			.setDesc("This is only a testing client please create your own client")
-			.addButton(button => {
-				button
-				.setButtonText("Login")
-				.onClick(value => {
-					window.open(`${this.plugin.settings.googleOAuthServer}/api/google`);
-				})
-			})
+			const loginButton = customSetting(containerEl,
+				"Login with testclient",
+				"This is only a testing client please create your own client",
+			   ).createEl("img");
+
+			   loginButton.className='GoogleLoginButton'
+			   loginButton.src = "https://i.imgur.com/eC4W4gS.png";
+			   loginButton.addEventListener("click", () => {
+				   window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+			   });
 		}
 
 	}
@@ -387,7 +374,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 export function settingsAreComplete(showNotice = true): boolean {
 	const plugin = GoogleCalendarPlugin.getInstance();
 	if (
-		plugin.settings.googleApiToken == "" ||
 		plugin.settings.googleClientId == "" ||
 		plugin.settings.googleClientSecret == ""
 	) {
@@ -399,12 +385,8 @@ export function settingsAreComplete(showNotice = true): boolean {
 
 export function settingsAreCorret(): boolean {
 	const plugin = GoogleCalendarPlugin.getInstance();
+	
 	if (
-		/^AIza[0-9A-Za-z-_]{35}$/.test(plugin.settings.googleApiToken) == false
-	) {
-		new Notice("API Token is not the correct format");
-		return false;
-	} else if (
 		/^[0-9a-zA-z-]*\.apps\.googleusercontent\.com$/.test(
 			plugin.settings.googleClientId
 		) == false
@@ -422,7 +404,7 @@ export function settingsAreCorret(): boolean {
 
 export function settingsAreCompleteAndLoggedIn(showNotice = true): boolean {
 
-	if(!getRefreshToken() || getRefreshToken() == "" || !getToken()) {
+	if((!getRefreshToken() || getRefreshToken() == "") && (!getUserId() || getUserId() == "")) {
 		createNotice(
 			"Google Calendar missing settings or not logged in"
 		);
