@@ -169,9 +169,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
                     let array = _.get(event, match[1], "");
                     for(let i = 0; i < array.length; i++){
                         if(array[i].displayName){
-                            newContent += `- [@${array[i].displayName}](${array[i].email})\n`;
+                            newContent += `- [[@${array[i].displayName}]]\n`;
                         }else{
-                            newContent += `- [@${array[i].email}](${array[i].email})\n`;
+                            newContent += `- [[@${array[i].email}]]\n`;
                         }
                     }
                 } else if(match[1] == "attachments"){
