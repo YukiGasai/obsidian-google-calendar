@@ -163,9 +163,30 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
    
         output.forEach(match => {
             if(match){
+                let newContent:any = "";
 
-                let newContent = _.get(event, match[1], "");
-                
+                if(match[1] == "attendees"){
+                    let array = _.get(event, match[1], "");
+                    for(let i = 0; i < array.length; i++){
+                        if(array[i].displayName){
+                            newContent += `- [@${array[i].displayName}](${array[i].email})\n`;
+                        }else{
+                            newContent += `- [@${array[i].email}](${array[i].email})\n`;
+                        }
+                    }
+                } else if(match[1] == "attachments"){
+                    let array = _.get(event, match[1], "");
+                    for(let i = 0; i < array.length; i++){
+                        if(array[i].title){
+                            newContent += `- [${array[i].title}](${array[i].fileUrl})\n`;
+                        }else{
+                            newContent += `- [${array[i].fileUrl}](${array[i].fileUrl})\n`;
+                        }
+                    }
+                }else{
+                    newContent = _.get(event, match[1], "");
+                }
+            
                 //Turn objects into json for a better display be more specific in the template
                 if(newContent === Object(newContent)){
                     newContent = JSON.stringify(newContent);
