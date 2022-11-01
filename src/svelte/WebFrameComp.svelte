@@ -22,7 +22,6 @@ if(!date.isValid()){
 }
 
 onMount(() => {
-    console.log(theme)
     if(theme == "auto") {
         theme =  getCurrentTheme();
     }

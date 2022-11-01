@@ -6,6 +6,8 @@
     import { EventListModal } from "../modal/EventListModal";
     import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
+    import _ from "lodash"
+
 
     export let displayedMonth = window.moment();
     export let width:number = 0;
@@ -23,9 +25,8 @@
 
         today = window.moment();
         
-        const prevMonthDate = month.clone().subtract(1, "month").startOf("month");
-        const nextMonthDate = month.clone().add(1, "month").endOf("month");
-
+        const prevMonthDate = month.clone().startOf("month").subtract(6, "days");
+        const nextMonthDate = month.clone().endOf("month").add(12, "days");
 
         const eventsInMonth = await googleListEvents({
             startDate:prevMonthDate,
@@ -34,15 +35,31 @@
             exclude
         });    
 
+        //Dont do anything when events are the same
+        if(_.isEqual(eventsInMonth, events)){
+            return;
+        }
+
+        
+        let eventsByDay = _.groupBy(eventsInMonth, event =>
+            window.moment(event.start.date ?? event.start.dateTime).startOf('day').format()
+        );
 
         events = eventsInMonth;
         const customTagsSource: ICalendarSource = {
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
-              
-                const eventsOfTheDay = getEventsOfDay(eventsInMonth, day);
-                const dots:IDot[] = eventsOfTheDay.map(event => {
-                    return {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
-                })
+            
+                const eventsOfTheDay = eventsByDay[day.startOf("day").format()]; 
+                if (!eventsOfTheDay){
+                    return {
+                    dataAttributes: {"amount": "0"},
+                    dots: [],
+                };
+                } 
+                const dots:IDot[] = Array(eventsOfTheDay.length).fill(
+                    {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
+                );
+
                 return {
                     dataAttributes: {"amount": eventsOfTheDay.length + ""},
                     dots: dots,

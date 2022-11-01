@@ -10,7 +10,6 @@ import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { googleListCalendars } from "./GoogleListCalendars";
-import ct from 'countries-and-timezones'
 import { requestUrl } from 'obsidian';
 
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
@@ -78,14 +77,6 @@ export async function googleListEvents(
 
 		eventList = [...eventList, ...events];
 	}
-
-	//Sort events for date
-	eventList = eventList.sort((a:GoogleEvent, b:GoogleEvent) : number => {
-		const startA = window.moment((a.start.date || a.start.dateTime))
-		const startB = window.moment((b.start.date || b.start.dateTime))
-
-		return startA.isBefore(startB, "minute") ? -1 : 1;
-	})
 
 	return eventList;
 }
@@ -237,9 +228,8 @@ async function googleListEventsByCalendar(
 ): Promise<GoogleEvent[]> {
 	
 	//Turn dates into strings for request and caching
-	const timezone    = ct.getTimezone(GoogleCalendar.timeZone);
-	const startString = (startDate.toISOString());
-	const endString   = (endDate.toISOString());
+	const startString = startDate.toISOString();
+	const endString   = endDate.toISOString();
 
 	//get the hashmap key from start end and calendar
 	const cacheKey:string = JSON.stringify({start: startString, end: endString, calendar: GoogleCalendar.id});
