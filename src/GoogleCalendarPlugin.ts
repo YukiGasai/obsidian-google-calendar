@@ -21,6 +21,7 @@ import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEve
 import { TemplateSuggest } from "./helper/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./helper/GoogleCalendarPluginApi";
+import { getCurrentTheme } from "./helper/GetCurrentTheme";
 
 
 
@@ -40,6 +41,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	defaultCalendar: "",
 	calendarBlackList: [],
 	insertTemplates: [],
+	webViewDefaultColorMode: getCurrentTheme()
 };
 
 export default class GoogleCalendarPlugin extends Plugin {

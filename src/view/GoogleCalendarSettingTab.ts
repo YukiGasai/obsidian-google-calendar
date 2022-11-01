@@ -189,6 +189,20 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		}
 
 	}
+
+		new Setting(containerEl)
+		.setName("Default webview theme")
+		.addDropdown(async (dropdown) => {
+			dropdown.addOption("auto", "Auto");
+			dropdown.addOption("dark", "Dark");
+			dropdown.addOption("light", "Light");
+			dropdown.setValue(this.plugin.settings.webViewDefaultColorMode);
+			dropdown.onChange(async(state)=> {
+				this.plugin.settings.webViewDefaultColorMode = state;
+				await this.plugin.saveSettings();
+			})
+		});
+
 		new Setting(containerEl)
 		.setName("Auto create Event Notes")
 		.setDesc("Will create new notes from a event if the description contains :obsidian:")

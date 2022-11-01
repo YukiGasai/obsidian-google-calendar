@@ -1,8 +1,14 @@
 <script lang="ts">
+	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+	import { onMount } from "svelte";
+	import { getCurrentTheme } from "../helper/GetCurrentTheme";
+
+const plugin = GoogleCalendarPlugin.getInstance();
 
 export let date   = window.moment();
 export let width  = 0;
 export let height = 0;
+export let theme  = plugin.settings.webViewDefaultColorMode;
 let frame;
 let webUrl:string = ""
 
@@ -15,13 +21,23 @@ if(!date.isValid()){
     webUrl = `https://calendar.google.com/calendar/u/0/r/day/${dateString}`;
 }
 
-const domReady = () => {
-  frame.insertCSS(`
-    html body div div div div {
-        margin-left: -256px;
+onMount(() => {
+    console.log(theme)
+    if(theme == "auto") {
+        theme =  getCurrentTheme();
     }
-  `);
-}
+
+    if(theme == "dark"){
+        frame.addEventListener("dom-ready", () => {
+            frame.insertCSS(`
+                html {
+                    filter: hue-rotate(180deg)invert(100)contrast(93%) !important;
+                }
+            
+            `);
+        });
+    }
+})
 
 </script>
 
@@ -31,7 +47,6 @@ const domReady = () => {
     <webview 
         src={webUrl}
         allowpopups
-        dom-ready="{domReady}"
         class="fullSize"
         bind:this={frame}
     />
@@ -39,7 +54,6 @@ const domReady = () => {
     <webview 
         src={webUrl}
         allowpopups
-        dom-ready="{domReady}"
         style:width="{width}px"
         style:height="{height}px"
         bind:this={frame}

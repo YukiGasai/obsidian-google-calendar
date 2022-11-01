@@ -32,7 +32,7 @@ export async function checkEditorForCodeBlocks(
 	el: HTMLElement,
 	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
-	let {type,height,width,date,navigation,timespan,exclude,include}:CodeBlockOptions = parseYaml(text);
+	let {type,height,width,date,navigation,timespan,exclude,include,theme}:CodeBlockOptions = parseYaml(text);
 
 	if(!type){
 		type = CodeBlockTypes.day;
@@ -81,6 +81,7 @@ export async function checkEditorForCodeBlocks(
 						height: height ?? 500,
 						width: width ?? 500,
 						date: blockDate,
+						theme: theme ?? "auto"
 					})
 				);
 			}

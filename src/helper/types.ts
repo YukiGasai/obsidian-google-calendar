@@ -16,9 +16,10 @@ export interface GoogleCalendarPluginSettings {
 	autoCreateEventKeepOpen: boolean,
 	importStartOffset: number,
 	importEndOffset: number,
-defaultCalendar: string,
+	defaultCalendar: string,
 	calendarBlackList: [string, string][];
 	insertTemplates: Template[];
+	webViewDefaultColorMode: string;
 }
 
 export interface Template {
@@ -304,4 +305,5 @@ export interface CodeBlockOptions {
 	timespan?: number;
 	include?: string[];
 	exclude?: string[];
+	theme: string;
 }
