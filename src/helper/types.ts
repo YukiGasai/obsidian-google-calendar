@@ -278,6 +278,7 @@ export interface EventCacheValue {
 export interface ListOptions {
 	startDate?: moment.Moment;
 	endDate?: moment.Moment;
+	sort?: 'asc' | 'desc';
 	singleCalendar?: GoogleCalendar;
 	exclude?: string[];
 	include?: string[];

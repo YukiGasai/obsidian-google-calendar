@@ -11,7 +11,7 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { getGoogleAuthToken } from "./GoogleAuth";
 import { googleListCalendars } from "./GoogleListCalendars";
 import { requestUrl } from 'obsidian';
-
+import _ from "lodash"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 const cachedEvents = new Map<string, EventCacheValue>();
@@ -32,6 +32,7 @@ export function googleClearCachedEvents():void{
 export async function googleListEvents(
 	{ 	startDate,
 		endDate,
+		sort,
 		exclude: excludedCalendars,
 		include: includedCalendars,
 	} : ListOptions = {}
@@ -78,11 +79,14 @@ export async function googleListEvents(
 		eventList = [...eventList, ...events];
 	}
 
+	if(sort) {
+		//Sort because multi day requests will only sort by date
+		eventList = _.orderBy(eventList, [(event:GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], [sort])
+
+	}
+
 	return eventList;
 }
-
-
-
 
 
 
@@ -115,15 +119,16 @@ async function requestEventsFromApi(
 			GoogleCalendar.id
 		)}/events?`;
 		url += `maxResults=${resultSizes}`;
-		url += `&singleEvents=True`;
-		url += `&orderBy=startTime`;
+		url += `&futureevents=true`
+		url += `&singleEvents=true`;
+		url += `&orderby=starttime`;
+		url += `&sortorder=ascending`;
 		url += `&timeMin=${startString}`;
 		url += `&timeMax=${endString}`;
 
 		if (tmpRequestResult && tmpRequestResult.nextPageToken) {
 			url += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
 		}
-
 		const response = await requestUrl({
 			url:url,
 			method: "GET",
@@ -137,16 +142,13 @@ async function requestEventsFromApi(
 			continue;
 		}
 
-
 		tmpRequestResult = await response.json;
 
-		tmpRequestResult.items.forEach((event) => {
-			event.parent = GoogleCalendar;
+		const newList = tmpRequestResult.items.filter((event) => {
+				event.parent = GoogleCalendar;
+				return event.status != "cancelled"
 		});
 
-		const newList = tmpRequestResult.items.filter(
-			(event) => event.status != "cancelled"
-		);
 		totalEventList = [...totalEventList, ...newList];
 	} while (tmpRequestResult.items.length == resultSizes);
 	
@@ -168,43 +170,42 @@ function resolveMultiDayEventsHelper(
 	let extraEvents:GoogleEvent[] = [];
 	
 	totalEventList.forEach((tmp:GoogleEvent) => {
-		if(tmp.start.dateTime && tmp.end.dateTime){
-			const endMoment = window.moment(tmp.end.dateTime);
-			let startMoment = window.moment(tmp.start.dateTime);
-	
-			if(!startMoment.isSame(endMoment, "day")) {
+		if(!tmp.start.dateTime || !tmp.end.dateTime)return;
+		
+		const endMoment = window.moment(tmp.end.dateTime);
+		let startMoment = window.moment(tmp.start.dateTime);
+
+		if(startMoment.isSame(endMoment, "day"))return;
+		
+		let extraEventsTmp:GoogleEvent[] = [];
+
+		let totalDays = endMoment.endOf("day").diff(startMoment.startOf("day"), "days") + 1;
 			
-				let extraEventsTmp:GoogleEvent[] = [];
-	
-				let totalDays = endMoment.endOf("day").diff(startMoment.startOf("day"), "days") + 1;
-					
-				const title = tmp.summary;
-	
-				let dayCount = 1;
-	
-				do{
-					tmp.summary =  `${title} (Day ${dayCount}/${totalDays})`
-					tmp.eventType = "multiDay";
-					extraEventsTmp = [...extraEventsTmp, structuredClone(tmp)];	
-					dayCount++;
-					startMoment = startMoment.add(1, "days");
-					tmp.start.dateTime = startMoment.format("YYYY-MM-DD HH:mm");
-				}while(!startMoment.isAfter(endMoment, "day"));
-				
-	
-				extraEventsTmp = extraEventsTmp.filter(event => {
-					const startMoment = window.moment(event.start.dateTime);
-					if(date && startMoment.isBefore(date, "day"))return false;
-					if(endDate && startMoment.isSameOrAfter(endDate, "day"))return false;
-					return true;
-				})
-	
-				tmp.eventType = "delete";
-	
-				extraEvents = [...extraEvents, ...extraEventsTmp];
-	
-			}
-		}
+		const title = tmp.summary;
+
+		let dayCount = 1;
+
+		do{
+			tmp.summary =  `${title} (Day ${dayCount}/${totalDays})`
+			tmp.eventType = "multiDay";
+			extraEventsTmp = [...extraEventsTmp, structuredClone(tmp)];	
+			dayCount++;
+			startMoment = startMoment.add(1, "days");
+			tmp.start.dateTime = startMoment.format("YYYY-MM-DD HH:mm");
+		}while(!startMoment.isAfter(endMoment, "day"));
+		
+
+		extraEventsTmp = extraEventsTmp.filter(event => {
+			const startMoment = window.moment(event.start.dateTime);
+			if(date && startMoment.isBefore(date, "day"))return false;
+			if(endDate && startMoment.isSameOrAfter(endDate, "day"))return false;
+			return true;
+		})
+
+		tmp.eventType = "delete";
+
+		extraEvents = [...extraEvents, ...extraEventsTmp];
+
 	});
 
 	totalEventList = [...totalEventList, ...extraEvents];
