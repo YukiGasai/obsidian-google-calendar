@@ -51,3 +51,7 @@ input[type="datetime-local"] {
 	cursor: pointer;
 	height: 42px;
 }
+
+.templater_search {
+    width: calc(100% - 20px);
+}

@@ -7,9 +7,10 @@
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
-    import { manuallyCreateNoteFromEvent } from "../helper/AutoEventNoteCreator";
+    import { createNoteFromEvent, manuallyCreateNoteFromEvent } from "../helper/AutoEventNoteCreator";
     import { Frequency, RRule, RRuleSet, Weekday } from "rrule";
     import type { Options } from "rrule"
+	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
@@ -237,6 +238,12 @@
         }
     }
 
+    const createNote = () => {
+
+        new CreateNotePromptModal(plugin.app, event).open();
+    }
+
+
     const openInBrowser = () => {
         window.open(event.htmlLink);
     }
@@ -387,6 +394,10 @@ $: {
                 <button on:click="{createEvent}">Create</button>
             </div>
         {/if}
+
+        <div class="buttonRow">
+            <button on:click="{createNote}">Create Note</button>
+        </div>
     </div>
 </div>
 

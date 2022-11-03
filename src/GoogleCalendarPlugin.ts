@@ -60,6 +60,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	templaterPlugin:any;
 
+	settingsTab: GoogleCalendarSettingTab;
+
 	initView = async (viewId:string): Promise<void> => {
 		if (
 			this.app.workspace.getLeavesOfType(viewId)
@@ -172,7 +174,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "List Google Calendars",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(false);
+				const canRun = settingsAreCompleteAndLoggedIn();
 
 				if (checking) {
 					return canRun;
@@ -194,7 +196,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Create Google Calendar Event",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(false);
+				const canRun = settingsAreCompleteAndLoggedIn();
 
 				if (checking) {
 					return canRun;
@@ -218,7 +220,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "List Google Calendars",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(false);
+				const canRun = settingsAreCompleteAndLoggedIn();
 
 				if (checking) {
 					return canRun;
@@ -240,7 +242,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "List Google Events",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(false);
+				const canRun = settingsAreCompleteAndLoggedIn();
 
 				if (checking) {
 					return canRun;
@@ -251,7 +253,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 				}
 
 				googleListEvents().then((events) => {
-					new EventListModal(events).open()
+					new EventListModal(events, "details").open()
 				});
 			},
 		});
@@ -262,7 +264,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Google Calendar Trigger Auto Import",
 
 			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn(false);
+				const canRun = settingsAreCompleteAndLoggedIn();
 
 				if (checking) {
 					return canRun;
@@ -273,6 +275,58 @@ export default class GoogleCalendarPlugin extends Plugin {
 				}
 
 				checkForEventNotes(this);
+			},
+		});
+
+		this.addCommand({
+			id: "google-calendar-create-event-note",
+			name: "Create Event Note",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				googleListEvents().then((events) => {
+					new EventListModal(events, "createNote").open()
+				});
+			},
+		});
+
+		this.addCommand({
+			id: "google-calendar-create-event-note-current-event",
+			name: "Create Event Note for current event",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				googleListEvents().then((events) => {
+					events = events.filter(event => {
+						if(event.start.date) return true;
+						const startMoment = window.moment(event.start.dateTime);
+						const endMoment = window.moment(event.end.dateTime);
+						const nowMoment = window.moment();
+						if(nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)){
+							return false;
+						}
+						return true;
+					})
+					new EventListModal(events, "createNote").open()
+				});
 			},
 		});
 
@@ -316,7 +370,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 				checking: boolean,
 				editor: Editor
 			): boolean => {
-				const canRun = settingsAreCompleteAndLoggedIn(false);
+				const canRun = settingsAreCompleteAndLoggedIn();
 
 				if (checking) {
 					return canRun;
@@ -349,6 +403,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
+		this.settingsTab = new GoogleCalendarSettingTab(this.app, this);
+
+		this.addSettingTab(this.settingsTab);
 
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
 			if(this.settings.useCustomClient) return;			
@@ -356,9 +413,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 			setAccessToken(req['at']);
 			setExpirationTime(+new Date() + 3600000);
 			new Notice("Login successfull!");
+
+			this.settingsTab.display();
 		  });
 
-		this.addSettingTab(new GoogleCalendarSettingTab(this.app, this));
+	
 	}
 
 	onunload(): void {

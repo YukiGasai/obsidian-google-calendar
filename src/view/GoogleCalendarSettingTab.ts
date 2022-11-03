@@ -22,15 +22,17 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+
+
 	display(): void {
 		const { containerEl } = this;
+
+		const isLoggedIn = (getRefreshToken() || getUserId());
 
 		containerEl.empty();
 
 		containerEl.createEl("h2", { text: "Settings for Google Calendar" });
 		containerEl.createEl("h4", { text: "Please restart Obsidian to let changes take effect"})
-
-
 		
 		new Setting(containerEl)
 			.setName("Use own authentication client")
@@ -73,65 +75,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					})
 			);
 
-		const AuthSetting = new Setting(containerEl);
-
-		const createLogOutButton = (button: ButtonComponent) => {
-			button.setButtonText("Logout");
-			button.onClick(async () => {
-				setRefreshToken("");
-				setAccessToken("");
-				setExpirationTime(0);
-				button.buttonEl.remove();
-
-				AuthSetting.setName("Login");
-				AuthSetting.setDesc("Login to your Google Account");
-				AuthSetting.addButton((button: ButtonComponent) => {
-					button.setButtonText("Login");
-					button.onClick(async () => {
-						if (settingsAreCorret()) {
-							LoginGoogle();
-						}
-					});
-				});
-			});
-		};
-
-		if (Platform.isDesktop) {
-			if (getRefreshToken()) {
-				AuthSetting.setName("Logout");
-				AuthSetting.setDesc("Logout off your Google Account");
-				AuthSetting.addButton(createLogOutButton);
-			} else {
-				AuthSetting.setName("Login");
-				AuthSetting.setDesc("Login to your Google Account");
-				AuthSetting.addButton((button: ButtonComponent) => {
-					button.setButtonText("Login");
-					button.onClick(async () => {
-						if (settingsAreCorret()) {
-							LoginGoogle();
-
-							let count = 0;
-							const intId = setInterval(() => {
-								count++;
-
-								if (count > 900) {
-									clearInterval(intId);
-								} else if (getRefreshToken()) {
-									clearInterval(intId);
-									button.buttonEl.remove();
-									AuthSetting.setName("Logout");
-									AuthSetting.setDesc(
-										"Logout off your Google Account"
-									);
-									AuthSetting.addButton(createLogOutButton);
-								}
-							}, 200);
-						}
-					});
-				});
-		
-			}
-		} else {
+		if (Platform.isMobileApp) {
 			new Setting(containerEl)
 				.setName("Refresh Token")
 				.setDesc("Google Refresh Token from OAuth")
@@ -159,36 +103,31 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			})
 		})
 
+	}
 
-		if(getUserId()){
-		new Setting(containerEl)
-			.setName("Login with testclient")
-			.setDesc("This is only a testing client please create your own client")
-			.addButton(button => {
-				button
-				.setButtonText("Logout")
-				.onClick(value => {
+	new Setting(containerEl)
+		.setName("Login with google")
+		.addButton(button => {
+			button
+			.setButtonText(isLoggedIn ? "Logout" : "Login")
+			.onClick(() => {
+				if(isLoggedIn){
 					setRefreshToken("");
 					setUserId("");
 					setAccessToken("");
 					setExpirationTime(0);
+					this.hide();
 					this.display();
-				})
+				}else{
+					if(this.plugin.settings.useCustomClient){
+						LoginGoogle()
+					}else{
+						window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+					}
+				}
 			})
-		}else{
-			const loginButton = customSetting(containerEl,
-				"Login with testclient",
-				"This is only a testing client please create your own client",
-			   ).createEl("img");
+		})
 
-			   loginButton.className='GoogleLoginButton'
-			   loginButton.src = "https://i.imgur.com/eC4W4gS.png";
-			   loginButton.addEventListener("click", () => {
-				   window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
-			   });
-		}
-
-	}
 
 		new Setting(containerEl)
 		.setName("Default webview theme")
@@ -200,6 +139,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			dropdown.onChange(async(state)=> {
 				this.plugin.settings.webViewDefaultColorMode = state;
 				await this.plugin.saveSettings();
+				this.hide();
+				this.display();
 			})
 		});
 
@@ -211,6 +152,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			toggle.onChange(async (state) => {
 				this.plugin.settings.autoCreateEventNotes = state;
 				await this.plugin.saveSettings();
+				this.hide();
+				this.display();
 			});
 		});
 
@@ -222,68 +165,59 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			toggle.onChange(async (state) => {
 				this.plugin.settings.autoCreateEventKeepOpen = state;
 				await this.plugin.saveSettings();
+				this.hide();
+				this.display();
 			});
 		});
 
-		const ImportStartSetting = customSetting(
-			containerEl,
-			"Import Start Offset",
-			"Days in the past from events to import",
-			"SubSettings"
-		).createEl("input", {
-			type: "number",
+		new Setting(containerEl)
+		.setName("Import Start Offset")
+		.setDesc("Days in the past from events to import")
+		.addSlider(cb => {
+			cb.sliderEl.addClass("SubSettings");
+			cb.setValue(this.plugin.settings.importStartOffset)
+			cb.setLimits(0, 7, 1);
+			cb.setDynamicTooltip();
+			cb.onChange(async value => {
+				cb.showTooltip()
+				this.plugin.settings.importStartOffset = value;
+				await this.plugin.saveSettings();
+			});
+			
 		});
-		ImportStartSetting.value = this.plugin.settings.importStartOffset + "";
-		ImportStartSetting.min = "0";
-		ImportStartSetting.step = "1";
-		ImportStartSetting.addEventListener("input", async () => {
-			this.plugin.settings.importStartOffset = parseInt(
-				ImportStartSetting.value
-			);
-			await this.plugin.saveSettings();
+
+		new Setting(containerEl)
+		.setName("Import End Offset")
+		.setDesc("Days in the future from events to import")
+		.addSlider(cb => {
+			cb.sliderEl.addClass("SubSettings");
+			cb.setValue(this.plugin.settings.importEndOffset)
+			cb.setLimits(0, 7, 1);
+			cb.setDynamicTooltip();
+			cb.onChange(async value => {
+				this.plugin.settings.importEndOffset = value;
+				await this.plugin.saveSettings();
+			});
 		});
 
 
-		const ImportEndSetting = customSetting(
-			containerEl,
-			"Import End Offset",
-			"Days in the future from events to import",
-			"SubSettings"
-		).createEl("input", {
-			type: "number",
-		});
-		ImportEndSetting.value = this.plugin.settings.importEndOffset + "";
-		ImportEndSetting.min = "0";
-		ImportEndSetting.step = "1";
-		ImportEndSetting.addEventListener("input", async () => {
-			this.plugin.settings.importEndOffset = parseInt(
-				ImportEndSetting.value
-			);
-			await this.plugin.saveSettings();
-		});
-
-		const RefreshIntervalInput = customSetting(
-			containerEl,
-			"Refresh Interval",
-			"Time in seconds between refresh request from google server"
-		).createEl("input", {
-			type: "number",
-		});
-		RefreshIntervalInput.value = this.plugin.settings.refreshInterval + "";
-		RefreshIntervalInput.min = "10";
-		RefreshIntervalInput.step = "1";
-		RefreshIntervalInput.addEventListener("input", async () => {
-			this.plugin.settings.refreshInterval = parseInt(
-				RefreshIntervalInput.value
-			);
-			await this.plugin.saveSettings();
+		new Setting(containerEl)
+			.setName("Refresh Interval")
+			.setDesc("Time in seconds between refresh request from google server")
+			.addSlider(cb => {
+				cb.setValue(this.plugin.settings.refreshInterval)
+				cb.setLimits(10, 360, 1);
+				cb.setDynamicTooltip();
+				cb.onChange(async value => {
+					this.plugin.settings.refreshInterval = value;
+					await this.plugin.saveSettings();
+			})
 		});
 
 		const templateList:Template[] = this.plugin.settings.insertTemplates;
 		if(templateList.length) {
 			new Setting(containerEl).setName("Saved Templates");
 			
-
 			templateList.forEach((template:Template) => {
 				const setting = new Setting(containerEl)
 					.setClass("SubSettings")
@@ -294,6 +228,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							this.plugin.settings.insertTemplates.remove(template);
 							setting.settingEl.remove();
 							await this.plugin.saveSettings();
+							this.hide();
+							this.display();
 						});
 					});
 			});
@@ -416,7 +352,7 @@ export function settingsAreCorret(): boolean {
 	return true;
 }
 
-export function settingsAreCompleteAndLoggedIn(showNotice = true): boolean {
+export function settingsAreCompleteAndLoggedIn(): boolean {
 
 	if((!getRefreshToken() || getRefreshToken() == "") && (!getUserId() || getUserId() == "")) {
 		createNotice(

@@ -48,6 +48,7 @@ function checkAccessTokenValid(): boolean {
 
 
 const refreshWithCustomClient = async (plugin:GoogleCalendarPlugin): Promise<boolean>  => {
+
 	const refreshBody = {
 		client_id: plugin.settings.googleClientId,
 		client_secret: plugin.settings.googleClientSecret,
@@ -185,6 +186,7 @@ export async function LoginGoogle(): Promise<void> {
 						setExpirationTime(r.tokens.expiry_date);
 
 						console.info("Tokens acquired.");
+						plugin.settingsTab.display();
 					}
 				} catch (e) {
 					console.log("Auth failed")

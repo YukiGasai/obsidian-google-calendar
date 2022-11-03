@@ -1,9 +1,10 @@
-import type { GoogleEvent } from "../helper/types";
+import type { GoogleEvent, ModalSelectMode } from "../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
 import { googleListEvents } from "../googleApi/GoogleListEvents";
+import { CreateNotePromptModal } from './CreateNotePromptModal';
 
 /**
  * This class is used to diplay a select modal in which the user can select an event
@@ -13,15 +14,18 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	eventsChanged: boolean;
 	currentDate: moment.Moment;
 	closeFunction?: () => void;
+	modalSelectMode: ModalSelectMode;
 
 	constructor(
 		eventList: GoogleEvent[], 
+		modalSelectMode: ModalSelectMode,
 		currentDate:moment.Moment = window.moment(), 
 		eventsChanged = false, 
 		closeFunction?: () => void
 		) {
 		super(GoogleCalendarPlugin.getInstance().app);
 		this.eventList = [...eventList];
+		this.modalSelectMode = modalSelectMode;
 		this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left/right to switch day`);
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
@@ -89,8 +93,12 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
+		if(this.modalSelectMode == "details"){
 		this.open();
 		new EventDetailsModal(item, () => this.eventsChanged = true).open();
+		}else if(this.modalSelectMode == "createNote"){
+			new CreateNotePromptModal(this.app, item).open();
+		}
 	}
 
 	onClose(): void {

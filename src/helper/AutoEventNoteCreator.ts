@@ -79,6 +79,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     const { vault } = plugin.app;
     const { adapter } = vault;
 
+
     
     let folderPath = app.fileManager.getNewFileParent("").path;
 
@@ -210,10 +211,16 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         //Get the folder where the templates are stored from the template plugin
         const coreTemplateFolderPath = normalizePath(plugin.coreTemplatePlugin.instance.options.folder);
 
-        //Get Path to template file and check if it exists
-        let templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
-        if(coreTemplateFolderPath === "/"){
+        let templateFilePath;
+    
+        if(await adapter.exists(templateName)){
             templateFilePath = templateName;
+        }else{
+            //Get Path to template file and check if it exists
+            templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
+            if(coreTemplateFolderPath === "/"){
+                templateFilePath = templateName;
+            }
         }
 
         if(!await adapter.exists(templateFilePath)){
@@ -245,11 +252,20 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         //Get the folder where the templates are stored from the template plugin
         const templaterFolderPath = normalizePath(plugin.templaterPlugin.settings.templates_folder);
 
-        //Get Path to template file and check if it exists
-        let templateFilePath = `${templaterFolderPath}/${templateName}`;
-        if(templaterFolderPath === "/"){
+
+        let templateFilePath;
+    
+        if(await adapter.exists(templateName)){
             templateFilePath = templateName;
+        }else{
+            //Get Path to template file and check if it exists
+            templateFilePath = `${templaterFolderPath}/${templateName}`;
+            if(templaterFolderPath === "/"){
+                templateFilePath = templateName;
+            }
+
         }
+
         if(!await adapter.exists(templateFilePath)){
             createNotice(`Templater Template: ${templateName} doesn't exit.`)
             return false;
@@ -275,5 +291,3 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         }
     }
 }
-
-

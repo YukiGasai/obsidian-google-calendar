@@ -73,7 +73,7 @@
     const goToDaySelect = async (event:GoogleEvent) => {
         const clickedDate = window.moment(event.start.date || event.start.dateTime);
         const events = await googleListEvents({startDate:clickedDate});
-        new EventListModal(events, clickedDate, false, () => {
+        new EventListModal(events,'details', clickedDate, false, () => {
             googleClearCachedEvents();
             date = date;
         }).open();

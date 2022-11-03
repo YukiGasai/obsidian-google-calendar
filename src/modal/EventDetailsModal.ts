@@ -24,8 +24,6 @@ export class EventDetailsModal extends Modal {
 			this.closeFunction = closeFunction;
 		}
 	}
-
-	
 	
 
 	async onOpen(): Promise<void> {

@@ -308,3 +308,6 @@ export interface CodeBlockOptions {
 	exclude?: string[];
 	theme: string;
 }
+
+
+export type ModalSelectMode = "details" | "createNote";

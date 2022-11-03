@@ -29,6 +29,6 @@ export class CalendarsListModal extends FuzzySuggestModal<GoogleCalendar> {
 		item: GoogleCalendar
 	): Promise<void> {
 		const events = await googleListEvents({include: [item.id]});
-		new EventListModal(events).open();
+		new EventListModal(events, "details").open();
 	}
 }
