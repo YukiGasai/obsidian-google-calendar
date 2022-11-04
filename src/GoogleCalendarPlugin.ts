@@ -15,13 +15,14 @@ import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
-import { checkForEventNotes } from "./helper/AutoEventNoteCreator";
+import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
 import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
 import { TemplateSuggest } from "./helper/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./helper/GoogleCalendarPluginApi";
 import { getCurrentTheme } from "./helper/GetCurrentTheme";
+import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 
 
 
@@ -41,7 +42,11 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	defaultCalendar: "",
 	calendarBlackList: [],
 	insertTemplates: [],
-	webViewDefaultColorMode: getCurrentTheme()
+	webViewDefaultColorMode: getCurrentTheme(),
+	useDefaultTemplate: false,
+	defaultTemplate: "",
+	defaultFolder: (app.vault as any).config.newFileFolderPath,
+
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
@@ -325,7 +330,16 @@ export default class GoogleCalendarPlugin extends Plugin {
 						}
 						return true;
 					})
-					new EventListModal(events, "createNote").open()
+
+					if(events.length == 1){
+						if(this.settings.useDefaultTemplate){
+							createNoteFromEvent(events[0], this.settings.defaultFolder, this.settings.defaultTemplate)
+						}else{
+							new CreateNotePromptModal(events[0]).open();
+						}
+					}else{
+						new EventListModal(events, "createNote").open();
+					}
 				});
 			},
 		});

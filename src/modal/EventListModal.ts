@@ -5,6 +5,7 @@ import { FuzzySuggestModal } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { CreateNotePromptModal } from './CreateNotePromptModal';
+import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 
 /**
  * This class is used to diplay a select modal in which the user can select an event
@@ -15,7 +16,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	currentDate: moment.Moment;
 	closeFunction?: () => void;
 	modalSelectMode: ModalSelectMode;
-
+	plugin = GoogleCalendarPlugin.getInstance()
 	constructor(
 		eventList: GoogleEvent[], 
 		modalSelectMode: ModalSelectMode,
@@ -23,7 +24,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		eventsChanged = false, 
 		closeFunction?: () => void
 		) {
-		super(GoogleCalendarPlugin.getInstance().app);
+		super(window.app);
 		this.eventList = [...eventList];
 		this.modalSelectMode = modalSelectMode;
 		this.setPlaceholder(`${currentDate.format("MM/DD/YYYY")} Arrow left/right to switch day`);
@@ -34,7 +35,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 			this.closeFunction = closeFunction
 		}
 
-		this.inputEl.addEventListener("keyup", async(ev)=>{
+		this.inputEl.addEventListener("keydown", async(ev)=>{
 			let dateUpdated = false;
 			const list = this.getSuggestions(this.inputEl.value);
 			if(!list.length && ev.key == "Enter"){
@@ -94,10 +95,14 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
 		if(this.modalSelectMode == "details"){
-		this.open();
-		new EventDetailsModal(item, () => this.eventsChanged = true).open();
+			this.open();
+			new EventDetailsModal(item, () => this.eventsChanged = true).open();
 		}else if(this.modalSelectMode == "createNote"){
-			new CreateNotePromptModal(this.app, item).open();
+			if(this.plugin.settings.useDefaultTemplate){
+				createNoteFromEvent(item, this.plugin.settings.defaultFolder, this.plugin.settings.defaultTemplate)
+			}else{
+				new CreateNotePromptModal(item).open();
+			}
 		}
 	}
 
