@@ -6,13 +6,13 @@ import {
 	App,
 	Setting,
 	Notice,
-	ButtonComponent,
 	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
 import { getRefreshToken, getUserId, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "../helper/LocalStorage";
-import { customSetting } from "src/helper/CustomSettingElement";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+import { FileSuggest } from "../helper/input/FileSuggest";
+import { FolderSuggest } from "../helper/input/FolderSuggester";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -21,8 +21,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
-
-
 
 	display(): void {
 		const { containerEl } = this;
@@ -52,6 +50,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("ClientId")
 			.setDesc("Google client id")
+			.setClass("SubSettings")
 			.addText((text) =>
 				text
 					.setPlaceholder("Enter your client id")
@@ -65,6 +64,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("ClientSecret")
 			.setDesc("Google client secret")
+			.setClass("SubSettings")
 			.addText((text) =>
 				text
 					.setPlaceholder("Enter your client secret")
@@ -79,6 +79,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName("Refresh Token")
 				.setDesc("Google Refresh Token from OAuth")
+				.setClass("SubSettings")
 				.addText((text) =>
 					text
 						.setPlaceholder("Enter refresh token")
@@ -94,6 +95,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 		.setName("Serverurl")
 		.setDesc("The url to the server where the oauth takes place")
+		.setClass("SubSettings")
 		.addText(text => {
 			text
 			.setValue(this.plugin.settings.googleOAuthServer)
@@ -128,6 +130,18 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			})
 		})
 
+		new Setting(containerEl)
+			.setName("Refresh Interval")
+			.setDesc("Time in seconds between refresh request from google server")
+			.addSlider(cb => {
+				cb.setValue(this.plugin.settings.refreshInterval)
+				cb.setLimits(10, 360, 1);
+				cb.setDynamicTooltip();
+				cb.onChange(async value => {
+					this.plugin.settings.refreshInterval = value;
+					await this.plugin.saveSettings();
+			})
+		});
 
 		new Setting(containerEl)
 		.setName("Default webview theme")
@@ -160,6 +174,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 		.setName("Keep auto created Notes open")
 		.setDesc("When creating a new note should it stay open for direct editing")
+		.setClass("SubSettings")
 		.addToggle((toggle) => {
 			toggle.setValue(this.plugin.settings.autoCreateEventKeepOpen);
 			toggle.onChange(async (state) => {
@@ -170,11 +185,11 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 		});
 
-		new Setting(containerEl)
+		const s = new Setting(containerEl)
 		.setName("Import Start Offset")
 		.setDesc("Days in the past from events to import")
+		.setClass("SubSettings")
 		.addSlider(cb => {
-			cb.sliderEl.addClass("SubSettings");
 			cb.setValue(this.plugin.settings.importStartOffset)
 			cb.setLimits(0, 7, 1);
 			cb.setDynamicTooltip();
@@ -183,14 +198,13 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				this.plugin.settings.importStartOffset = value;
 				await this.plugin.saveSettings();
 			});
-			
 		});
 
 		new Setting(containerEl)
 		.setName("Import End Offset")
 		.setDesc("Days in the future from events to import")
+		.setClass("SubSettings")
 		.addSlider(cb => {
-			cb.sliderEl.addClass("SubSettings");
 			cb.setValue(this.plugin.settings.importEndOffset)
 			cb.setLimits(0, 7, 1);
 			cb.setDynamicTooltip();
@@ -202,17 +216,55 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 
 		new Setting(containerEl)
-			.setName("Refresh Interval")
-			.setDesc("Time in seconds between refresh request from google server")
-			.addSlider(cb => {
-				cb.setValue(this.plugin.settings.refreshInterval)
-				cb.setLimits(10, 360, 1);
-				cb.setDynamicTooltip();
-				cb.onChange(async value => {
-					this.plugin.settings.refreshInterval = value;
-					await this.plugin.saveSettings();
+		.setName("Use defaults for note creation")
+		.setDesc("If active creating notes will be faster but less flexable")
+		.addToggle(toggle => {
+			toggle.setValue(this.plugin.settings.useDefaultTemplate);
+			toggle.onChange(async(state)=>{
+				this.plugin.settings.useDefaultTemplate = state;
+				await this.plugin.saveSettings();
+				this.display();
 			})
+		})
+
+
+	if(this.plugin.settings.useDefaultTemplate){
+		new Setting(containerEl)
+		.setName("Default Template")
+		.setDesc("Template to use at note creation")
+		.setClass("SubSettings")
+		.addSearch((cb) => {
+			new FileSuggest(
+				cb.inputEl,
+				this.plugin
+			);
+			cb.setPlaceholder("Template")
+				.setValue(this.plugin.settings.defaultTemplate)
+				.onChange(async(new_template) => {
+					this.plugin.settings.defaultTemplate = new_template;
+					await this.plugin.saveSettings();
+				});
+			// @ts-ignore
+			cb.containerEl.addClass("templater_search");
 		});
+		
+		new Setting(containerEl)
+		.setName("Default Folder")
+		.setDesc("Folder to save notes to after creation")
+		.setClass("SubSettings")
+		.addSearch((cb) => {
+			new FolderSuggest(cb.inputEl);
+			cb.setPlaceholder("Example: folder1/folder2")
+				.setValue(this.plugin.settings.defaultFolder)
+				.onChange(async(new_folder) => {
+					this.plugin.settings.defaultFolder = new_folder;
+					await this.plugin.saveSettings();
+				});
+			// @ts-ignore
+			cb.containerEl.addClass("templater_search");
+		});
+	}
+
 
 		const templateList:Template[] = this.plugin.settings.insertTemplates;
 		if(templateList.length) {
@@ -234,9 +286,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					});
 			});
 		}
-
-
-
 
 		if(settingsAreCompleteAndLoggedIn()){
 
@@ -321,7 +370,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 	}
 }
 
-export function settingsAreComplete(showNotice = true): boolean {
+export function settingsAreComplete(): boolean {
 	const plugin = GoogleCalendarPlugin.getInstance();
 	if (
 		plugin.settings.googleClientId == "" ||
@@ -333,18 +382,16 @@ export function settingsAreComplete(showNotice = true): boolean {
 	return true;
 }
 
-export function settingsAreCorret(): boolean {
-	const plugin = GoogleCalendarPlugin.getInstance();
-	
+export function settingsAreCorret(): boolean {	
 	if (
 		/^[0-9a-zA-z-]*\.apps\.googleusercontent\.com$/.test(
-			plugin.settings.googleClientId
+			this.plugin.settings.googleClientId
 		) == false
 	) {
 		new Notice("Client ID Token is not the correct format");
 		return false;
 	} else if (
-		/^[0-9a-zA-z-]*$/.test(plugin.settings.googleClientSecret) == false
+		/^[0-9a-zA-z-]*$/.test(this.plugin.settings.googleClientSecret) == false
 	) {
 		new Notice("Client Secret is not the correct format");
 		return false;

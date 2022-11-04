@@ -14,8 +14,8 @@ import { FileSuggest } from "../helper/input/FileSuggest";
     template:string = null;
     folder:string = null;
     plugin = GoogleCalendarPlugin.getInstance();
-    constructor(app: App, event: GoogleEvent) {
-      super(app);
+    constructor(event: GoogleEvent) {
+      super(window.app);
       this.event = event;
     }
   

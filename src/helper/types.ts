@@ -20,6 +20,9 @@ export interface GoogleCalendarPluginSettings {
 	calendarBlackList: [string, string][];
 	insertTemplates: Template[];
 	webViewDefaultColorMode: string;
+	useDefaultTemplate: boolean;
+	defaultTemplate: string;
+	defaultFolder: string;
 }
 
 export interface Template {

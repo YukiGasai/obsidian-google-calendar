@@ -389,15 +389,14 @@ $: {
                 </div>
             {/if}    
 
+            <div class="buttonRow">
+                <button on:click="{createNote}">Create Note</button>
+            </div>
         {:else}
             <div class="buttonRow">
                 <button on:click="{createEvent}">Create</button>
             </div>
         {/if}
-
-        <div class="buttonRow">
-            <button on:click="{createNote}">Create Note</button>
-        </div>
     </div>
 </div>
 
