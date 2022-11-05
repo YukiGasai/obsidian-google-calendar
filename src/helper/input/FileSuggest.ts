@@ -48,9 +48,18 @@ export class FileSuggest extends TextInputSuggest<TFile> {
     }
 
     getSuggestions(input_str: string): TFile[] {
-        const templater  = normalizePath(this.plugin?.templaterPlugin?.settings?.templates_folder);
-        //const core       = normalizePath(this.plugin?.coreTemplatePlugin?.instance?.options?.folder);
-        const all_files = get_tfiles_from_folder(templater);
+        let all_files:TFile[] = [];
+        if(this.plugin.templaterPlugin){
+            const path = normalizePath(this.plugin?.templaterPlugin?.settings?.templates_folder)
+            const files = get_tfiles_from_folder(path);
+            all_files = [...all_files, ...files];
+        }
+        if(this.plugin.coreTemplatePlugin){
+            const path = normalizePath(this.plugin?.coreTemplatePlugin?.instance?.options?.folder)
+            const files = get_tfiles_from_folder(path);
+            all_files = [...all_files, ...files]
+        }
+        
         if (!all_files) {
             return [];
         }

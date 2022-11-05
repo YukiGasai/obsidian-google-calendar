@@ -56,7 +56,7 @@ export class InsertEventsModal extends Modal {
             tableOptions.forEach(objectPath => {
                 objectPath = objectPath.split(".").join(" ").toLocaleUpperCase();
                 headerString += `| ${objectPath} `;
-                headerDividerString += `| ---- `
+                headerDividerString += `| --- `
             });
 
             headerString += "|\n";

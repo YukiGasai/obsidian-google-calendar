@@ -87,7 +87,10 @@ A schedule view to see all your event in a order
 | List Google Calendars|               Opens a dropdown to view all calendars |
 | Create Google Calendar Event|        Opens an empty details view to create a new event |
 | Google Calendar Trigger Auto Import| Runs the Auto create Notes function again |
+| Create Event Note|                   Creates an event note for a selected event |
+| Create Event Note for current event| Creates an event note for a currently running selected event |
 | Copy Google Calendar Refresh Token to Clipboard|  Copies the refresh token (PC only) |
+
 
 
 ### @Anotation
