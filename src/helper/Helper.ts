@@ -53,3 +53,8 @@ export function getEventHeight(
 	const endPercentage = dateToPercent(new Date(event.end.dateTime));
 	return timeLineHeight * (endPercentage - startPercentage);
 }
+
+
+export const getCurrentTheme = () => {
+    return (app.vault as any).config.theme ? ( (app.vault as any).config.theme == "obsidian" ? "dark" : "light" ) : "dark";
+}

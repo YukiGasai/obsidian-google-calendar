@@ -11,8 +11,8 @@ import {
 import { LoginGoogle } from "../googleApi/GoogleAuth";
 import { getRefreshToken, getUserId, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "../helper/LocalStorage";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-import { FileSuggest } from "../helper/input/FileSuggest";
-import { FolderSuggest } from "../helper/input/FolderSuggester";
+import { FileSuggest } from "../suggest/FileSuggest";
+import { FolderSuggest } from "../suggest/FolderSuggester";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;

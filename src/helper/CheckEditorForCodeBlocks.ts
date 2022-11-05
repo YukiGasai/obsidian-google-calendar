@@ -10,7 +10,7 @@ import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
 import ScheduleComp from "../svelte/ScheduleComp.svelte"
-import { SvelteBuilder } from "../helper/SvelteBuilder";
+import { SvelteBuilder } from "../svelte/SvelteBuilder";
 
 
 /**

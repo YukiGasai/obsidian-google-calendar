@@ -76,7 +76,7 @@ export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<v
  */
 export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string, templateName?:string): Promise<void> => {
     const plugin = GoogleCalendarPlugin.getInstance();
-    const { vault } = plugin.app;
+    const { vault } = app;
     const { adapter } = vault;
 
 
@@ -271,7 +271,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
             return false;
         }
 
-        const templateFile = plugin.app.vault.getAbstractFileByPath(templateFilePath);
+        const templateFile = app.vault.getAbstractFileByPath(templateFilePath);
 
         if(!(templateFile instanceof TFile))return false;
 

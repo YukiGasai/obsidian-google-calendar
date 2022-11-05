@@ -151,5 +151,4 @@ Inserting a template strings into a file that already has an inserted event usin
 
 [Hotkeys for templates](https://github.com/Vinzent03/obsidian-hotkeys-for-templates)
 
-
-
+[obsidian-periodic-notes](https://github.com/liamcain/obsidian-periodic-notes)

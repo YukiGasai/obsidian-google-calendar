@@ -1,9 +1,9 @@
 import { App, Modal, Setting } from "obsidian";
-import { FolderSuggest } from "../helper/input/FolderSuggester";
+import { FolderSuggest } from "../suggest/FolderSuggester";
 import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 import type { GoogleCalendar, GoogleEvent } from "../helper/types";
 import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
-import { FileSuggest } from "../helper/input/FileSuggest";
+import { FileSuggest } from "../suggest/FileSuggest";
 
 
 /**

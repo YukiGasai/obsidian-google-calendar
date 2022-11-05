@@ -228,10 +228,10 @@
     }
 
     const openCreateNote = async () => {
-        const file = plugin.app.vault.getFiles().find(file => file.basename == event.summary)
+        const file = app.vault.getFiles().find(file => file.basename == event.summary)
         
         if(file){
-            plugin.app.workspace.getLeaf(true).openFile(file);
+            app.workspace.getLeaf(true).openFile(file);
             closeFunction();
         }else{
             await manuallyCreateNoteFromEvent(event);

@@ -3,8 +3,8 @@
     import type { GoogleEvent } from "../helper/types";
 
     import TreeMap from 'ts-treemap'
-    import { dateToPercent } from "../helper/CanvasDrawHelper";
-    import {getEventStartPosition, getEventHeight} from "../helper/CanvasDrawHelper";
+    import { dateToPercent } from "../helper/Helper";
+    import {getEventStartPosition, getEventHeight} from "../helper/Helper";
     
     import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
     import {EventDetailsModal} from '../modal/EventDetailsModal'

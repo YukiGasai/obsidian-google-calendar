@@ -2,7 +2,7 @@
 
 import { normalizePath, TAbstractFile, TFile, TFolder, Vault } from "obsidian";
 import { TextInputSuggest } from "./suggest";
-import type GoogleCalendarPlugin from './../../GoogleCalendarPlugin';
+import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
 
 export function resolve_tfolder(folder_str: string): TFolder {
     folder_str = normalizePath(folder_str);

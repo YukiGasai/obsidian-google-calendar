@@ -3,7 +3,7 @@
 	import type { GoogleCalendar, GoogleEvent, Template } from "../helper/types";
 	import { onMount } from "svelte";
 	import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-	import { GoogleEventSuggestionList } from "../helper/GoogleEventSuggestionList";
+	import { GoogleEventSuggestionList } from "../suggest/GoogleEventSuggestionList";
 	import { googleListEvents } from "../googleApi/GoogleListEvents";
 	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 	import { AskNameModal } from "../modal/AskNameModal";

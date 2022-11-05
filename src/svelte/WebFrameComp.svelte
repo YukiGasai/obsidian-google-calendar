@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 	import { onMount } from "svelte";
-	import { getCurrentTheme } from "../helper/GetCurrentTheme";
+	import { getCurrentTheme } from "../helper/Helper";
 
 const plugin = GoogleCalendarPlugin.getInstance();
 

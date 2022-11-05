@@ -1,5 +1,5 @@
 
-import type { ListOptions, IGoogleCalendarPluginApi } from './types';
+import type { ListOptions, IGoogleCalendarPluginApi } from '../helper/types';
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { googleGetEvent } from "../googleApi/GoogleGetEvent";
 import { googleListCalendars } from '../googleApi/GoogleListCalendars';

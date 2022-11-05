@@ -18,10 +18,10 @@ import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
 import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
-import { TemplateSuggest } from "./helper/TemplateSuggest";
+import { TemplateSuggest } from "./suggest/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
-import { GoogleCalendarPluginApi } from "./helper/GoogleCalendarPluginApi";
-import { getCurrentTheme } from "./helper/GetCurrentTheme";
+import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
+import { getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 
 

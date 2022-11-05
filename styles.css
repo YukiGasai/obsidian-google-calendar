@@ -1,25 +1,8 @@
-.block-language-gEvent > webview {
-	width: 100%;
-	height: 100%;
-}
-
-.test {
-	width: 300px;
-	height: 300px;
-	background: red;
-}
-.hoverPopup {
-	position: absolute;
-	width: 200px;
-	height: 500px;
-	background-color: red;
-	border-radius: 5px;
-}
-
 #calendar-container .today {
 	font-weight: bold;
 	color: red;
 }
+
 input[type="date"],
 input[type="datetime-local"] {
 	background: var(--background-modifier-form-field);
@@ -38,18 +21,12 @@ input[type="datetime-local"] {
 	flex-direction: column;
 }
 
-
 .SubSettings{
 	margin-left: 40px;
 }
 
 .suggestionText{
 	font-size: 20px;
-}
-
-.GoogleLoginButton{
-	cursor: pointer;
-	height: 42px;
 }
 
 .templater_search {
