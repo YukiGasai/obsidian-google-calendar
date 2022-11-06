@@ -101,7 +101,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 			if(this.plugin.settings.useDefaultTemplate){
 				createNoteFromEvent(item, this.plugin.settings.defaultFolder, this.plugin.settings.defaultTemplate)
 			}else{
-				new CreateNotePromptModal(item).open();
+				new CreateNotePromptModal(item, ()=>{}).open();
 			}
 		}
 	}

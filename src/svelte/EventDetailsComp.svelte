@@ -7,10 +7,11 @@
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
-    import { createNoteFromEvent, manuallyCreateNoteFromEvent } from "../helper/AutoEventNoteCreator";
+    import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
     import { Frequency, RRule, RRuleSet, Weekday } from "rrule";
     import type { Options } from "rrule"
 	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
+  import type { TFile } from "obsidian";
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
@@ -29,7 +30,7 @@
     let inputStartDateTime:string;
     let inputEndDateTime:string;
     let inputStartDate:string;
-
+    let eventNote: TFile = app.vault.getFiles().find(file => file.basename == event.summary);
     let listofWeekState:[Weekday,boolean][] = [[RRule.MO, true],[RRule.TU, true],[RRule.WE, true],[RRule.TH, true],[RRule.FR, true],[RRule.SA, true],[RRule.SU, true]]
 
    
@@ -227,23 +228,15 @@
         }
     }
 
-    const openCreateNote = async () => {
-        const file = app.vault.getFiles().find(file => file.basename == event.summary)
-        
-        if(file){
-            app.workspace.getLeaf(true).openFile(file);
-            closeFunction();
-        }else{
-            await manuallyCreateNoteFromEvent(event);
-        }
+    const openNote = async () => {
+        app.workspace.getLeaf(true).openFile(eventNote);
+        closeFunction();
     }
 
-    const createNote = () => {
-
-        new CreateNotePromptModal(event).open();
+    const createNote = async () => {
+        new CreateNotePromptModal(event, (newNote:TFile) => eventNote = newNote).open();
     }
-
-
+    
     const openInBrowser = () => {
         window.open(event.htmlLink);
     }
@@ -367,12 +360,16 @@ $: {
 
             <div class="buttonRow">
                 {#if recurring }
-                    <button on:click="{openInBrowser}">Recurring Event</button>
+                    <button on:click="{openInBrowser}">Show Recurring Event</button>
                 {:else}
-                    <button on:click="{openInBrowser}">Single Event</button>
+                    <button on:click="{openInBrowser}">Show Single Event</button>
                 {/if}
 
-                <button on:click="{openCreateNote}">Open/Create</button>
+                {#if eventNote}
+                    <button on:click="{openNote}">Open Event Note</button>
+                {:else}
+                    <button on:click="{createNote}">Create Event Note</button>
+                {/if}
             </div>
 
 
@@ -389,9 +386,6 @@ $: {
                 </div>
             {/if}    
 
-            <div class="buttonRow">
-                <button on:click="{createNote}">Create Note</button>
-            </div>
         {:else}
             <div class="buttonRow">
                 <button on:click="{createEvent}">Create</button>

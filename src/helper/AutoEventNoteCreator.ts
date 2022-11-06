@@ -51,21 +51,52 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<
     }
 }
 
+const injectEventDetails = (event: GoogleEvent, inputText:string):string => {
+    const regexp = /{{gEvent\.([^}>]*)}}/gm;
+    let matches;
+    const output = [];
+    do {
+        matches = regexp.exec(inputText);
+        output.push(matches);
+    } while(matches);
 
-export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<void> => {
+    output.forEach(match => {
+        if(match){
+            let newContent:any = "";
 
-    if(!settingsAreCompleteAndLoggedIn()){
-        return;
-    }
+            if(match[1] == "attendees"){
+                let array = _.get(event, match[1], "");
+                for(let i = 0; i < array.length; i++){
+                    if(array[i].displayName){
+                        newContent += `- [[@${array[i].displayName}]]\n`;
+                    }else{
+                        newContent += `- [[@${array[i].email}]]\n`;
+                    }
+                }
+            } else if(match[1] == "attachments"){
+                let array = _.get(event, match[1], "");
+                for(let i = 0; i < array.length; i++){
+                    if(array[i].title){
+                        newContent += `- [${array[i].title}](${array[i].fileUrl})\n`;
+                    }else{
+                        newContent += `- [${array[i].fileUrl}](${array[i].fileUrl})\n`;
+                    }
+                }
+            }else{
+                newContent = _.get(event, match[1], "");
+            }
+        
+            //Turn objects into json for a better display be more specific in the template
+            if(newContent === Object(newContent)){
+                newContent = JSON.stringify(newContent);
+            }
 
-    //regex will check for text and extract a template name if it exists
-    const match = event.description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
-    
-
-    //the trigger text was found and a new note will be created
-    await createNoteFromEvent(event, match?.[1], match?.[2]);
-      
+            inputText = inputText.replace(match[0],newContent??"")
+        }
+    })
+    return inputText;
 }
+
 
 /**
  * This function will create a new Note in the vault of the user if a template name is given the plugin will access the 
@@ -74,15 +105,13 @@ export const manuallyCreateNoteFromEvent = async (event: GoogleEvent) :Promise<v
  * @param fileName The name of the new Note
  * @param templateName  The used Template to fill the file
  */
-export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string, templateName?:string): Promise<void> => {
+export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string, templateName?:string): Promise<TFile> => {
     const plugin = GoogleCalendarPlugin.getInstance();
     const { vault } = app;
     const { adapter } = vault;
 
-
-    
+    //Destination folder path
     let folderPath = app.fileManager.getNewFileParent("").path;
-
     if(folderName){
         if(folderName.endsWith("-")){
             folderName = folderName.slice(0, -1);   
@@ -94,12 +123,11 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
             folderPath = folderName;
         }
     }
-
     const filePath = normalizePath(`${folderPath}/${event.summary}.md`);
 
     //check if file already exists
     if(await adapter.exists(filePath)){
-        return;
+        return vault.getAbstractFileByPath(filePath) as TFile;
     }
 
     //Create file with no content
@@ -108,7 +136,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
 
     //check if the template plugin is active
     if((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName){
-        return;
+        return vault.getAbstractFileByPath(filePath) as TFile;
     }
 
     //Check if the template name has a file extension
@@ -129,164 +157,95 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
     await newLeaf.openFile(file, editModeState);
     
     if(plugin.templaterPlugin && plugin.coreTemplatePlugin){
-        const wasInserted = await insertTemplaterTemplate();
+        const wasInserted = await insertTemplate(true);
         if(!wasInserted){
-            const wasInsertedAgain = await insertCoreTemplate()
+            const wasInsertedAgain = await insertTemplate(false);
             if(!wasInsertedAgain){
                 createNotice("Template not compatable")
             }
         }       
     }else if(plugin.templaterPlugin){
-        const wasInserted = await insertTemplaterTemplate();
+        const wasInserted = await insertTemplate(true);
         if(!wasInserted){
             createNotice("Template not compatable")
         }
     }else if(plugin.coreTemplatePlugin){
-        const wasInserted = await insertCoreTemplate();
+        const wasInserted = await insertTemplate(false);
         if(!wasInserted){
             createNotice("Template not compatable")
         }
     }
 
-
-    if(newLeaf.view instanceof MarkdownView){
-
-        let fileContent = newLeaf.view.editor.getValue()
-  
-        const oldContent = fileContent;
-        const regexp = /{{gEvent\.([^}>]*)}}/gm;
-        let matches;
-        const output = [];
-        do {
-            matches = regexp.exec(fileContent);
-            output.push(matches);
-        } while(matches);
-   
-        output.forEach(match => {
-            if(match){
-                let newContent:any = "";
-
-                if(match[1] == "attendees"){
-                    let array = _.get(event, match[1], "");
-                    for(let i = 0; i < array.length; i++){
-                        if(array[i].displayName){
-                            newContent += `- [[@${array[i].displayName}]]\n`;
-                        }else{
-                            newContent += `- [[@${array[i].email}]]\n`;
-                        }
-                    }
-                } else if(match[1] == "attachments"){
-                    let array = _.get(event, match[1], "");
-                    for(let i = 0; i < array.length; i++){
-                        if(array[i].title){
-                            newContent += `- [${array[i].title}](${array[i].fileUrl})\n`;
-                        }else{
-                            newContent += `- [${array[i].fileUrl}](${array[i].fileUrl})\n`;
-                        }
-                    }
-                }else{
-                    newContent = _.get(event, match[1], "");
-                }
-            
-                //Turn objects into json for a better display be more specific in the template
-                if(newContent === Object(newContent)){
-                    newContent = JSON.stringify(newContent);
-                }
-
-                fileContent = fileContent.replace(match[0],newContent??"")
-            }
-        })
-
-        if(fileContent !== oldContent) {
-            newLeaf.view.editor.setValue(fileContent)
-        }
-    }
     
     if(!plugin.settings.autoCreateEventKeepOpen){
         newLeaf.detach();
     }
 
-
-    async function insertCoreTemplate() : Promise<boolean>{
-        //Get the folder where the templates are stored from the template plugin
-        const coreTemplateFolderPath = normalizePath(plugin.coreTemplatePlugin.instance.options.folder);
-
-        let templateFilePath;
+    return vault.getAbstractFileByPath(filePath) as TFile;
+   
+    async function insertTemplate(useTemplater:boolean) : Promise<boolean> {
     
-        if(await adapter.exists(templateName)){
-            templateFilePath = templateName;
+        //Get the default template path from the plugin settings
+        let tempalteFolderPath;
+        if(useTemplater){
+            tempalteFolderPath = normalizePath(plugin?.templaterPlugin?.settings?.templates_folder);
         }else{
-            //Get Path to template file and check if it exists
-            templateFilePath = `${coreTemplateFolderPath}/${templateName}`;
-            if(coreTemplateFolderPath === "/"){
-                templateFilePath = templateName;
-            }
-        }
-
-        if(!await adapter.exists(templateFilePath)){
-            createNotice(`Core Template: ${templateName} doesn't exit.`)
-            return false;
-        }
-
-        //Get the file from the path
-        const templateFile = vault.getAbstractFileByPath(templateFilePath);
-
-        if(!(templateFile instanceof TFile))return false;
-
-        const result = await vault.cachedRead(templateFile);
-
-        if(result.contains("<%") && result.contains("%>")){
-            return false;
+            tempalteFolderPath = normalizePath(plugin?.coreTemplatePlugin?.instance?.options?.folder);
         }
         
-        //Insert the template by calling the command from the plugin
-        try{
-            await plugin.coreTemplatePlugin.instance.insertTemplate(templateFile);   
-        return true; 
-        }catch{
-            return false;
-        }
-    }
-
-    async function insertTemplaterTemplate(){
-        //Get the folder where the templates are stored from the template plugin
-        const templaterFolderPath = normalizePath(plugin.templaterPlugin.settings.templates_folder);
-
-
+        //Chek if the template name or path exists
         let templateFilePath;
-    
         if(await adapter.exists(templateName)){
             templateFilePath = templateName;
         }else{
             //Get Path to template file and check if it exists
-            templateFilePath = `${templaterFolderPath}/${templateName}`;
-            if(templaterFolderPath === "/"){
+            templateFilePath = `${tempalteFolderPath}/${templateName}`;
+            if(tempalteFolderPath === "/"){
                 templateFilePath = templateName;
             }
-
         }
-
+    
         if(!await adapter.exists(templateFilePath)){
-            createNotice(`Templater Template: ${templateName} doesn't exit.`)
+            createNotice(`Template: ${templateName} doesn't exit.`)
             return false;
         }
-
-        const templateFile = app.vault.getAbstractFileByPath(templateFilePath);
-
+    
+        //Get the file from the path
+        const templateFile = vault.getAbstractFileByPath(templateFilePath);
+    
+        //Read in templatefile
         if(!(templateFile instanceof TFile))return false;
+    
+        const result = await vault.cachedRead(templateFile);
 
-        let result = await vault.cachedRead(templateFile);
-
-        result = result.replace(/{{gEvent\.([^}>]*)}}/gm, "")
- 
-        if(result.contains("{{") && result.contains("}}")){
+        //Get template with injected event data
+        const newContent = injectEventDetails(event, result);
+    
+        if(useTemplater && newContent.contains("{{") && newContent.contains("}}")){
+            return false;
+        }else if(!useTemplater && newContent.contains("<%") && newContent.contains("%>")){
             return false;
         }
 
+        const tmpTemplateFilePath = templateFile.path + ".tmp";
+    
+        await adapter.write(tmpTemplateFilePath, newContent);
+        
+        const tmpTemplateFile = app.vault.getAbstractFileByPath(tmpTemplateFilePath);
+
+        if(!(tmpTemplateFile instanceof TFile))return false;
+
+        //Insert the template by calling the command from the plugin
         try{
-            await plugin.templaterPlugin.templater.append_template_to_active_file(templateFile);
-            return true;
+            if(useTemplater){
+                await plugin.templaterPlugin.templater.append_template_to_active_file(tmpTemplateFile);
+            }else{
+                await plugin.coreTemplatePlugin.instance.insertTemplate(tmpTemplateFile);   
+            }
+            adapter.remove(tmpTemplateFilePath);
+            return true; 
         }catch{
+            adapter.remove(tmpTemplateFilePath);
             return false;
         }
     }

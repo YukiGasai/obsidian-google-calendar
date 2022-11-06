@@ -1,4 +1,4 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Setting, TFile } from "obsidian";
 import { FolderSuggest } from "../suggest/FolderSuggester";
 import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 import type { GoogleCalendar, GoogleEvent } from "../helper/types";
@@ -14,9 +14,11 @@ import { FileSuggest } from "../suggest/FileSuggest";
     template:string = null;
     folder:string = null;
     plugin = GoogleCalendarPlugin.getInstance();
-    constructor(event: GoogleEvent) {
+    onSumbit: (newFile: TFile) => void;
+    constructor(event: GoogleEvent, onSubmit:(newFile: TFile) => void) {
       super(window.app);
       this.event = event;
+      this.onSumbit = onSubmit;
     }
   
     onOpen() {
@@ -56,8 +58,9 @@ import { FileSuggest } from "../suggest/FileSuggest";
         .setName("")
         .addButton(button => {
           button.setButtonText("Create Note")
-          button.onClick((e)=> {
-              createNoteFromEvent(this.event, this.folder, this.template)
+          button.onClick(async (e)=> {
+              const newNote = await createNoteFromEvent(this.event, this.folder, this.template)
+              this.onSumbit(newNote);
               this.close();
           })
         })

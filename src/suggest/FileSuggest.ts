@@ -64,10 +64,12 @@ export class FileSuggest extends TextInputSuggest<TFile> {
             return [];
         }
 
+        const all_files_set = new Set(all_files);
+
         const files: TFile[] = [];
         const lower_input_str = input_str.toLowerCase();
 
-        all_files.forEach((file: TAbstractFile) => {
+        all_files_set.forEach((file: TAbstractFile) => {
             if (
                 file instanceof TFile &&
                 file.extension === "md" &&

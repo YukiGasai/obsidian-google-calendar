@@ -332,10 +332,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 					})
 
 					if(events.length == 1){
-						if(this.settings.useDefaultTemplate){
+						if(this.settings.useDefaultTemplate && this.settings.defaultFolder && this.settings.defaultFolder){
 							createNoteFromEvent(events[0], this.settings.defaultFolder, this.settings.defaultTemplate)
 						}else{
-							new CreateNotePromptModal(events[0]).open();
+							new CreateNotePromptModal(events[0], ()=>{}).open();
 						}
 					}else{
 						new EventListModal(events, "createNote").open();
