@@ -142,7 +142,6 @@ The fields to use are defined in the [Google Calendar API](https://developers.go
 
 Inserting a template strings into a file that already has an inserted event using @Anotation will automatically replace the template with the event information. 
 
-
 ## Thank you to the following plugins: 
 
 [obsidian-calendar-plugin](https://github.com/liamcain/obsidian-calendar-plugin)
@@ -152,3 +151,8 @@ Inserting a template strings into a file that already has an inserted event usin
 [Hotkeys for templates](https://github.com/Vinzent03/obsidian-hotkeys-for-templates)
 
 [obsidian-periodic-notes](https://github.com/liamcain/obsidian-periodic-notes)
+
+## Sponsor
+If you like the plugin maybe 👉👈
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q1G07N2)
