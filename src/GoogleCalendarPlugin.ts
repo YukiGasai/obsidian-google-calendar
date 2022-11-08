@@ -320,25 +320,46 @@ export default class GoogleCalendarPlugin extends Plugin {
 				}
 
 				googleListEvents().then((events) => {
-					events = events.filter(event => {
-						if(event.start.date) return true;
+					let currentEvents = events.filter(event => {
+						if(event.start.date) return false;
 						const startMoment = window.moment(event.start.dateTime);
 						const endMoment = window.moment(event.end.dateTime);
 						const nowMoment = window.moment();
 						if(nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)){
 							return false;
 						}
+					
 						return true;
 					})
+		
+					if(currentEvents.length == 0) {
+						currentEvents = events.filter(event => {
+							if(event.start.date) return false;
+							const startMoment = window.moment(event.start.dateTime).subtract(1,"hour");
+							const endMoment = window.moment(event.end.dateTime);
+							const nowMoment = window.moment();
+							if(nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)){
+								return false;
+							}
+							return true;
+						})
+					}
 
-					if(events.length == 1){
+					if(currentEvents.length == 0){
+						currentEvents = events.filter(event => {
+							if(event.start.date) return true;
+							return false
+						})
+					}
+
+					if(currentEvents.length == 1){
 						if(this.settings.useDefaultTemplate && this.settings.defaultFolder && this.settings.defaultFolder){
-							createNoteFromEvent(events[0], this.settings.defaultFolder, this.settings.defaultTemplate)
+							createNoteFromEvent(currentEvents[0], this.settings.defaultFolder, this.settings.defaultTemplate)
 						}else{
-							new CreateNotePromptModal(events[0], ()=>{}).open();
+							new CreateNotePromptModal(currentEvents[0], ()=>{}).open();
 						}
 					}else{
-						new EventListModal(events, "createNote").open();
+						new EventListModal(currentEvents, "createNote").open();
 					}
 				});
 			},
