@@ -105,8 +105,6 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
 		if(item.id == "xxx"){
-
-			console.log(this.currentDate)
 			let note = getDailyNote(this.currentDate, this.dailyNoteMap);
 			if(!note){
 				note = await createDailyNote(this.currentDate)

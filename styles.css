@@ -34,5 +34,5 @@ input[type="datetime-local"] {
 }
 
 .googleCalendarDailyDot{
-	fill: rgb(106, 161, 216) !important;
+    fill: var(--daily-dot-color) !important;
 }

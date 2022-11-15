@@ -52,12 +52,12 @@
         events = eventsInMonth;
         const customTagsSource: ICalendarSource = {
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
-            
+
                 let dots:IDot[] = [];
                 if(plugin.settings.activateDailyNoteAddon){
                     const note = getDailyNote(day, dailyNotes);
                     if(note){
-                        dots = [{isFilled: true, className: "googleCalendarDailyDot", color: "#00FFFF"}]
+                        dots = [{isFilled: true, className: "googleCalendarDailyDot", color: "default"}]
                     }
                 }
                 const eventsOfTheDay = eventsByDay[day.startOf("day").format()]; 
@@ -70,7 +70,7 @@
                 dots = [
                     ...dots,
                     ...Array(eventsOfTheDay.length).fill(
-                        {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
+                        {isFilled: true, className: "googleCalendarDot", color: "default"}
                     )
                 ]
 
@@ -129,7 +129,7 @@
 </script>
 
 {#if width==0 || height == 0}
-    <div class="calendarContainer" >
+    <div class="calendarContainer" style="--daily-dot-color: {plugin.settings.dailyNoteDotColor}">
         {#if loading}
             <p>Loading...</p>
         {:else} 
@@ -148,6 +148,7 @@
 {:else}
     <div 
         class="calendarContainer" 
+        style="--theme-color: {plugin.settings.dailyNoteDotColor}"
         style:width="{width}px" 
         style:height="{height}px"
         >

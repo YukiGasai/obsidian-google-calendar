@@ -47,6 +47,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	defaultTemplate: "",
 	defaultFolder: (app.vault as any).config.newFileFolderPath,
 	activateDailyNoteAddon: false,
+	dailyNoteDotColor: "#6aa1d8",
 };
 
 export default class GoogleCalendarPlugin extends Plugin {

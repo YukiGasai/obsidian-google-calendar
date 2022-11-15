@@ -24,6 +24,7 @@ export interface GoogleCalendarPluginSettings {
 	defaultTemplate: string;
 	defaultFolder: string;
 	activateDailyNoteAddon: boolean;
+	dailyNoteDotColor: string;
 }
 
 export interface Template {

@@ -171,6 +171,21 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 		});
 
+		if(this.plugin.settings.activateDailyNoteAddon){
+			new Setting(containerEl)
+			.setName("Daily dot color")
+			.setDesc("Color for daily note dots in month view")
+			.addText((toggle) => {
+				toggle.inputEl.type = "color"
+				toggle.setValue(this.plugin.settings.dailyNoteDotColor);
+				toggle.onChange(async (state) => {
+					this.plugin.settings.dailyNoteDotColor = state;
+					await this.plugin.saveSettings();
+				});
+			});
+	
+		}
+
 
 		new Setting(containerEl)
 		.setName("Auto create Event Notes")
