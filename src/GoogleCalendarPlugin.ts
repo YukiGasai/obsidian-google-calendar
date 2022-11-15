@@ -46,7 +46,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	useDefaultTemplate: false,
 	defaultTemplate: "",
 	defaultFolder: (app.vault as any).config.newFileFolderPath,
-
+	activateDailyNoteAddon: false,
 };
 
 export default class GoogleCalendarPlugin extends Plugin {

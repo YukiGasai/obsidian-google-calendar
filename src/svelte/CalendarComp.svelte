@@ -7,6 +7,8 @@
     import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
     import _ from "lodash"
+    import { getAllDailyNotes, getDailyNote } from "obsidian-daily-notes-interface";
+    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 
     export let displayedMonth = window.moment();
@@ -16,15 +18,17 @@
     export let exclude;
 
     let interval;
+    let newDayInterval;
     let events: GoogleEvent[];
     let loading: boolean = true;
     let sources:ICalendarSource[];
     let today = window.moment();
-    
+    let dailyNotes = getAllDailyNotes();
+    let plugin = GoogleCalendarPlugin.getInstance();
+
     async function getSource(month:moment.Moment) {
 
-        today = window.moment();
-        
+
         const prevMonthDate = month.clone().startOf("month").subtract(6, "days");
         const nextMonthDate = month.clone().endOf("month").add(12, "days");
 
@@ -49,16 +53,26 @@
         const customTagsSource: ICalendarSource = {
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
             
+                let dots:IDot[] = [];
+                if(plugin.settings.activateDailyNoteAddon){
+                    const note = getDailyNote(day, dailyNotes);
+                    if(note){
+                        dots = [{isFilled: true, className: "googleCalendarDailyDot", color: "#00FFFF"}]
+                    }
+                }
                 const eventsOfTheDay = eventsByDay[day.startOf("day").format()]; 
                 if (!eventsOfTheDay){
                     return {
-                    dataAttributes: {"amount": "0"},
-                    dots: [],
+                    dataAttributes: {"amount": dots.length + ""},
+                    dots: dots,
                 };
                 } 
-                const dots:IDot[] = Array(eventsOfTheDay.length).fill(
-                    {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
-                );
+                dots = [
+                    ...dots,
+                    ...Array(eventsOfTheDay.length).fill(
+                        {isFilled: true, className: "googleCalendarDot", color: "#FFFFFF"}
+                    )
+                ]
 
                 return {
                     dataAttributes: {"amount": eventsOfTheDay.length + ""},
@@ -97,12 +111,19 @@
         if(interval){
             clearInterval(interval);
         }
-        interval = setInterval(() => getSource(displayedMonth), 10000)
+        interval = setInterval(() => getSource(displayedMonth), 1000)
+
+        if(newDayInterval){
+            clearInterval(newDayInterval);
+        }
+        newDayInterval = setInterval(() => today = window.moment(), 60000)
+
         getSource(displayedMonth)
 
     }
     onDestroy(() => {
         clearInterval(interval);
+        clearInterval(newDayInterval);
     })
 
 </script>

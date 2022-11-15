@@ -32,7 +32,6 @@ export function googleClearCachedEvents():void{
 export async function googleListEvents(
 	{ 	startDate,
 		endDate,
-		sort,
 		exclude: excludedCalendars,
 		include: includedCalendars,
 	} : ListOptions = {}
@@ -79,11 +78,8 @@ export async function googleListEvents(
 		eventList = [...eventList, ...events];
 	}
 
-	if(sort) {
-		//Sort because multi day requests will only sort by date
-		eventList = _.orderBy(eventList, [(event:GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], [sort])
-
-	}
+	//Sort because multi day requests will only sort by date
+	eventList = _.orderBy(eventList, [(event:GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], "asc")
 
 	return eventList;
 }

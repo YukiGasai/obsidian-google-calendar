@@ -22,7 +22,6 @@
         const newEvents = await googleListEvents({
             startDate:date,
             endDate:date.clone().add(timeSpan, "day"),
-            sort: 'asc',
             include,
             exclude
         });

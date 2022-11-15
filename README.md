@@ -142,6 +142,11 @@ The fields to use are defined in the [Google Calendar API](https://developers.go
 
 Inserting a template strings into a file that already has an inserted event using @Anotation will automatically replace the template with the event information. 
 
+
+### Use daily notes
+To make this plugin a one stop solution for calendars in obsidian you can enable the setting `Show daily notes`. This will allow you to see your daily notes and google events inside the month view and will add the option to view or create a daily note when opening an event select. 
+![modal with dilay note](https://i.imgur.com/LhhP7C2.png)
+
 ## Thank you to the following plugins: 
 
 [obsidian-calendar-plugin](https://github.com/liamcain/obsidian-calendar-plugin)

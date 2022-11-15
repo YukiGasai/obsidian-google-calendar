@@ -142,7 +142,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 			})
 		});
-
+		
 		new Setting(containerEl)
 		.setName("Default webview theme")
 		.addDropdown(async (dropdown) => {
@@ -157,6 +157,20 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				this.display();
 			})
 		});
+
+		new Setting(containerEl)
+		.setName("Show daily notes")
+		.setDesc("Will disply daily notes and allow to open and create daily notes")
+		.addToggle((toggle) => {
+			toggle.setValue(this.plugin.settings.activateDailyNoteAddon);
+			toggle.onChange(async (state) => {
+				this.plugin.settings.activateDailyNoteAddon = state;
+				await this.plugin.saveSettings();
+				this.hide();
+				this.display();
+			});
+		});
+
 
 		new Setting(containerEl)
 		.setName("Auto create Event Notes")

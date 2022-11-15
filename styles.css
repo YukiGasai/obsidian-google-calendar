@@ -32,3 +32,7 @@ input[type="datetime-local"] {
 .templater_search {
     width: calc(100% - 20px);
 }
+
+.googleCalendarDailyDot{
+	fill: rgb(106, 161, 216) !important;
+}

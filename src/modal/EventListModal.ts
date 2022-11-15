@@ -1,12 +1,12 @@
 import type { GoogleEvent, ModalSelectMode } from "../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-import { FuzzySuggestModal } from "obsidian";
+import { FuzzySuggestModal, TFile } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { CreateNotePromptModal } from './CreateNotePromptModal';
 import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
-
+import { getDailyNote, createDailyNote, getAllDailyNotes } from 'obsidian-daily-notes-interface';
 /**
  * This class is used to diplay a select modal in which the user can select an event
 */
@@ -16,6 +16,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	currentDate: moment.Moment;
 	closeFunction?: () => void;
 	modalSelectMode: ModalSelectMode;
+	dailyNoteMap: Record<string, TFile>;
 	plugin = GoogleCalendarPlugin.getInstance()
 	constructor(
 		eventList: GoogleEvent[], 
@@ -31,6 +32,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
 		this.currentDate = currentDate.clone();
+		this.dailyNoteMap = getAllDailyNotes();
 		if(closeFunction){
 			this.closeFunction = closeFunction
 		}
@@ -78,11 +80,19 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	getItems(): GoogleEvent[] {
+		if(this.plugin.settings.activateDailyNoteAddon){
+			return [{id:"xxx", start:null, end:null},...this.eventList];
+		}
 		return this.eventList;
 	}
 
 	getItemText(item: GoogleEvent): string {
-
+		if(item.id == "xxx"){
+			if(getDailyNote(this.currentDate, this.dailyNoteMap)){
+				return "Open daily note"
+			}
+			return "Create daily note"
+		}
 		if(item.start.date) {
 			return `${item.start.date}\t\t | ${item.summary}\t`;
 		}else{
@@ -94,6 +104,17 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
+		if(item.id == "xxx"){
+
+			console.log(this.currentDate)
+			let note = getDailyNote(this.currentDate, this.dailyNoteMap);
+			if(!note){
+				note = await createDailyNote(this.currentDate)
+			}
+			app.workspace.getLeaf(true).openFile(note);
+
+			return;
+		}
 		if(this.modalSelectMode == "details"){
 			this.open();
 			new EventDetailsModal(item, () => this.eventsChanged = true).open();
