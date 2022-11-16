@@ -7,8 +7,8 @@
     import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
     import _ from "lodash"
-    import { getAllDailyNotes, getDailyNote } from "obsidian-daily-notes-interface";
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+    import { getDailyNotes, getSingleDailyNote } from "../helper/DailyNoteHelper";
 
 
     export let displayedMonth = window.moment();
@@ -17,18 +17,18 @@
     export let include;
     export let exclude;
 
+    let dailyNoteList = getDailyNotes();
     let interval;
     let newDayInterval;
     let events: GoogleEvent[];
     let loading: boolean = true;
     let sources:ICalendarSource[];
     let today = window.moment();
-    let dailyNotes = getAllDailyNotes();
     let plugin = GoogleCalendarPlugin.getInstance();
 
     async function getSource(month:moment.Moment) {
 
-
+        plugin.settings.dailyNoteDotColor = plugin.settings.dailyNoteDotColor;
         const prevMonthDate = month.clone().startOf("month").subtract(6, "days");
         const nextMonthDate = month.clone().endOf("month").add(12, "days");
 
@@ -40,10 +40,10 @@
         });    
 
         //Dont do anything when events are the same
-        if(_.isEqual(eventsInMonth, events)){
+        if(_.isEqual(eventsInMonth, events) && _.isEqual(dailyNoteList, getDailyNotes())){
             return;
         }
-
+        dailyNoteList = getDailyNotes();
         
         let eventsByDay = _.groupBy(eventsInMonth, event =>
             window.moment(event.start.date ?? event.start.dateTime).startOf('day').format()
@@ -55,7 +55,7 @@
 
                 let dots:IDot[] = [];
                 if(plugin.settings.activateDailyNoteAddon){
-                    const note = getDailyNote(day, dailyNotes);
+                    const note = getSingleDailyNote(day);
                     if(note){
                         dots = [{isFilled: true, className: "googleCalendarDailyDot", color: "default"}]
                     }
@@ -105,8 +105,6 @@
         }).open();
     
     }
-
-
     $: {
         if(interval){
             clearInterval(interval);
@@ -129,12 +127,12 @@
 </script>
 
 {#if width==0 || height == 0}
-    <div class="calendarContainer" style="--daily-dot-color: {plugin.settings.dailyNoteDotColor}">
+    <div class="calendarContainer">
         {#if loading}
             <p>Loading...</p>
         {:else} 
 
-            <div>
+            <div style="--daily-dot-color: {plugin.settings.dailyNoteDotColor}">
                 <CalendarBase
                     showWeekNums={false}
                     {onClickDay}

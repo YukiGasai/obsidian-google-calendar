@@ -1,5 +1,5 @@
 import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
-import { Editor, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import { Editor, EventRef, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -23,6 +23,7 @@ import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
 import { getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
+import { checkForNewDailyNotes } from "./helper/DailyNoteHelper";
 
 
 
@@ -68,6 +69,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 	settingsTab: GoogleCalendarSettingTab;
 
+	events: EventRef[] = [];
+
 	initView = async (viewId:string): Promise<void> => {
 		if (
 			this.app.workspace.getLeavesOfType(viewId)
@@ -85,6 +88,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 	};
 
 	onLayoutReady = ():void => {
+		checkForNewDailyNotes();
+
 		//Get the template plugin to run their commands
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const coreTemplatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
@@ -108,6 +113,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 		await this.loadSettings();
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
+
+		this.events.push(this.app.vault.on('create', checkForNewDailyNotes));
+		this.events.push(this.app.vault.on('delete', checkForNewDailyNotes));
+		this.events.push(this.app.vault.on('rename', checkForNewDailyNotes));
+
+		for(let event in this.events){
+			this.registerEvent(event);
+		}
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) => 
 			checkEditorForCodeBlocks(text, el, ctx)
@@ -452,8 +465,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 			this.settingsTab.display();
 		  });
-
-	
 	}
 
 	onunload(): void {
@@ -461,6 +472,13 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
+
+
+		for(let event in this.events){
+			app.vault.offref(event);
+		}
+
+
 	}
 
 	async loadSettings(): Promise<void> {

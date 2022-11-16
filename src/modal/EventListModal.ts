@@ -6,7 +6,8 @@ import { EventDetailsModal } from './EventDetailsModal';
 import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { CreateNotePromptModal } from './CreateNotePromptModal';
 import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
-import { getDailyNote, createDailyNote, getAllDailyNotes } from 'obsidian-daily-notes-interface';
+import { createDailyNote } from 'obsidian-daily-notes-interface';
+import { getSingleDailyNote } from "../helper/DailyNoteHelper";
 /**
  * This class is used to diplay a select modal in which the user can select an event
 */
@@ -32,7 +33,6 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
 		this.currentDate = currentDate.clone();
-		this.dailyNoteMap = getAllDailyNotes();
 		if(closeFunction){
 			this.closeFunction = closeFunction
 		}
@@ -88,7 +88,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 	getItemText(item: GoogleEvent): string {
 		if(item.id == "xxx"){
-			if(getDailyNote(this.currentDate, this.dailyNoteMap)){
+			if(getSingleDailyNote(this.currentDate)){
 				return "Open daily note"
 			}
 			return "Create daily note"
@@ -105,7 +105,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
 		if(item.id == "xxx"){
-			let note = getDailyNote(this.currentDate, this.dailyNoteMap);
+			let note = getSingleDailyNote(this.currentDate);
 			if(!note){
 				note = await createDailyNote(this.currentDate)
 			}
