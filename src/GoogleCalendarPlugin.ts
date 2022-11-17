@@ -114,12 +114,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
-		this.events.push(this.app.vault.on('create', checkForNewDailyNotes));
-		this.events.push(this.app.vault.on('delete', checkForNewDailyNotes));
-		this.events.push(this.app.vault.on('rename', checkForNewDailyNotes));
-
-		for(let event in this.events){
+		for(let eventName in ["create", "delete", "rename"]) {
+			 // @ts-ignore:
+			const event = this.app.vault.on(eventName, checkForNewDailyNotes);
 			this.registerEvent(event);
+			this.events.push(event);
 		}
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) => 
@@ -468,6 +467,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
@@ -475,9 +475,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 
 		for(let event in this.events){
-			app.vault.offref(event);
+			this.app.vault.offref(event);
 		}
-
+		this.events = [];
 
 	}
 

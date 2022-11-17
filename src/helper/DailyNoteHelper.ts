@@ -15,7 +15,7 @@ export const dailyNotesUpdated = new Event('dailyNoteUpdate', {
 export const checkForNewDailyNotes = ():void => {
     if(app.workspace.layoutReady){
         const newEvents = getAllDailyNotes();
-        if(!_.equals(allDailyNotes,newEvents))
+        if(_.isEqual(allDailyNotes,newEvents) == false)
         allDailyNotes = newEvents;
         document.dispatchEvent(dailyNotesUpdated);
     }

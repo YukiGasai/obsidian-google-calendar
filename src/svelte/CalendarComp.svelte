@@ -131,7 +131,6 @@
         {#if loading}
             <p>Loading...</p>
         {:else} 
-
             <div style="--daily-dot-color: {plugin.settings.dailyNoteDotColor}">
                 <CalendarBase
                     showWeekNums={false}
@@ -146,7 +145,6 @@
 {:else}
     <div 
         class="calendarContainer" 
-        style="--theme-color: {plugin.settings.dailyNoteDotColor}"
         style:width="{width}px" 
         style:height="{height}px"
         >
@@ -154,7 +152,7 @@
             <p>Loading...</p>
         {:else} 
     
-            <div>
+            <div style="--theme-color: {plugin.settings.dailyNoteDotColor}">
                 <CalendarBase
                     showWeekNums={false}
                     {onClickDay}
