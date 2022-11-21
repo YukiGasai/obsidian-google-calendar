@@ -4,7 +4,7 @@ import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { getAllDailyNotes, getDailyNote,  } from "obsidian-daily-notes-interface"
 import _ from "lodash";
 
-let allDailyNotes:Record<string,TFile> = getAllDailyNotes()
+let allDailyNotes:Record<string,TFile> = {};
 
 export const dailyNotesUpdated = new Event('dailyNoteUpdate', {
     bubbles: true,
