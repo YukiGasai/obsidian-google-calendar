@@ -88,7 +88,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 	};
 
 	onLayoutReady = ():void => {
-		checkForNewDailyNotes();
+		checkForNewDailyNotes(this);
 
 		//Get the template plugin to run their commands
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,13 +114,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
-		for(let eventName in ["create", "delete", "rename"]) {
-			 // @ts-ignore:
-			const event = this.app.vault.on(eventName, checkForNewDailyNotes);
-			this.registerEvent(event);
-			this.events.push(event);
-		}
 
+		this.events.push(this.app.vault.on("create", ()=>checkForNewDailyNotes(this)));
+		this.events.push(this.app.vault.on("delete", ()=>checkForNewDailyNotes(this)));
+		this.events.push(this.app.vault.on("rename", ()=>checkForNewDailyNotes(this)));
+		this.events.forEach(event => {
+			this.registerEvent(event);
+		});
+		
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) => 
 			checkEditorForCodeBlocks(text, el, ctx)
 		);
