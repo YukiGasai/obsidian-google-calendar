@@ -123,7 +123,8 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
             folderPath = folderName;
         }
     }
-    const filePath = normalizePath(`${folderPath}/${event.summary}.md`);
+    let cleanEventSummary = event.summary.replace('/', '-').replace(':', '-').replace('\\', '-');
+    const filePath = normalizePath(`${folderPath}/${cleanEventSummary}.md`);
 
     //check if file already exists
     if(await adapter.exists(filePath)){
