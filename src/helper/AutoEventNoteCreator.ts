@@ -123,7 +123,18 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
             folderPath = folderName;
         }
     }
-    let cleanEventSummary = event.summary.replace('/', '-').replace(':', '-').replace('\\', '-');
+    let cleanEventSummary = event.summary
+        .trim()
+        .replace('<', 'lt')
+        .replace('>', 'gt')
+        .replace('\"', '\'\'')
+        .replace('\\', '-')
+        .replace('/', '-')
+        .replace(':', '-')
+        .replace('|', '-')
+        .replace('*', '')
+        .replace('?', '');
+
     const filePath = normalizePath(`${folderPath}/${cleanEventSummary}.md`);
 
     //check if file already exists
