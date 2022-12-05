@@ -12,7 +12,7 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
  * @param event The event we want to create at the api
  * @returns The created Event
  */
-export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent> {
+export async function googleCreateEvent(event: GoogleEvent|any): Promise<GoogleEvent> {
 
 	if(!settingsAreCompleteAndLoggedIn())return null;
 
@@ -22,9 +22,9 @@ export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent
 	event.end.timeZone = event.parent.timeZone;
 
 	delete event.parent;
-
-	const updateResponse = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,
+	console.log(JSON.stringify(event))
+	const updateResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,{
+		//url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,
 		method: "POST",
 		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
 		body: JSON.stringify(event),
@@ -35,7 +35,7 @@ export async function googleCreateEvent(event: GoogleEvent): Promise<GoogleEvent
 		return null;
 	}
 
-	const createdEvent = await updateResponse.json;
+	const createdEvent = await updateResponse.json();
 
 	return createdEvent;
 

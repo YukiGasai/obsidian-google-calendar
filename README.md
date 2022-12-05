@@ -17,8 +17,8 @@ Manage your Google Calendar from inside Obsidian
 ### Test client reached user limit use own client
 The user limit of the test client is hit. This means that new Google accounts can't use the test client until it's verified by Google. I am working on getting the verification. For now, please resort to using your own client instead.
 
--   One click install from [comunity plugin store](obsidian://show-plugin?id=google-calendar)
--   Go to settigns and activate plugin
+-   One click install from [community plugin store](obsidian://show-plugin?id=google-calendar)
+-   Go to settings and activate plugin
 -   Go into plugin settings
 -   To *test* the plugin set `Use own authentication client` to false
 -   Press Login and authenticate with google
@@ -79,30 +79,31 @@ A schedule view to see all your event in a order
 
 | Name | Description |
 | ---  | --- |
-| Open Google Calendar web view|       Opens the web view |
-| Open Google Calendar month view|     Opens the month/calendar view|
-| Open Google Calendar day view|       Opens the day/timeline view|
-| Open Google Calendar schedule view|  Opens the schedule view|
-| Insert Google Events|                Inserts events into the active file as a table or list |
-| Insert Google Event CodeBlock|       Inserts a codeblock into the active file to display the 3 views  |
-| Insert Google Event Template|        Inserst a template string into the active file to insert event information |
-| List Google Events|                  Opens a dropdown to view todays events |
-| List Google Calendars|               Opens a dropdown to view all calendars |
-| Create Google Calendar Event|        Opens an empty details view to create a new event |
-| Google Calendar Trigger Auto Import| Runs the Auto create Notes function again |
-| Create Event Note|                   Creates an event note for a selected event |
-| Create Event Note for current event| Creates an event note for a currently running selected event |
+| Open Google Calendar web view|                    Opens the web view |
+| Open Google Calendar month view|                  Opens the month/calendar view|
+| Open Google Calendar day view|                    Opens the day/timeline view|
+| Open Google Calendar schedule view|               Opens the schedule view|
+| Insert Google Events|                             Inserts events into the active file as a table or list |
+| Insert Google Event CodeBlock|                    Inserts a codeblock into the active file to display the 3 views  |
+| Insert Google Event Template|                     Inserts a template string into the active file to insert event information |
+| List Google Events|                               Opens a dropdown to view todays events |
+| List Google Calendars|                            Opens a dropdown to view all calendars |
+| Create Google Calendar Event|                     Opens an empty details view to create a new event |
+| Create Google Calendar Event from frontmatter |   Creates an event from the yaml of an open file |
+| Google Calendar Trigger Auto Import|              Runs the Auto create Notes function again |
+| Create Event Note|                                Creates an event note for a selected event |
+| Create Event Note for current event|              Creates an event note for a currently running selected event |
 | Copy Google Calendar Refresh Token to Clipboard|  Copies the refresh token (PC only) |
 
 
 
-### @Anotation
-Refrence Google Calendar events inside text by typing @today or @01.01.2022 then select the event you want to insert.
+### @Annotation
+Reference Google Calendar events inside text by typing @today or @01.01.2022 then select the event you want to insert.
 
 Other Options are @tomorrow, @yesterday, @+1 @-1 
 
 ### CodeBlock
-This plugin adds a cutom codeBlock gEvent to insert the Web, Month and day and schedule view inside file. To options are parsed with yaml. 
+This plugin adds a custom codeBlock gEvent to insert the Web, Month and day and schedule view inside file. To options are parsed with yaml. 
 
 #### Parameters
 ```
@@ -128,11 +129,11 @@ The plugin allows you to generate notes automatically from Google Events.
 You can also define a template that should be used when creating new notes by adding the template title `:obsidian-UniTemplate:`
 Make sure to activate the core plugin Templates or the Templater plugin.
 
-You can also deifine a position where the new note should be saved by adding the folder location infornt of the text like this `:Folder/Path-obsidian:`
+You can also define a position where the new note should be saved by adding the folder location in front of the text like this `:Folder/Path-obsidian:`
 
 Example `:Uni/Math-obsidian-UniTemplate:` Create the node in the folder Math with the Template UniTemplate.
 
-To insert event information into tempates use `{{gEvent.AnyField}}` for both plugins
+To insert event information into templates use `{{gEvent.AnyField}}` for both plugins
 
 Example
 ```
@@ -143,12 +144,12 @@ Event Description
 ```
 The fields to use are defined in the [Google Calendar API](https://developers.google.com/calendar/api/v3/reference/events) and can be selected from the dropdown menu
 
-Inserting a template strings into a file that already has an inserted event using @Anotation will automatically replace the template with the event information. 
+Inserting a template strings into a file that already has an inserted event using @Annotation will automatically replace the template with the event information. 
 
 
 ### Use daily notes
 To make this plugin a one stop solution for calendars in obsidian you can enable the setting `Show daily notes`. This will allow you to see your daily notes and google events inside the month view and will add the option to view or create a daily note when opening an event select. 
-![modal with dilay note](https://i.imgur.com/LhhP7C2.png)
+![modal with daily note](https://i.imgur.com/LhhP7C2.png)
 
 ## Thank you to the following plugins: 
 

@@ -1,5 +1,5 @@
-import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
-import { Editor, EventRef, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import type { GoogleCalendarPluginSettings, GoogleEvent, IGoogleCalendarPluginApi } from "./helper/types";
+import { Editor, EventRef, MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -24,6 +24,7 @@ import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
 import { getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 import { checkForNewDailyNotes } from "./helper/DailyNoteHelper";
+import { googleCreateEvent } from "../src/googleApi/GoogleCreateEvent";
 
 
 
@@ -434,6 +435,85 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
+
+			
+		/**
+		 * This function will try to create a event from the yaml metadata of a file
+		*/	
+		this.addCommand({
+			id: "create-google-calendar-event-from-frontmatter ",
+			name: "Create Google Calendar Event from frontmatter",
+			editorCheckCallback: (
+				checking: boolean,
+				editor: Editor,
+				view: MarkdownView
+			): boolean => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				if( !view.file) {
+					return;
+				}
+
+				const frontmatter = app?.metadataCache?.getFileCache(view.file).frontmatter;
+
+				if(!frontmatter) {
+					return;
+				}
+
+				googleListCalendars().then(calendars => {
+					delete frontmatter.position;
+
+					frontmatter.calendar 
+					const calendar = calendars.find(calendar => calendar.id == (frontmatter.calendar ?? this.settings.defaultCalendar) || calendar.summary  == (frontmatter.calendar ?? this.settings.defaultCalendar));
+					if(!calendar)return;
+					frontmatter.parent = calendar;
+
+					//Check for a summary if there is none defined
+					if(frontmatter.title && !frontmatter.summary){
+						frontmatter.summary = frontmatter.title
+					}
+					if(!frontmatter.summary) {
+						frontmatter.summary = view.file.name;
+					}
+
+					//Check for start and end date if there is none defined
+					if(frontmatter.start instanceof String){
+						frontmatter.start = {date: frontmatter.start}
+					}
+					if(frontmatter.end instanceof String){
+						frontmatter.end = {date: frontmatter.end}
+					}
+					if(frontmatter.startTime){
+						frontmatter.start = {dateTime: frontmatter.startTime}
+					}
+					if(frontmatter.endTime){
+						frontmatter.end = {dateTime: frontmatter.endTime}
+					}
+					if(!frontmatter.start && !frontmatter.startTime){
+						frontmatter.start = {date: window.moment()}
+					}
+					if(!frontmatter.end && !frontmatter.endTime){
+						frontmatter.end = {date: window.moment()}
+					}
+					if(frontmatter.start?.date){
+						frontmatter.start.date = window.moment(frontmatter.start?.date).format("YYYY-MM-DD");
+						frontmatter.end.date = window.moment(frontmatter.end?.date).format("YYYY-MM-DD"); 
+					}else{
+						frontmatter.start.dateTime = window.moment(frontmatter.start?.dateTime).format();
+						frontmatter.end.dateTime = window.moment(frontmatter.end?.dateTime).format(); 
+					}
+					googleCreateEvent(frontmatter)
+				})
+			},
+		});
 
 		//Copy Refresh token to clipboard
 		this.addCommand({
