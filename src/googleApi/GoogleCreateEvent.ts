@@ -22,7 +22,6 @@ export async function googleCreateEvent(event: GoogleEvent|any): Promise<GoogleE
 	event.end.timeZone = event.parent.timeZone;
 
 	delete event.parent;
-	console.log(JSON.stringify(event))
 	const updateResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,{
 		//url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,
 		method: "POST",

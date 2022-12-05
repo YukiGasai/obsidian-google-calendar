@@ -481,34 +481,38 @@ export default class GoogleCalendarPlugin extends Plugin {
 						frontmatter.summary = frontmatter.title
 					}
 					if(!frontmatter.summary) {
-						frontmatter.summary = view.file.name;
+						frontmatter.summary = view.file.basename;
 					}
 
 					//Check for start and end date if there is none defined
-					if(frontmatter.start instanceof String){
+
+					if(typeof frontmatter.start == 'string'){
 						frontmatter.start = {date: frontmatter.start}
 					}
-					if(frontmatter.end instanceof String){
+					if(typeof frontmatter.end == 'string'){
 						frontmatter.end = {date: frontmatter.end}
 					}
+
 					if(frontmatter.startTime){
 						frontmatter.start = {dateTime: frontmatter.startTime}
 					}
 					if(frontmatter.endTime){
 						frontmatter.end = {dateTime: frontmatter.endTime}
 					}
+
 					if(!frontmatter.start && !frontmatter.startTime){
 						frontmatter.start = {date: window.moment()}
 					}
 					if(!frontmatter.end && !frontmatter.endTime){
-						frontmatter.end = {date: window.moment()}
+						frontmatter.end = frontmatter.start
 					}
-					if(frontmatter.start?.date){
-						frontmatter.start.date = window.moment(frontmatter.start?.date).format("YYYY-MM-DD");
-						frontmatter.end.date = window.moment(frontmatter.end?.date).format("YYYY-MM-DD"); 
+					
+					if(frontmatter.start.date){
+						frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
+						frontmatter.end.date = window.moment(frontmatter.end.date).format("YYYY-MM-DD"); 
 					}else{
-						frontmatter.start.dateTime = window.moment(frontmatter.start?.dateTime).format();
-						frontmatter.end.dateTime = window.moment(frontmatter.end?.dateTime).format(); 
+						frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
+						frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format(); 
 					}
 					googleCreateEvent(frontmatter)
 				})
