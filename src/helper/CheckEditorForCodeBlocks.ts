@@ -1,5 +1,5 @@
 /**
- * The Event Processor is checking the edior for plugin specific codeblocks
+ * The Event Processor is checking the editor for plugin specific codeblocks
  * marked with gEvent and replaces them with custom widgets 
  * from svelte components
  */

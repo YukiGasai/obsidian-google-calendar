@@ -1,6 +1,6 @@
 /**
  * This file helps to find the right colors for each event
- * Google is using specific colors accessable by an api endpoint
+ * Google is using specific colors accessible by an api endpoint
  * To save request we keep the colors saved
  * There is a difference in calendar and event color
  * 		Changing a color of an event the color is stores as a event color 

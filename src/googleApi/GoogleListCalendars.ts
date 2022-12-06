@@ -11,7 +11,7 @@ let cachedCalendars:GoogleCalendar[] = []
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
- * @param plugin a refrence to the main plugin object
+ * @param plugin a reference to the main plugin object
  * @param calendars The list of all possible calendars
  * @returns The filtered list of calendars
  */

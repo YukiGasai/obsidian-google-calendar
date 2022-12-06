@@ -17,10 +17,10 @@ export async function googleUpdateEvent(
 ): Promise<GoogleEvent> {
 	if(!settingsAreCompleteAndLoggedIn())return null;
 
-	// Use the reacurance id to update all events from a reacuring task
+	// Use the recurrence id to update all events from a recurring task
 	let id = event.recurringEventId ?? event.id;
 
-	//Check if the user wants to update all events from a reacrung task
+	//Check if the user wants to update all events from a recurring task
 	if (updateSingle && event.recurringEventId) {
 		id = event.id;
 	}

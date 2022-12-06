@@ -10,14 +10,14 @@ import type { GoogleEvent } from "./types";
 }
 
 /**
- * This function calcultes the y position of a event in a timlineview
+ * This function calculates the y position of a event in a timeline view
  * The height is the percentage the day has gone when the event starts
- * The start of the day is 0% the end is 100% this is maped to the height of th view 
+//  * The start of the day is 0% the end is 100% this is mapped to the height of th view 
  * 
  * If the event is full day the height is 0
  * 
- * @param event to calulate the poition from
- * @param timeLineHeight the max height of the timline 
+ * @param event to calculate the position from
+ * @param timeLineHeight the max height of the timeline 
  * @returns height where the events starts
  */
 export function getEventStartPosition(
@@ -33,12 +33,12 @@ export function getEventStartPosition(
 }
 
 /**
- * This function calulated the height of a event inside a timeline view
+ * This function calculated the height of a event inside a timeline view
  * The height is determined by the start and end time of the event
  * 
  * TODO Error when stretches over more than a day
  * @param event to get the height of
- * @param timeLineHeight the max height of the timline  
+ * @param timeLineHeight the max height of the timeline  
  * @returns the height of the event
  */
 export function getEventHeight(

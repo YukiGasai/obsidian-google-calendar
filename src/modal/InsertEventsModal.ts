@@ -5,7 +5,7 @@ import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
 import _ from "lodash";
 
 /**
- * This Class is used to create a modal to slect what and how information about a event should be importat into a file
+ * This Class is used to create a modal to select what and how information about a event should be imported into a file
  */
 
 

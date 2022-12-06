@@ -19,7 +19,7 @@ import _ from "lodash";
  *  This function is called once the obsidian plugin is loaded
  * 
  * 
- * @param plugin Refrence to the main plugin to acess the settings
+ * @param plugin Reference to the main plugin to access the settings
  */
 export const checkForEventNotes = async (plugin: GoogleCalendarPlugin) :Promise<void> => {
 

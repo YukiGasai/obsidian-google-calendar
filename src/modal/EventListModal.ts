@@ -9,7 +9,7 @@ import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 import { createDailyNote } from 'obsidian-daily-notes-interface';
 import { getSingleDailyNote } from "../helper/DailyNoteHelper";
 /**
- * This class is used to diplay a select modal in which the user can select an event
+ * This class is used to display a select modal in which the user can select an event
 */
 export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	eventList: GoogleEvent[];

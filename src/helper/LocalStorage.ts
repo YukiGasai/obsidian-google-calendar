@@ -30,7 +30,7 @@ export const getExpirationTime = (): number => {
 };
 
 /**
- * get user Id from LocalStorager
+ * get user Id from LocalStorage
  * @returns googleCalendarUserId
  */
  export const getUserId = (): string => {

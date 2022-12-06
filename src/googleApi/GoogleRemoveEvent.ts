@@ -9,7 +9,7 @@ import { requestUrl } from 'obsidian';
  * If the event is recurrent is will delete all it's instanced except if deleteSingle is set
  * @param event The event to delete
  * @param deleteSingle If set to true and if the event is recurrent only one instance is deleted
- * @returns a boolean if the deletion was successfull
+ * @returns a boolean if the deletion was successfully
  */
 export async function googleRemoveEvent(
 	event: GoogleEvent,
@@ -18,7 +18,7 @@ export async function googleRemoveEvent(
 
 	if(!settingsAreCompleteAndLoggedIn())return false;
 
-	// Use the reacurance id to delete all events from a reacuring task
+	// Use the recurrence id to delete all events from a recurring task
 	let id = event.recurringEventId ?? event.id;
 
 	if (deleteSingle && event.recurringEventId) {

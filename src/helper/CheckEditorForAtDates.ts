@@ -1,6 +1,6 @@
 /**
  * The editor checker is scanning the currently opened document and checks if a date is written
- * if there is a date with @ an dropdown will apear to select a event that is due to this date
+ * if there is a date with @ an dropdown will appear to select a event that is due to this date
  */
 
 import type { Editor } from "obsidian";

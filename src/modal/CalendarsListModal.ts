@@ -6,7 +6,7 @@ import { googleListEvents } from "../googleApi/GoogleListEvents";
 import { EventListModal } from "./EventListModal";
 
 /**
- * This class is used to diplay a select modal in which the user can select a calendar to see its events
+ * This class is used to display a select modal in which the user can select a calendar to see its events
  */
 export class CalendarsListModal extends FuzzySuggestModal<GoogleCalendar> {
 	calendarList: GoogleCalendar[];

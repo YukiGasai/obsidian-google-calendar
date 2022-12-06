@@ -7,7 +7,6 @@
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
-    import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
     import { Frequency, RRule, RRuleSet, Weekday } from "rrule";
     import type { Options } from "rrule"
 	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";

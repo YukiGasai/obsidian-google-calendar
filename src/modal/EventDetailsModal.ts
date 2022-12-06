@@ -5,7 +5,7 @@ import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
 
 /**
- * This Class is used to create a modal in which the user can see more informations about an event and can update and delte the event
+ * This Class is used to create a modal in which the user can see more information about an event and can update and delete the event
  */
 export class EventDetailsModal extends Modal {
 

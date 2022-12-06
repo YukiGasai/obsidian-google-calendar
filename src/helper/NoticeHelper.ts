@@ -3,7 +3,7 @@ import { Notice } from "obsidian";
 const noticeMap: Map<string, moment.Moment> = new Map();
 
 /**
- * A wrapper function around Notice to make them be able to only show in an intervall
+ * A wrapper function around Notice to make them be able to only show in an interval
  * @param text The text displayed inside the Notice
  */
 export function createNotice(

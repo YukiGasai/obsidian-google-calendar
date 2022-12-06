@@ -39,7 +39,7 @@
             exclude
         });    
 
-        //Dont do anything when events are the same
+        //Don't do anything when events are the same
         if(_.isEqual(eventsInMonth, events) && _.isEqual(dailyNoteList, getDailyNotes())){
             return;
         }

@@ -409,7 +409,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		});
 		
 		/**
-		* This function will list all events of a day you can choose eventst to insert and decide if you want a list or a table
+		* This function will list all events of a day you can choose events to insert and decide if you want a list or a table
 		* as a table and inset the table into the currently open editor using the markdown format
 		* This functions is used to save your events into a static field creating a backup of the day independent from the API
 		*/	
@@ -545,7 +545,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			setUserId(req['uid'])
 			setAccessToken(req['at']);
 			setExpirationTime(+new Date() + 3600000);
-			new Notice("Login successfull!");
+			new Notice("Login successful!");
 
 			this.settingsTab.display();
 		  });

@@ -34,7 +34,7 @@ function checkAccessTokenValid(): boolean {
 	//Check if the token exists
 	if(!getAccessToken() || getAccessToken() == "")return false;
 
-	//Check if Expiration time is not set or deafault 0
+	//Check if Expiration time is not set or default 0
 	if(!getExpirationTime())return false;
 
 	//Check if Expiration time is set to text
@@ -97,10 +97,10 @@ const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<bo
 }
 
 /**
- * Function the get the acces token used in every request to the Google Calendar API
+ * Function the get the access token used in every request to the Google Calendar API
  * 
- * Function will check if a accses token exists and if its still valid
- * if not it will request a new access token using the refersh token
+ * Function will check if a access token exists and if its still valid
+ * if not it will request a new access token using the refresh token
  * 
  * @returns A valid access Token
  */
@@ -112,7 +112,7 @@ export async function getGoogleAuthToken(): Promise<string> {
 	if (
 		checkAccessTokenValid() == false
 	) {
-		//Acceess token is no loger valid have to create a new one
+		//Access token is no longer valid have to create a new one
 		if (getRefreshToken() != "" || getUserId() != "") {
 
 			if(plugin.settings.useCustomClient){
@@ -135,7 +135,7 @@ export async function getGoogleAuthToken(): Promise<string> {
  * 
  * Function will start a local server 
  * User is redirected to OUATh screen
- * If authentication is sucessfull user is redirected to local server
+ * If authentication is successfully user is redirected to local server
  * Server will read the tokens and save it to local storage
  * Local server will shut down
  * 

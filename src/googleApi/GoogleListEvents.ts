@@ -27,7 +27,7 @@ export function googleClearCachedEvents():void{
  * This function is the main function to get a list of events. The function uses named parameters to make it easy to use.
  * You can set a timespan with start-/enddate and ex-/include calendars 
  * @param Input Object for named parameters  
- * @returns A list of GoogelCalendarEvents
+ * @returns A list of GoogleCalendarEvents
  */
 export async function googleListEvents(
 	{ 	startDate,
@@ -54,7 +54,7 @@ export async function googleListEvents(
 	//Get all calendars not on the black list
 	let calendarList = await googleListCalendars();
 	
-	//Get the list of calendars that should be querried
+	//Get the list of calendars that should be queried
 	if(includedCalendars && includedCalendars.length){
 		calendarList = calendarList.filter((calendar:GoogleCalendar) => 
 			(includedCalendars.contains(calendar.id) || includedCalendars.contains(calendar.summary))
@@ -88,11 +88,11 @@ export async function googleListEvents(
 
 
 // ===============================================================================
-// =================== HELPER Funcitons to make to list events ===================
+// =================== HELPER Functions to make to list events ===================
 // ===============================================================================
 
 /**
- * This function is the core of the list event function. It makes the http requests to the api and handels the pagination and error handeling
+ * This function is the core of the list event function. It makes the http requests to the api and handles the pagination and error handling
  * @param plugin 
  * @param GoogleCalendar 
  * @param startString 
@@ -210,11 +210,11 @@ function resolveMultiDayEventsHelper(
 }
 
 /**
- * This funcion will return a list of evetn in a timespan from a specific calendar
+ * This function will return a list of event in a timespan from a specific calendar
  * The function will check for an equal function call in the cache if there is a stored result that is not to old it will return without api request
  * @param GoogleCalendar  the calendar to get the events from
  * @param date the startdate of the checking time
- * @param endDate the endate of the checking time
+ * @param endDate the enddate of the checking time
  * @returns a list of Google Events
  */
 async function googleListEventsByCalendar(
