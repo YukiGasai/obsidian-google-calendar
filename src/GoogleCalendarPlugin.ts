@@ -25,6 +25,7 @@ import { getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 import { checkForNewDailyNotes } from "./helper/DailyNoteHelper";
 import { googleCreateEvent } from "../src/googleApi/GoogleCreateEvent";
+import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 
 
 
@@ -449,7 +450,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 				view: MarkdownView
 			): boolean => {
 				const canRun = settingsAreCompleteAndLoggedIn();
-
 				if (checking) {
 					return canRun;
 				}
@@ -468,53 +468,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListCalendars().then(calendars => {
-					delete frontmatter.position;
-
-					frontmatter.calendar 
-					const calendar = calendars.find(calendar => calendar.id == (frontmatter.calendar ?? this.settings.defaultCalendar) || calendar.summary  == (frontmatter.calendar ?? this.settings.defaultCalendar));
-					if(!calendar)return;
-					frontmatter.parent = calendar;
-
-					//Check for a summary if there is none defined
-					if(frontmatter.title && !frontmatter.summary){
-						frontmatter.summary = frontmatter.title
-					}
-					if(!frontmatter.summary) {
-						frontmatter.summary = view.file.basename;
-					}
-
-					//Check for start and end date if there is none defined
-
-					if(typeof frontmatter.start == 'string'){
-						frontmatter.start = {date: frontmatter.start}
-					}
-					if(typeof frontmatter.end == 'string'){
-						frontmatter.end = {date: frontmatter.end}
-					}
-
-					if(frontmatter.startTime){
-						frontmatter.start = {dateTime: frontmatter.startTime}
-					}
-					if(frontmatter.endTime){
-						frontmatter.end = {dateTime: frontmatter.endTime}
-					}
-
-					if(!frontmatter.start && !frontmatter.startTime){
-						frontmatter.start = {date: window.moment()}
-					}
-					if(!frontmatter.end && !frontmatter.endTime){
-						frontmatter.end = frontmatter.start
-					}
-					
-					if(frontmatter.start.date){
-						frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
-						frontmatter.end.date = window.moment(frontmatter.end.date).format("YYYY-MM-DD"); 
-					}else{
-						frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
-						frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format(); 
-					}
-					googleCreateEvent(frontmatter)
+				getEventFromFrontMatter(frontmatter, view).then(newEvent => {
+					googleCreateEvent(newEvent)
 				})
 			},
 		});
