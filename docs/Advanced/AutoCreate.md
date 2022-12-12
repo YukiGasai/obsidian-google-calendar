@@ -1,7 +1,7 @@
 # Auto Create Event Notes
 
 The plugin allows you to generate notes automatically from Google Events.
-1. To achieve this, activate enable `Auto create Event Notes` inside the settings.
+1. To achieve this, enable `Auto create Event Notes` inside the settings.
 1. Select an Import date range. This is the range in which events are checked. The center is always today.
 1. Google events that contain `:obsidian:` inside the description will create new notes if the plugin starts
 
@@ -26,4 +26,4 @@ Event Description
 
 The fields to use are defined in the [Google Calendar API](https://developers.google.com/calendar/api/v3/reference/events) and can be selected from the dropdown menu
 
-Inserting a template strings into a file that already has an inserted event using @Annotation will automatically replace the template with the event information. 
+> To trigger this feature manually use the `Google Calendar Trigger Auto Import` 

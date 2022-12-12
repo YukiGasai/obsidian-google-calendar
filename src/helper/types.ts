@@ -283,7 +283,6 @@ export interface EventCacheValue {
 export interface ListOptions {
 	startDate?: moment.Moment;
 	endDate?: moment.Moment;
-	singleCalendar?: GoogleCalendar;
 	exclude?: string[];
 	include?: string[];
 }
