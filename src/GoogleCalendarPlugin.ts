@@ -1,5 +1,5 @@
 import type { GoogleCalendarPluginSettings, GoogleEvent, IGoogleCalendarPluginApi } from "./helper/types";
-import { Editor, EventRef, MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import { Editor, EventRef, MarkdownView, normalizePath, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -462,13 +462,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				const frontmatter = app?.metadataCache?.getFileCache(view.file).frontmatter;
 
-				if(!frontmatter) {
-					return;
-				}
-
-				getEventFromFrontMatter(frontmatter, view).then(newEvent => {
+				getEventFromFrontMatter(view).then(newEvent => {
 					googleCreateEvent(newEvent)
 				})
 			},

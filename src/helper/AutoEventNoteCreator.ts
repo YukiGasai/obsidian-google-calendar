@@ -2,7 +2,7 @@ import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
-import { MarkdownView, normalizePath, TFile } from "obsidian";
+import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import _ from "lodash";
@@ -62,10 +62,10 @@ const injectEventDetails = (event: GoogleEvent, inputText:string):string => {
 
     output.forEach(match => {
         if(match){
-            let newContent:any = "";
+            let newContent = "";
 
             if(match[1] == "attendees"){
-                let array = _.get(event, match[1], "");
+                const array = _.get(event, match[1], "");
                 for(let i = 0; i < array.length; i++){
                     if(array[i].displayName){
                         newContent += `- [[@${array[i].displayName}]]\n`;
@@ -74,7 +74,7 @@ const injectEventDetails = (event: GoogleEvent, inputText:string):string => {
                     }
                 }
             } else if(match[1] == "attachments"){
-                let array = _.get(event, match[1], "");
+                const array = _.get(event, match[1], "");
                 for(let i = 0; i < array.length; i++){
                     if(array[i].title){
                         newContent += `- [${array[i].title}](${array[i].fileUrl})\n`;
@@ -123,11 +123,11 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
             folderPath = folderName;
         }
     }
-    let cleanEventSummary = event.summary
+    const cleanEventSummary = event.summary
         .trim()
         .replace('<', 'lt')
         .replace('>', 'gt')
-        .replace('\"', '\'\'')
+        .replace('"', '\'\'')
         .replace('\\', '-')
         .replace('/', '-')
         .replace(':', '-')
@@ -173,18 +173,18 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?:string
         if(!wasInserted){
             const wasInsertedAgain = await insertTemplate(false);
             if(!wasInsertedAgain){
-                createNotice("Template not compatable")
+                createNotice("Template not compatible")
             }
         }       
     }else if(plugin.templaterPlugin){
         const wasInserted = await insertTemplate(true);
         if(!wasInserted){
-            createNotice("Template not compatable")
+            createNotice("Template not compatible")
         }
     }else if(plugin.coreTemplatePlugin){
         const wasInserted = await insertTemplate(false);
         if(!wasInserted){
-            createNotice("Template not compatable")
+            createNotice("Template not compatible")
         }
     }
 

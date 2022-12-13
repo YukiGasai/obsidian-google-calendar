@@ -1,16 +1,38 @@
 import { FrontMatterCache, MarkdownView, normalizePath, TFile } from "obsidian";
-import { GoogleEventSuggestionList } from "src/suggest/GoogleEventSuggestionList";
 import { googleListCalendars } from "src/googleApi/GoogleListCalendars";
 import  GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 import _ from "lodash";
 
-export const getEventFromFrontMatter = async (frontmatter: FrontMatterCache, view: MarkdownView) => {
-        
+export const getEventFromFrontMatter = async (view: MarkdownView): Promise<FrontMatterCache> => {
+    
     const plugin = GoogleCalendarPlugin.getInstance();
 
+    const fileContent = await app.vault.adapter.read(normalizePath(view.file.path));
+
+    //Use a copy to prevent problems when running the command multiple times
+    const frontmatter:any = { ...app?.metadataCache?.getFileCache(view.file).frontmatter} ?? {};
+    
+    //Get dataview frontmatter form the file
+    const regexp = /\[([^[]*)::([^[]*)\]/gm;
+    let matches;
+    const output = [];
+    do {
+        matches = regexp.exec(fileContent);
+        output.push(matches);
+    } while(matches);
+
+
+    output.forEach(match => {
+        if(match){
+            _.set(frontmatter, match[1].trim(), match[2].trim());
+        }
+    });
+
+    if(!frontmatter) {
+        return;
+    }
+
     const frontMatterMapping = getFrontMatterMapping(frontmatter);
-
-
     //Use the mapping to resolve the values to the selected event details
     for(const [key, value] of Object.entries(frontMatterMapping)) {        
         const eventValue = _.get(frontmatter, key, null)
@@ -18,8 +40,6 @@ export const getEventFromFrontMatter = async (frontmatter: FrontMatterCache, vie
             _.set(frontmatter, value, eventValue);
         }
     }
-
-
     const calendars = await googleListCalendars();
     delete frontmatter.position;
    
@@ -32,6 +52,7 @@ export const getEventFromFrontMatter = async (frontmatter: FrontMatterCache, vie
     if(!frontmatter.summary) {
         frontmatter.summary = view.file.basename;
     }
+
 
     //Check for start and end date if there is none defined
     if(!frontmatter.start && !frontmatter.startTime){
@@ -68,7 +89,7 @@ const getFrontMatterMapping = (frontmatter:FrontMatterCache): Map<string, string
         if(!adapter.exists(newPath))return mapping;
 
         const file = app.vault.getAbstractFileByPath(newPath) as TFile;
-	    frontmatter = app?.metadataCache?.getFileCache(file).frontmatter;
+        frontmatter = app?.metadataCache?.getFileCache(file).frontmatter;
         if(!frontmatter)return mapping;
     }
 
