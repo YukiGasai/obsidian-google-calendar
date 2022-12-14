@@ -1,5 +1,5 @@
-import type { GoogleCalendarPluginSettings, GoogleEvent, IGoogleCalendarPluginApi } from "./helper/types";
-import { Editor, EventRef, MarkdownView, normalizePath, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
+import { Editor, EventRef, MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -13,7 +13,7 @@ import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/Month
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "./helper/LocalStorage";
+import { getRefreshToken, setAccessToken, setExpirationTime, setUserId } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -464,6 +464,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 
 				getEventFromFrontMatter(view).then(newEvent => {
+					if(!newEvent)return;
 					googleCreateEvent(newEvent)
 				})
 			},
@@ -498,7 +499,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			new Notice("Login successful!");
 
 			this.settingsTab.display();
-		  });
+		});
 	}
 
 	onunload(): void {
@@ -509,7 +510,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
 
 
-		for(let event in this.events){
+		for(const event in this.events){
 			this.app.vault.offref(event);
 		}
 		this.events = [];

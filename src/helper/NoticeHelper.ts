@@ -22,6 +22,7 @@ export function createNotice(
 		}
 		
 	}else{
+		console.log(`[Google Calendar] ${text}`)
 		new Notice(text);
 		noticeMap.set(text, now.add(1, "minute"))
 	}

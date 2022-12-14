@@ -2,6 +2,7 @@ import { FrontMatterCache, MarkdownView, normalizePath, TFile } from "obsidian";
 import { googleListCalendars } from "src/googleApi/GoogleListCalendars";
 import  GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 import _ from "lodash";
+import { createNotice } from "src/helper/NoticeHelper";
 
 export const getEventFromFrontMatter = async (view: MarkdownView): Promise<FrontMatterCache> => {
     
@@ -42,9 +43,13 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     }
     const calendars = await googleListCalendars();
     delete frontmatter.position;
-   
+
     const calendar = calendars.find(calendar => calendar.id == (frontmatter.calendar ?? plugin.settings.defaultCalendar) || calendar.summary  == (frontmatter.calendar ?? plugin.settings.defaultCalendar));
-    if(!calendar)return;
+   
+    if(!calendar){
+        createNotice("Event not created. Calendar not defined. Set a default calendar in the settings or set the field calendar");
+        return;
+    }
     frontmatter.parent = calendar;
 
     //Check for a summary if there is none defined
@@ -64,7 +69,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     
     if(frontmatter.start.date){
         frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
-        frontmatter.end.date = window.moment(frontmatter.end.date).format("YYYY-MM-DD"); 
+        frontmatter.end.date = window.moment(frontmatter.end.date).add(1,"day").format("YYYY-MM-DD"); 
     }else{
         frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
         frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format(); 
@@ -75,8 +80,6 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
 
 const getFrontMatterMapping = (frontmatter:FrontMatterCache): Map<string, string> => {
 
-    const {adapter} = app.vault;
-
     const mapping = new Map<string, string>();
 
     //Allow loading mapping data from another file 
@@ -85,10 +88,13 @@ const getFrontMatterMapping = (frontmatter:FrontMatterCache): Map<string, string
             frontmatter.mapping += ".md"
         }
         const newPath = normalizePath(frontmatter.mapping);
-
-        if(!adapter.exists(newPath))return mapping;
-
         const file = app.vault.getAbstractFileByPath(newPath) as TFile;
+
+        if(!file){
+            createNotice(`Mapping Error, file "${newPath}" not found.`);
+            return mapping
+        }
+        
         frontmatter = app?.metadataCache?.getFileCache(file).frontmatter;
         if(!frontmatter)return mapping;
     }
