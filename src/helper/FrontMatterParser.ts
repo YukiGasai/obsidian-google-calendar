@@ -12,7 +12,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     const fileContent = await app.vault.adapter.read(normalizePath(view.file.path));
 
     //Use a copy to prevent problems when running the command multiple times
-    const frontmatter:any = { ...app?.metadataCache?.getFileCache(view.file).frontmatter} ?? {};
+    const frontmatter:any = _.cloneDeep(app?.metadataCache?.getFileCache(view.file).frontmatter) ?? {};
     
     //Get dataview frontmatter form the file
     const regexp = /\[([^[]*)::([^[]*)\]/gm;
@@ -95,7 +95,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         console.log(calendar.timeZone)
         console.log(frontmatter.start.date)
         frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
-        frontmatter.end.date = window.moment(frontmatter.end.date).add(1,"day").format("YYYY-MM-DD"); 
+        frontmatter.end.date = window.moment(frontmatter.end.date).clone().add(1,"day").format("YYYY-MM-DD"); 
     }else{
         frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
         frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format(); 
