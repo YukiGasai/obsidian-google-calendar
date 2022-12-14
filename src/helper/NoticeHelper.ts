@@ -7,7 +7,8 @@ const noticeMap: Map<string, moment.Moment> = new Map();
  * @param text The text displayed inside the Notice
  */
 export function createNotice(
-	text: string
+	text: string,
+	ignoreTimeout = false
 ): void {
 
 	const now = window.moment();
@@ -16,7 +17,7 @@ export function createNotice(
 
 		const lastDisplay = noticeMap.get(text);
 
-		if(lastDisplay.isBefore(now)) {
+		if(lastDisplay.isBefore(now) || ignoreTimeout) {
 			new Notice(text);
 			noticeMap.set(text, now.add(1, "minute"))
 		}
@@ -24,7 +25,7 @@ export function createNotice(
 	}else{
 		console.log(`[Google Calendar] ${text}`)
 		new Notice(text);
-		noticeMap.set(text, now.add(1, "minute"))
+		noticeMap.set(text, now.add(0, "minute"))
 	}
 
 }

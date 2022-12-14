@@ -45,7 +45,7 @@ export async function googleUpdateEvent(
 
 	const updatedEvent = await updateResponse.json;
 
-	createNotice("Updated Event");
+	createNotice("Updated Event", true);
 
 	return updatedEvent;
 	

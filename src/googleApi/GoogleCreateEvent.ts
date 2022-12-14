@@ -36,7 +36,7 @@ export async function googleCreateEvent(event: GoogleEvent|any): Promise<GoogleE
 
 	const createdEvent = await updateResponse.json();
 	
-	createNotice(`Google Event ${createdEvent.summary} created`);
+	createNotice(`Google Event ${createdEvent.summary} created`, true);
 
 	return createdEvent;
 

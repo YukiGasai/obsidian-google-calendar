@@ -3,6 +3,7 @@ import { googleListCalendars } from "src/googleApi/GoogleListCalendars";
 import  GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 import _ from "lodash";
 import { createNotice } from "src/helper/NoticeHelper";
+import { marked } from 'marked';
 
 export const getEventFromFrontMatter = async (view: MarkdownView): Promise<FrontMatterCache> => {
     
@@ -30,6 +31,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     });
 
     if(!frontmatter) {
+        createNotice("No frontmatter found in note", true);
         return;
     }
 
@@ -42,8 +44,8 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         }
     }
     const calendars = await googleListCalendars();
+    const frontmatterPosition = frontmatter.position;
     delete frontmatter.position;
-
     const calendar = calendars.find(calendar => calendar.id == (frontmatter.calendar ?? plugin.settings.defaultCalendar) || calendar.summary  == (frontmatter.calendar ?? plugin.settings.defaultCalendar));
    
     if(!calendar){
@@ -57,7 +59,29 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     if(!frontmatter.summary) {
         frontmatter.summary = view.file.basename;
     }
+    
+    //Special Replacements for description
+    if(frontmatter.description?.toLowerCase() == "header"){
+        frontmatter.description = '';
+        const regexp = /^\s*(#{1,6})\s+(.*)$/gm;
+        let headerMatches;
+        const output = [];
+        do {
+            headerMatches = regexp.exec(fileContent);
+            output.push(headerMatches);
+        } while(headerMatches);
+    
+        output.forEach(match => {
+            if(!match)return
+            frontmatter.description +=  '   '.repeat(match[1].length - 1) + match[2] + '<br/>'
+        });
+    }
 
+    if(frontmatter.description?.toLowerCase() == "file") {
+        //Remove frontmatter before html conversion
+        const html = marked.parse(fileContent.substring(frontmatterPosition.end.offset));
+        frontmatter.description = html;
+    }
 
     //Check for start and end date if there is none defined
     if(!frontmatter.start && !frontmatter.startTime){
@@ -68,6 +92,8 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     }
     
     if(frontmatter.start.date){
+        console.log(calendar.timeZone)
+        console.log(frontmatter.start.date)
         frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
         frontmatter.end.date = window.moment(frontmatter.end.date).add(1,"day").format("YYYY-MM-DD"); 
     }else{
@@ -94,12 +120,18 @@ const getFrontMatterMapping = (frontmatter:FrontMatterCache): Map<string, string
             createNotice(`Mapping Error, file "${newPath}" not found.`);
             return mapping
         }
-        
+
         frontmatter = app?.metadataCache?.getFileCache(file).frontmatter;
-        if(!frontmatter)return mapping;
+        if(!frontmatter){
+            createNotice(`Mapping Error, file "${newPath}" does not contain frontmatter.`);
+            return mapping;
+        }
     }
-
-    if(!frontmatter.mapping)return mapping;
-
+    
+    //Return no mapping if there in none provided
+    if(!frontmatter.mapping) {
+        return mapping;
+    }
+    
     return frontmatter.mapping;
 }

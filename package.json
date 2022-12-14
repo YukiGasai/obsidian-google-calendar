@@ -1,6 +1,6 @@
 {
 	"name": "google-calendar",
-	"version": "1.7.2",
+	"version": "1.7.3",
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -39,11 +39,13 @@
 	"dependencies": {
 		"@googleapis/calendar": "^1.0.2",
 		"@popperjs/core": "^2.11.6",
+		"@types/marked": "^4.0.8",
 		"clipboardy": "^3.0.0",
 		"countries-and-timezones": "^3.3.0",
 		"docsify-darklight-theme": "^3.2.0",
 		"google-auth-library": "^8.0.2",
 		"googleapis": "^100.0.0",
+		"marked": "^4.2.4",
 		"obsidian-calendar-ui": "^0.3.12",
 		"obsidian-daily-notes-interface": "^0.9.4",
 		"open": "^8.4.0",
