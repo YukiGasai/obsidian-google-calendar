@@ -14,7 +14,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
 
     //Use a copy to prevent problems when running the command multiple times
     const frontmatter:any = _.cloneDeep(app?.metadataCache?.getFileCache(view.file).frontmatter) ?? {};
-    
+    console.log(app.metadataCache.getFileCache(view.file))
     //Get dataview frontmatter form the file
     const regexp = /\[([^[]*)::([^[]*)\]/gm;
     let matches;
@@ -61,27 +61,51 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         frontmatter.summary = view.file.basename;
     }
     
-    //Special Replacements for description
-    if(frontmatter.description?.toLowerCase() == "header"){
-        frontmatter.description = '';
-        const regexp = /^\s*(#{1,6})\s+(.*)$/gm;
-        let headerMatches;
-        const output = [];
-        do {
-            headerMatches = regexp.exec(fileContent);
-            output.push(headerMatches);
-        } while(headerMatches);
-    
-        output.forEach(match => {
-            if(!match)return
-            frontmatter.description +=  '   '.repeat(match[1].length - 1) + match[2] + '<br/>'
-        });
-    }
 
-    if(frontmatter.description?.toLowerCase() == "file") {
-        //Remove frontmatter before html conversion
-        const html = marked.parse(fileContent.substring(frontmatterPosition.end.offset));
-        frontmatter.description = html;
+    if(frontmatter.description){
+
+        if(typeof frontmatter.description == "string") {
+
+            //Special Replacements for description
+            if(frontmatter.description?.toLowerCase() == "header"){
+                frontmatter.description = '';
+            
+                const headers = app?.metadataCache?.getFileCache(view.file).headings
+                headers.forEach(header => {
+                    frontmatter.description +=  `<h${header.level}>${header.heading}</h${header.level}>`
+                });
+            }
+
+            if(frontmatter.description?.toLowerCase() == "file") {
+                //Remove frontmatter before html conversion
+                const html = marked.parse(fileContent.substring(frontmatterPosition.end.offset));
+                frontmatter.description = html;
+            }
+        }else if(typeof frontmatter.description == "object") {
+           
+            const headers = app?.metadataCache?.getFileCache(view.file).headings
+
+            const contentList = frontmatter.description.map(index => {
+               
+                if(index >= headers.length){
+                    return -1;
+                }
+                if(index + 1 < headers.length){
+                    return fileContent.substring(headers[index].position.start.offset, headers[index+1].position.start.offset - 1);
+                }else {
+                    return fileContent.substring(headers[index].position.start.offset, fileContent.length);
+                }
+            })
+
+            console.log(contentList);
+
+            if(contentList.contains(-1)){
+                createNotice("Event not created.A Header in the headerlist is out of range", true);
+                return;
+            }
+            const html = marked.parse(contentList.join("\n"));
+            frontmatter.description = html;
+        }
     }
 
 
