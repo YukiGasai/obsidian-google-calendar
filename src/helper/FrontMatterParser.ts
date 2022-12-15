@@ -4,6 +4,7 @@ import  GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 import _ from "lodash";
 import { createNotice } from "src/helper/NoticeHelper";
 import { marked } from 'marked';
+import RRule, { RRuleSet } from "rrule";
 
 export const getEventFromFrontMatter = async (view: MarkdownView): Promise<FrontMatterCache> => {
     
@@ -83,6 +84,9 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         frontmatter.description = html;
     }
 
+
+
+
     //Check for start and end date if there is none defined
     if(!frontmatter.start && !frontmatter.startTime){
         frontmatter.start = {date: window.moment()}
@@ -92,13 +96,25 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     }
     
     if(frontmatter.start.date){
-        console.log(calendar.timeZone)
-        console.log(frontmatter.start.date)
         frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
         frontmatter.end.date = window.moment(frontmatter.end.date).clone().add(1,"day").format("YYYY-MM-DD"); 
     }else{
         frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
         frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format(); 
+    }
+
+
+    //Special replacement for recurrence
+    if(frontmatter.recurrence) {
+        try{
+            const rule = RRule.fromText(frontmatter.recurrence);
+            const ruleSet = new RRuleSet()
+            ruleSet.rrule(rule);
+            frontmatter.recurrence = ruleSet.valueOf();
+        }catch(err) {
+            createNotice("Event not created. Error in recurrence text.", true)
+            return;
+        }
     }
 
     return frontmatter;
