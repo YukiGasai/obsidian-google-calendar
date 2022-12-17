@@ -1,7 +1,6 @@
-import { requestUrl } from "obsidian";
-import { getGoogleAuthToken } from "./GoogleAuth";
-import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import type { GoogleEvent } from "../helper/types";
+import { callRequest } from "src/helper/RequestWrapper";
+import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { createNotice } from "../helper/NoticeHelper";
 /**
  * Function to get information of a single event by id
@@ -13,17 +12,11 @@ import { createNotice } from "../helper/NoticeHelper";
 	
 	if(!settingsAreCompleteAndLoggedIn())return null;
 
-	const updateResponse = await requestUrl({
-		url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
-		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-	});
-
-	if (updateResponse.status !== 200) {
+	const createdEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`, "GET", null)
+	if (!createdEvent) {
 		createNotice("Could not get Google Event");
 		return null;
 	}
 
-
-	const createdEvent = await updateResponse.json;
 	return createdEvent;
 }

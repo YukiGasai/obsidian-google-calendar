@@ -1,8 +1,7 @@
 import type { GoogleEvent } from "../helper/types";
 
 import { createNotice } from "../helper/NoticeHelper";
-import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
-import { requestUrl } from 'obsidian';
+import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 
@@ -22,20 +21,13 @@ export async function googleCreateEvent(event: GoogleEvent|any): Promise<GoogleE
 	event.end.timeZone = event.parent.timeZone;
 
 	delete event.parent;
-	const updateResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,{
-		//url: `https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`,
-		method: "POST",
-		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-		body: JSON.stringify(event),
-	});
+	const createdEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`, 'POST', event)
 
-	if (updateResponse.status !== 200) {
+	if (!createdEvent) {
 		createNotice("Could not create Google Event");
 		return null;
 	}
-
-	const createdEvent = await updateResponse.json();
-	
+		
 	createNotice(`Google Event ${createdEvent.summary} created`, true);
 
 	return createdEvent;

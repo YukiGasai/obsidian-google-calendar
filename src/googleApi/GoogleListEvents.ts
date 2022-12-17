@@ -8,9 +8,8 @@ import type {
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
-import { getGoogleAuthToken } from "./GoogleAuth";
 import { googleListCalendars } from "./GoogleListCalendars";
-import { requestUrl } from 'obsidian';
+import { callRequest } from "src/helper/RequestWrapper";
 import _ from "lodash"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
@@ -125,20 +124,13 @@ async function requestEventsFromApi(
 		if (tmpRequestResult && tmpRequestResult.nextPageToken) {
 			url += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
 		}
-		const response = await requestUrl({
-			url:url,
-			method: "GET",
-			headers: {
-				Authorization: "Bearer " + (await getGoogleAuthToken()),
-			},
-		});
 
-		if (response.status !== 200) {
+		tmpRequestResult = await callRequest(url, "GET", null);
+
+		if (!tmpRequestResult) {
 			createNotice("Could not list Google Events");
 			continue;
 		}
-
-		tmpRequestResult = await response.json;
 
 		const newList = tmpRequestResult.items.filter((event) => {
 				event.parent = GoogleCalendar;
@@ -175,7 +167,7 @@ function resolveMultiDayEventsHelper(
 		
 		let extraEventsTmp:GoogleEvent[] = [];
 
-		let totalDays = endMoment.endOf("day").diff(startMoment.startOf("day"), "days") + 1;
+		const totalDays = endMoment.endOf("day").diff(startMoment.startOf("day"), "days") + 1;
 			
 		const title = tmp.summary;
 

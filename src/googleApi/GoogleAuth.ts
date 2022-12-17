@@ -23,8 +23,9 @@ import {
 	setExpirationTime,
 	setRefreshToken,
 } from "../helper/LocalStorage";
-import { Notice, Platform, requestUrl } from "obsidian";
-
+import { Notice, Platform } from "obsidian";
+import { callRequest } from "src/helper/RequestWrapper";
+import { createNotice } from 'src/helper/NoticeHelper';
 
 
 const PORT = 42813
@@ -51,21 +52,19 @@ const refreshWithCustomClient = async (plugin:GoogleCalendarPlugin): Promise<boo
 
 	const refreshBody = {
 		client_id: plugin.settings.googleClientId,
-		client_secret: plugin.settings.googleClientSecret,
+		client_secret: plugin.settings.googleClientSecret.trim(),
 		grant_type: "refresh_token",
 		refresh_token: getRefreshToken(),
 	};
 
-	const response = await requestUrl({
-		method: "POST",
-		url: "https://oauth2.googleapis.com/token",
-		body: JSON.stringify(refreshBody)
-	});
+	const tokenData = await callRequest('https://oauth2.googleapis.com/token', "POST", refreshBody, true)
 
-	if (response.status != 200) return false;
+	if(!tokenData){
+		createNotice("Error while refreshing authentication");
+		return false;
+	}
 
 	//Save new Access token and Expiration Time
-	const tokenData = await response.json;
 	setAccessToken(tokenData.access_token);
 	setExpirationTime(+new Date() + tokenData.expires_in*1000);
 	return true;
@@ -78,19 +77,14 @@ const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<bo
 		uid: getUserId(),
 	};
 
-	const response = await requestUrl({
-		url:`${plugin.settings.googleOAuthServer}/api/google/refresh`,
-		method: "POST",
-		body: JSON.stringify(refreshBody),
-		headers: {"Content-Type":"application/json"}
-	});
+	const tokenData = await callRequest(`${plugin.settings.googleOAuthServer}/api/google/refresh`, "POST", refreshBody, true)
 
-
-
-	if (response.status != 200) return false;
+	if(!tokenData){
+		createNotice("Error while refreshing authentication");
+		return false;
+	}
 
 	//Save new Access token and Expiration Time
-	const {tokenData} = await response.json;
 	setAccessToken(tokenData.access_token);
 	setExpirationTime(+new Date() + tokenData.expires_in*1000);
 	return true;
@@ -104,8 +98,7 @@ const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<bo
  * 
  * @returns A valid access Token
  */
-export async function getGoogleAuthToken(): Promise<string> {
-	const plugin = GoogleCalendarPlugin.getInstance();
+export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<string> {
 	if (!settingsAreCompleteAndLoggedIn()) return "";
 	let gotRefreshToken = false;
 	//Check if the Access token is still valid
@@ -152,7 +145,7 @@ export async function LoginGoogle(): Promise<void> {
 		const destroyer = require("server-destroy");
 		const oAuth2Client = new OAuth2Client(
 			plugin.settings.googleClientId,
-			plugin.settings.googleClientSecret,
+			plugin.settings.googleClientSecret.trim(),
 			`http://127.0.0.1:${PORT}/callback`
 		);
 		const authorizeUrl = oAuth2Client.generateAuthUrl({

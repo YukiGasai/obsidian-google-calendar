@@ -2,9 +2,8 @@ import type { GoogleCalendar, GoogleCalendarList } from "./../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
-import { getGoogleAuthToken } from "./GoogleAuth";
 import { getGoogleColors } from "./GoogleColors";
-import { requestUrl } from 'obsidian';
+import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 let cachedCalendars:GoogleCalendar[] = []
@@ -45,18 +44,12 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 	//Make sure the colors for calendar and events are loaded before getting the first calendar
 	await getGoogleColors();
 
+	const calendarList: GoogleCalendarList = await callRequest(`https://www.googleapis.com/calendar/v3/users/me/calendarList`, "GET", null)
 
-	const response = await requestUrl({
-		url:`https://www.googleapis.com/calendar/v3/users/me/calendarList`,
-		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-	});
-
-	if (response.status !== 200) {
+	if (!calendarList) {
 		createNotice("Could not list Google Calendars");
 		return [];
 	}
-
-	const calendarList: GoogleCalendarList = await response.json;
 
 	cachedCalendars = calendarList.items;
 

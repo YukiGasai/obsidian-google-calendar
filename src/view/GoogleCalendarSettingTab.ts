@@ -56,7 +56,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					.setPlaceholder("Enter your client id")
 					.setValue(this.plugin.settings.googleClientId)
 					.onChange(async (value) => {
-						this.plugin.settings.googleClientId = value;
+						this.plugin.settings.googleClientId = value.trim();
 						await this.plugin.saveSettings();
 					})
 			);
@@ -70,7 +70,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					.setPlaceholder("Enter your client secret")
 					.setValue(this.plugin.settings.googleClientSecret)
 					.onChange(async (value) => {
-						this.plugin.settings.googleClientSecret = value;
+						this.plugin.settings.googleClientSecret = value.trim();
 						await this.plugin.saveSettings();
 					})
 			);
@@ -85,7 +85,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						.setPlaceholder("Enter refresh token")
 						.setValue(this.plugin.settings.googleRefreshToken)
 						.onChange(async (value) => {
-							this.plugin.settings.googleRefreshToken = value;
+							this.plugin.settings.googleRefreshToken = value.trim();
 							setRefreshToken(value);
 						})
 				);
@@ -93,14 +93,14 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 	}else{
 
 		new Setting(containerEl)
-		.setName("Serverurl")
+		.setName("Server url")
 		.setDesc("The url to the server where the oauth takes place")
 		.setClass("SubSettings")
 		.addText(text => {
 			text
 			.setValue(this.plugin.settings.googleOAuthServer)
 			.onChange(async (value) => {
-				this.plugin.settings.googleOAuthServer = value;
+				this.plugin.settings.googleOAuthServer = value.trim();
 				await this.plugin.saveSettings();
 			})
 		})
@@ -160,7 +160,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 		.setName("Show daily notes")
-		.setDesc("Will disply daily notes and allow to open and create daily notes")
+		.setDesc("Will display daily notes and allow to open and create daily notes")
 		.addToggle((toggle) => {
 			toggle.setValue(this.plugin.settings.activateDailyNoteAddon);
 			toggle.onChange(async (state) => {
@@ -214,7 +214,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 		});
 
-		const s = new Setting(containerEl)
+		new Setting(containerEl)
 		.setName("Import Start Offset")
 		.setDesc("Days in the past from events to import")
 		.setClass("SubSettings")
@@ -245,8 +245,19 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 
 		new Setting(containerEl)
+		.setName("Debug Mode")
+		.setDesc("Enable if something is not working")
+		.addToggle(toggle => {
+			toggle.setValue(this.plugin.settings.debugMode);
+			toggle.onChange(async(state)=>{
+				this.plugin.settings.debugMode = state;
+				await this.plugin.saveSettings();
+			})
+		})
+
+		new Setting(containerEl)
 		.setName("Use defaults for note creation")
-		.setDesc("If active creating notes will be faster but less flexable")
+		.setDesc("If active creating notes will be faster but less flexible")
 		.addToggle(toggle => {
 			toggle.setValue(this.plugin.settings.useDefaultTemplate);
 			toggle.onChange(async(state)=>{
@@ -255,7 +266,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				this.display();
 			})
 		})
-
 
 	if(this.plugin.settings.useDefaultTemplate){
 		new Setting(containerEl)

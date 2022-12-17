@@ -1,8 +1,7 @@
 import type { GoogleEvent } from "../helper/types";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { createNotice } from "../helper/NoticeHelper";
-import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
-import { requestUrl } from 'obsidian';
+import { callRequest } from "src/helper/RequestWrapper";
 /**
  * This function can update simple properties of an event at the api.
  * If the event is recurrent is will update all it's instanced except if updateSingle is set
@@ -29,21 +28,13 @@ export async function googleUpdateEvent(
 	const calenderId = event.parent.id;
 	delete event.parent;
 
-	const updateResponse = await requestUrl({
-		url:`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}`,
-		method: "PUT",
-		contentType: "application/json",
-		headers: {"Authorization": "Bearer " + (await getGoogleAuthToken())},
-		body: JSON.stringify(event),
-	});
 
-	if (updateResponse.status !== 200) {
+	const updatedEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${id}`, "PUT", event)
+
+	if (!updatedEvent) {
 		createNotice("Could not create Google Event");
 		return null;
 	}
-
-
-	const updatedEvent = await updateResponse.json;
 
 	createNotice("Updated Event", true);
 
