@@ -18,8 +18,13 @@ export const callRequest = async(url: string, method: string, body: any, noAuth 
     //Debugged request
     if(plugin.settings.debugMode)
     {
-        console.log(`New Request for url ${method}:${url}`);    
-        console.log({body,headers:requestHeaders});
+        console.log(`New Request ${method}:${url}`);    
+
+        const sanitizeHeader = {...requestHeaders};
+        if(sanitizeHeader['Authorization']){
+            sanitizeHeader['Authorization'] = sanitizeHeader['Authorization'].substring(0, 15) + "...";
+        }
+        console.log({body,headers:sanitizeHeader});
         
         const response = await fetch(url, {
 			method: method,
