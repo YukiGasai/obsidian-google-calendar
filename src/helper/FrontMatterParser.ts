@@ -6,6 +6,26 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { marked } from 'marked';
 import RRule, { RRuleSet } from "rrule";
 
+
+const extractHeaderContent = (index: number, headers, fileContent:string) : string => {
+    console.log(index);
+    if(index < 0) {
+        index = headers.length + index;
+    }
+
+    if(index >= headers.length && index >= 0){
+        return;
+    }
+    
+    //Maybe a problem with negative indexes
+    if(index + 1 < headers.length){
+        return fileContent.substring(headers[index].position.start.offset, headers[index+1].position.start.offset - 1);
+    }else {
+        return fileContent.substring(headers[index].position.start.offset, fileContent.length);
+    }
+
+}
+
 export const getEventFromFrontMatter = async (view: MarkdownView): Promise<FrontMatterCache> => {
     
     const plugin = GoogleCalendarPlugin.getInstance();
@@ -87,20 +107,56 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
 
             const contentList = frontmatter.description.map(index => {
                
-                if(index >= headers.length){
-                    return -1;
-                }
-                if(index + 1 < headers.length){
-                    return fileContent.substring(headers[index].position.start.offset, headers[index+1].position.start.offset - 1);
-                }else {
-                    return fileContent.substring(headers[index].position.start.offset, fileContent.length);
+
+                if(typeof index  == "number"){
+                    
+                    const content = extractHeaderContent(index, headers, fileContent);
+                    if(!content){
+                        return -1;
+                    }
+                    return content;
+                }else if(typeof index == "object") {
+                    if(index.length != 2){
+                        return -1;
+                    }
+        
+                    let [start, end] = index;
+
+                    if(start < 0) {
+                        start = headers.length + start;
+                    }
+                    if(end < 0) {
+                        end = headers.length + end;
+                    }
+                    //Check if the start and end are in range
+                    if(start >= headers.length || end >= headers.length || start < 0 || end < 0){
+                        return -1;
+                    }
+
+                    //Check if the start is smaller than the end
+                    if(start > end){   
+                        return -1;
+                    }
+
+
+                    let totalContent:string = "";
+                    for (let headerIndex = start; headerIndex <= end; headerIndex++) {
+                        
+                        const content = extractHeaderContent(headerIndex, headers, fileContent);
+                        if(!content){
+                            return -1;
+                        }
+                        totalContent += (content + "\n");
+                    }
+                    return totalContent;
+
                 }
             })
 
             console.log(contentList);
 
             if(contentList.contains(-1)){
-                createNotice("Event not created.A Header in the headerlist is out of range", true);
+                createNotice("Event not created.A Header in the head    erlist is out of range", true);
                 return;
             }
             const html = marked.parse(contentList.join("\n"));
