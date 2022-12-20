@@ -31,19 +31,14 @@ export async function getGoogleColors():Promise<void> {
 		return;
 	}
 
-	for (let i = 1; ; i++) {
-		const color = colorData.calendar[i+""]?.background;
-		if(!color)break;
-		
-		calendarColors.set(i+"", color)
-	}
+	Object.keys(colorData.calendar).forEach(key => {
+		calendarColors.set(key, colorData.calendar[key].background);
+	});
 
-	for (let i = 1; ; i++) {
-		const color = colorData.event[i+""]?.background;
-		if(!color)break;
-		
-		eventColors.set(i+"", color)
-	}
+	Object.keys(colorData.event).forEach(key => {
+		eventColors.set(key, colorData.event[key].background);
+	});
+	
 } 
 
 /**

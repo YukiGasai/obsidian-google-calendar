@@ -17,13 +17,13 @@ let cachedCalendars:GoogleCalendar[] = []
 function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:GoogleCalendar[]):GoogleCalendar[]{
 	//Remove the calendars contained in the blacklist
 	const filteredCalendars = calendars.filter((calendar) => {
-		const foundIndex = plugin.settings.calendarBlackList.findIndex(
+		return !plugin.settings.calendarBlackList.some(
 			(c) => c[0] == calendar.id
 		);
-		return foundIndex == -1;
 	});
 	return filteredCalendars;
 }
+
 
 /**
  * This functions get all google calendars from the user that were not Black listed by him
