@@ -42,7 +42,6 @@
 		"@types/marked": "^4.0.8",
 		"clipboardy": "^3.0.0",
 		"countries-and-timezones": "^3.3.0",
-		"docsify-darklight-theme": "^3.2.0",
 		"google-auth-library": "^8.0.2",
 		"googleapis": "^100.0.0",
 		"marked": "^4.2.4",
