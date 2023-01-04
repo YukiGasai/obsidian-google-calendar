@@ -25,7 +25,7 @@ export interface GoogleCalendarPluginSettings {
 	defaultFolder: string;
 	activateDailyNoteAddon: boolean;
 	dailyNoteDotColor: string;
-	debugMode:boolean;
+	debugMode: boolean;
 }
 
 export interface Template {
@@ -289,8 +289,8 @@ export interface ListOptions {
 }
 
 export interface IGoogleCalendarPluginApi {
-	getEvent: (id:string, calendarId:string) => Promise<GoogleEvent>,
-	getEvents: (input:ListOptions) => Promise<GoogleEvent[]>,
+	getEvent: (id: string, calendarId: string) => Promise<GoogleEvent>,
+	getEvents: (input: ListOptions) => Promise<GoogleEvent[]>,
 	getCalendars: () => Promise<GoogleCalendar[]>,
 }
 

@@ -5,7 +5,7 @@
  */
 
 import { CodeBlockOptions, CodeBlockTypes } from "../helper/types";
-import { MarkdownPostProcessorContext,  parseYaml,  Platform } from "obsidian";
+import { MarkdownPostProcessorContext, parseYaml, Platform } from "obsidian";
 import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
@@ -32,9 +32,11 @@ export async function checkEditorForCodeBlocks(
 	el: HTMLElement,
 	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
-	let {type,height,width,date,navigation,timespan,exclude,include,theme}:CodeBlockOptions = parseYaml(text);
+	const parsedYaml = parseYaml(text);
+	const { height, width, date, navigation, timespan, exclude, include, theme }: CodeBlockOptions = parsedYaml
+	let { type }: CodeBlockOptions = parsedYaml;
 
-	if(!type){
+	if (!type) {
 		type = CodeBlockTypes.day;
 	}
 
@@ -53,21 +55,21 @@ export async function checkEditorForCodeBlocks(
 	if (
 		date == undefined ||
 		date == "today" ||
-		date == "tomorrow" || 
+		date == "tomorrow" ||
 		date == "yesterday" ||
 		window.moment(date, momentFormatArray, true).isValid()
 	) {
-		let blockDate:moment.Moment;
+		let blockDate: moment.Moment;
 
-		if(date == undefined){
+		if (date == undefined) {
 			blockDate = undefined
-		}else if(date == "today"){
+		} else if (date == "today") {
 			blockDate = window.moment();
-		}else if (date == "tomorrow"){
+		} else if (date == "tomorrow") {
 			blockDate = window.moment().add(1, "day");
-		}else if (date == "yesterday"){
+		} else if (date == "yesterday") {
 			blockDate = window.moment().subtract(1, "day");
-		}else{
+		} else {
 			blockDate = window.moment(date);
 		}
 
@@ -98,18 +100,18 @@ export async function checkEditorForCodeBlocks(
 			);
 
 		} else if (type == CodeBlockTypes.month) {
-			
+
 			ctx.addChild(
 				new SvelteBuilder(CalendarComp, el, {
-						height: height,
-						width: width,
-						displayedMonth: blockDate,
-						include: include,
-						exclude: exclude,
+					height: height,
+					width: width,
+					displayedMonth: blockDate,
+					include: include,
+					exclude: exclude,
 				})
 			);
 
-		}else if (type == CodeBlockTypes.schedule) {
+		} else if (type == CodeBlockTypes.schedule) {
 			ctx.addChild(
 				new SvelteBuilder(ScheduleComp, el, {
 					timeSpan: timespan,

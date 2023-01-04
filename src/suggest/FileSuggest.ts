@@ -6,7 +6,7 @@ import type GoogleCalendarPlugin from '../GoogleCalendarPlugin';
 
 export function resolve_tfolder(folder_str: string): TFolder {
     folder_str = normalizePath(folder_str);
- 
+
     const folder = app.vault.getAbstractFileByPath(folder_str);
     if (!folder || !(folder instanceof TFolder)) {
         return null
@@ -48,18 +48,18 @@ export class FileSuggest extends TextInputSuggest<TFile> {
     }
 
     getSuggestions(input_str: string): TFile[] {
-        let all_files:TFile[] = [];
-        if(this.plugin.templaterPlugin){
+        let all_files: TFile[] = [];
+        if (this.plugin.templaterPlugin) {
             const path = normalizePath(this.plugin?.templaterPlugin?.settings?.templates_folder)
             const files = get_tfiles_from_folder(path);
             all_files = [...all_files, ...files];
         }
-        if(this.plugin.coreTemplatePlugin){
+        if (this.plugin.coreTemplatePlugin) {
             const path = normalizePath(this.plugin?.coreTemplatePlugin?.instance?.options?.folder)
             const files = get_tfiles_from_folder(path);
             all_files = [...all_files, ...files]
         }
-        
+
         if (!all_files) {
             return [];
         }

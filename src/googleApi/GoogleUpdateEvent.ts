@@ -14,7 +14,7 @@ export async function googleUpdateEvent(
 	event: GoogleEvent,
 	updateSingle = false
 ): Promise<GoogleEvent> {
-	if(!settingsAreCompleteAndLoggedIn())return null;
+	if (!settingsAreCompleteAndLoggedIn()) return null;
 
 	// Use the recurrence id to update all events from a recurring task
 	let id = event.recurringEventId ?? event.id;
@@ -23,7 +23,7 @@ export async function googleUpdateEvent(
 	if (updateSingle && event.recurringEventId) {
 		id = event.id;
 	}
- 
+
 	//clean the event object to send it to the api directly
 	const calenderId = event.parent.id;
 	delete event.parent;
@@ -39,5 +39,5 @@ export async function googleUpdateEvent(
 	createNotice("Updated Event", true);
 
 	return updatedEvent;
-	
+
 }

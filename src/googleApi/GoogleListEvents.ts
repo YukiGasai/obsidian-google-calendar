@@ -18,7 +18,7 @@ const cachedEvents = new Map<string, EventCacheValue>();
 /**
  * Function to clear the complete event cache to force new request
  */
-export function googleClearCachedEvents():void{
+export function googleClearCachedEvents(): void {
 	cachedEvents.clear()
 }
 
@@ -29,43 +29,43 @@ export function googleClearCachedEvents():void{
  * @returns A list of GoogleCalendarEvents
  */
 export async function googleListEvents(
-	{ 	startDate,
+	{ startDate,
 		endDate,
 		exclude: excludedCalendars,
 		include: includedCalendars,
-	} : ListOptions = {}
+	}: ListOptions = {}
 ): Promise<GoogleEvent[]> {
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 
 	//Make sure there is a start date
-	if(!startDate){
+	if (!startDate) {
 		startDate = window.moment();
 	}
 	startDate = startDate.startOf("day");
 
 	//Make sure there is a end date
-	if(!endDate) {
+	if (!endDate) {
 		endDate = startDate.clone();
 	}
 	endDate = endDate.endOf("day");
 
 	//Get all calendars not on the black list
 	let calendarList = await googleListCalendars();
-	
+
 	//Get the list of calendars that should be queried
-	if(includedCalendars && includedCalendars.length){
-		calendarList = calendarList.filter((calendar:GoogleCalendar) => 
+	if (includedCalendars && includedCalendars.length) {
+		calendarList = calendarList.filter((calendar: GoogleCalendar) =>
 			(includedCalendars.contains(calendar.id) || includedCalendars.contains(calendar.summary))
-		);		
-	}else if(excludedCalendars && excludedCalendars.length){
-		calendarList = calendarList.filter((calendar:GoogleCalendar) => 
+		);
+	} else if (excludedCalendars && excludedCalendars.length) {
+		calendarList = calendarList.filter((calendar: GoogleCalendar) =>
 			!(excludedCalendars.contains(calendar.id) || excludedCalendars.contains(calendar.summary))
-		);		
+		);
 	}
 
 	//Get Events from calendars
-	let eventList:GoogleEvent[] = []
+	let eventList: GoogleEvent[] = []
 	for (let i = 0; i < calendarList.length; i++) {
 		const events = await googleListEventsByCalendar(
 			plugin,
@@ -78,7 +78,7 @@ export async function googleListEvents(
 	}
 
 	//Sort because multi day requests will only sort by date
-	eventList = _.orderBy(eventList, [(event:GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], "asc")
+	eventList = _.orderBy(eventList, [(event: GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], "asc")
 
 	return eventList;
 }
@@ -104,7 +104,7 @@ async function requestEventsFromApi(
 	endString: string
 ): Promise<GoogleEvent[]> {
 
-	if(!settingsAreCompleteAndLoggedIn())return [];
+	if (!settingsAreCompleteAndLoggedIn()) return [];
 
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
@@ -133,13 +133,13 @@ async function requestEventsFromApi(
 		}
 
 		const newList = tmpRequestResult.items.filter((event) => {
-				event.parent = GoogleCalendar;
-				return event.status != "cancelled"
+			event.parent = GoogleCalendar;
+			return event.status != "cancelled"
 		});
 
 		totalEventList = [...totalEventList, ...newList];
 	} while (tmpRequestResult.items.length == resultSizes);
-	
+
 	return totalEventList;
 }
 
@@ -151,42 +151,42 @@ async function requestEventsFromApi(
  * @returns 
  */
 function resolveMultiDayEventsHelper(
-	totalEventList:GoogleEvent[],
+	totalEventList: GoogleEvent[],
 	date?: moment.Moment,
 	endDate?: moment.Moment
-	):GoogleEvent[] {
-	let extraEvents:GoogleEvent[] = [];
-	
-	totalEventList.forEach((tmp:GoogleEvent) => {
-		if(!tmp.start.dateTime || !tmp.end.dateTime)return;
-		
+): GoogleEvent[] {
+	let extraEvents: GoogleEvent[] = [];
+
+	totalEventList.forEach((tmp: GoogleEvent) => {
+		if (!tmp.start.dateTime || !tmp.end.dateTime) return;
+
 		const endMoment = window.moment(tmp.end.dateTime);
 		let startMoment = window.moment(tmp.start.dateTime);
 
-		if(startMoment.isSame(endMoment, "day"))return;
-		
-		let extraEventsTmp:GoogleEvent[] = [];
+		if (startMoment.isSame(endMoment, "day")) return;
+
+		let extraEventsTmp: GoogleEvent[] = [];
 
 		const totalDays = endMoment.endOf("day").diff(startMoment.startOf("day"), "days") + 1;
-			
+
 		const title = tmp.summary;
 
 		let dayCount = 1;
 
-		do{
-			tmp.summary =  `${title} (Day ${dayCount}/${totalDays})`
+		do {
+			tmp.summary = `${title} (Day ${dayCount}/${totalDays})`
 			tmp.eventType = "multiDay";
-			extraEventsTmp = [...extraEventsTmp, structuredClone(tmp)];	
+			extraEventsTmp = [...extraEventsTmp, structuredClone(tmp)];
 			dayCount++;
 			startMoment = startMoment.add(1, "days");
 			tmp.start.dateTime = startMoment.format("YYYY-MM-DD HH:mm");
-		}while(!startMoment.isAfter(endMoment, "day"));
-		
+		} while (!startMoment.isAfter(endMoment, "day"));
+
 
 		extraEventsTmp = extraEventsTmp.filter(event => {
 			const startMoment = window.moment(event.start.dateTime);
-			if(date && startMoment.isBefore(date, "day"))return false;
-			if(endDate && startMoment.isSameOrAfter(endDate, "day"))return false;
+			if (date && startMoment.isBefore(date, "day")) return false;
+			if (endDate && startMoment.isSameOrAfter(endDate, "day")) return false;
 			return true;
 		})
 
@@ -215,33 +215,33 @@ async function googleListEventsByCalendar(
 	startDate: moment.Moment,
 	endDate: moment.Moment
 ): Promise<GoogleEvent[]> {
-	
+
 	//Turn dates into strings for request and caching
 	const startString = startDate.toISOString();
-	const endString   = endDate.toISOString();
+	const endString = endDate.toISOString();
 
 	//get the hashmap key from start end and calendar
-	const cacheKey:string = JSON.stringify({start: startString, end: endString, calendar: GoogleCalendar.id});
+	const cacheKey: string = JSON.stringify({ start: startString, end: endString, calendar: GoogleCalendar.id });
 
 	//Check if cache has request saved
-	if(cachedEvents.has(cacheKey)){
-		const {events, updated} = cachedEvents.get(cacheKey);
-		if(updated.clone().add(plugin.settings.refreshInterval, "second").isAfter(window.moment())){
+	if (cachedEvents.has(cacheKey)) {
+		const { events, updated } = cachedEvents.get(cacheKey);
+		if (updated.clone().add(plugin.settings.refreshInterval, "second").isAfter(window.moment())) {
 			return events;
 		}
 	}
 
 	//Get the events because cache was no option
-	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startString, endString);	
+	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startString, endString);
 
 	//Turn multi day events into multiple events
-	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate); 
+	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate);
 
 	//Filter out original multi day event
-	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => indexEvent.eventType!=="delete");
+	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => indexEvent.eventType !== "delete");
 
 	//Cache result
-	cachedEvents.set(cacheKey, {events: totalEventList, updated: window.moment()})
+	cachedEvents.set(cacheKey, { events: totalEventList, updated: window.moment() })
 
 	return totalEventList;
 }

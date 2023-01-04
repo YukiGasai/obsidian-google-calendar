@@ -38,7 +38,7 @@ export class EventSelectReplaceModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
-		
+
 		const replacementString = `[${item.summary}](${item.htmlLink}&cal=${item.parent.id})`;
 
 		this.editor.replaceRange(

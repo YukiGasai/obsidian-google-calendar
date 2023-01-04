@@ -13,16 +13,16 @@ export function createNotice(
 
 	const now = window.moment();
 
-	if(noticeMap.has(text)){
+	if (noticeMap.has(text)) {
 
 		const lastDisplay = noticeMap.get(text);
 
-		if(lastDisplay.isBefore(now) || ignoreTimeout) {
+		if (lastDisplay.isBefore(now) || ignoreTimeout) {
 			new Notice(text);
 			noticeMap.set(text, now.add(1, "minute"))
 		}
-		
-	}else{
+
+	} else {
 		console.log(`[Google Calendar] ${text}`)
 		new Notice(text);
 		noticeMap.set(text, now.add(0, "minute"))

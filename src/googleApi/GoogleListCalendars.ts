@@ -6,7 +6,7 @@ import { getGoogleColors } from "./GoogleColors";
 import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
-let cachedCalendars:GoogleCalendar[] = []
+let cachedCalendars: GoogleCalendar[] = []
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
@@ -14,7 +14,7 @@ let cachedCalendars:GoogleCalendar[] = []
  * @param calendars The list of all possible calendars
  * @returns The filtered list of calendars
  */
-function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:GoogleCalendar[]):GoogleCalendar[]{
+function filterCalendarsByBlackList(plugin: GoogleCalendarPlugin, calendars: GoogleCalendar[]): GoogleCalendar[] {
 	//Remove the calendars contained in the blacklist
 	const filteredCalendars = calendars.filter((calendar) => {
 		return !plugin.settings.calendarBlackList.some(
@@ -32,13 +32,13 @@ function filterCalendarsByBlackList(plugin:GoogleCalendarPlugin, calendars:Googl
  */
 export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
-	if(!settingsAreCompleteAndLoggedIn())return [];
+	if (!settingsAreCompleteAndLoggedIn()) return [];
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 
-	if(cachedCalendars.length){
+	if (cachedCalendars.length) {
 		//Filter for every request instead of caching the filtered result to allow hot swap settings
-		return filterCalendarsByBlackList(plugin,cachedCalendars);
+		return filterCalendarsByBlackList(plugin, cachedCalendars);
 	}
 
 	//Make sure the colors for calendar and events are loaded before getting the first calendar

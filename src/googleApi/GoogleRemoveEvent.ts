@@ -14,7 +14,7 @@ export async function googleRemoveEvent(
 	deleteSingle = false
 ): Promise<boolean> {
 
-	if(!settingsAreCompleteAndLoggedIn())return false;
+	if (!settingsAreCompleteAndLoggedIn()) return false;
 
 	// Use the recurrence id to delete all events from a recurring task
 	let id = event.recurringEventId ?? event.id;
@@ -24,9 +24,9 @@ export async function googleRemoveEvent(
 	}
 
 	const response = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${event.parent.id}/events/${id}`, 'DELETE', null);
-	if(response){
+	if (response) {
 		return true;
-	}else{
+	} else {
 		return false
 	}
 }

@@ -51,30 +51,30 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	defaultFolder: (app.vault as any).config.newFileFolderPath,
 	activateDailyNoteAddon: false,
 	dailyNoteDotColor: "#6aa1d8",
-	debugMode:false,
+	debugMode: false,
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
 
 	private static instance: GoogleCalendarPlugin;
-	
+
 	public static getInstance(): GoogleCalendarPlugin {
-        return GoogleCalendarPlugin.instance;
-    }
+		return GoogleCalendarPlugin.instance;
+	}
 
 	api: IGoogleCalendarPluginApi;
 
 	settings: GoogleCalendarPluginSettings;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	coreTemplatePlugin:any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	templaterPlugin:any;
+
+	coreTemplatePlugin: any;
+
+	templaterPlugin: any;
 
 	settingsTab: GoogleCalendarSettingTab;
 
 	events: EventRef[] = [];
 
-	initView = async (viewId:string): Promise<void> => {
+	initView = async (viewId: string): Promise<void> => {
 		if (
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
@@ -90,19 +90,19 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 	};
 
-	onLayoutReady = ():void => {
+	onLayoutReady = (): void => {
 		checkForNewDailyNotes(this);
 
 		//Get the template plugin to run their commands
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const coreTemplatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
-		if(coreTemplatePlugin && coreTemplatePlugin.enabled){
+		if (coreTemplatePlugin && coreTemplatePlugin.enabled) {
 			this.coreTemplatePlugin = coreTemplatePlugin;
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const templaterPlugin = (this.app as any).plugins.plugins["templater-obsidian"];
-		if(templaterPlugin && templaterPlugin._loaded){
+		if (templaterPlugin && templaterPlugin._loaded) {
 			this.templaterPlugin = templaterPlugin;
 		}
 
@@ -118,14 +118,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
 
-		this.events.push(this.app.vault.on("create", ()=>checkForNewDailyNotes(this)));
-		this.events.push(this.app.vault.on("delete", ()=>checkForNewDailyNotes(this)));
-		this.events.push(this.app.vault.on("rename", ()=>checkForNewDailyNotes(this)));
+		this.events.push(this.app.vault.on("create", () => checkForNewDailyNotes(this)));
+		this.events.push(this.app.vault.on("delete", () => checkForNewDailyNotes(this)));
+		this.events.push(this.app.vault.on("rename", () => checkForNewDailyNotes(this)));
 		this.events.forEach(event => {
 			this.registerEvent(event);
 		});
-		
-		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) => 
+
+		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) =>
 			checkEditorForCodeBlocks(text, el, ctx)
 		);
 
@@ -162,7 +162,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addCommand({
 			id: "open-google-calendar-timline-view",
 			name: "Open Google Calendar timeline view",
-			callback: () => 
+			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_DAY)
 		});
 
@@ -170,7 +170,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addCommand({
 			id: "open-google-calendar-month-view",
 			name: "Open Google Calendar month view",
-			callback: () => 
+			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_MONTH)
 		});
 
@@ -178,7 +178,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addCommand({
 			id: "open-google-calendar-web-view",
 			name: "Open Google Calendar web view",
-			callback: () => 
+			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEB)
 		});
 
@@ -186,7 +186,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addCommand({
 			id: "open-google-calendar-schedule-view",
 			name: "Open Google Calendar schedule view",
-			callback: () => 
+			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE)
 		});
 
@@ -227,11 +227,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 				if (!canRun) {
 					return;
 				}
-	
-				new EventDetailsModal({start:{}, end:{}}, () => {
+
+				new EventDetailsModal({ start: {}, end: {} }, () => {
 					googleClearCachedEvents()
 				}).open()
-				
+
 			},
 		});
 
@@ -338,44 +338,44 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 				googleListEvents().then((events) => {
 					let currentEvents = events.filter(event => {
-						if(event.start.date) return false;
+						if (event.start.date) return false;
 						const startMoment = window.moment(event.start.dateTime);
 						const endMoment = window.moment(event.end.dateTime);
 						const nowMoment = window.moment();
-						if(nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)){
+						if (nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)) {
 							return false;
 						}
-					
+
 						return true;
 					})
-		
-					if(currentEvents.length == 0) {
+
+					if (currentEvents.length == 0) {
 						currentEvents = events.filter(event => {
-							if(event.start.date) return false;
-							const startMoment = window.moment(event.start.dateTime).subtract(1,"hour");
+							if (event.start.date) return false;
+							const startMoment = window.moment(event.start.dateTime).subtract(1, "hour");
 							const endMoment = window.moment(event.end.dateTime);
 							const nowMoment = window.moment();
-							if(nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)){
+							if (nowMoment.isBefore(startMoment) || nowMoment.isAfter(endMoment)) {
 								return false;
 							}
 							return true;
 						})
 					}
 
-					if(currentEvents.length == 0){
+					if (currentEvents.length == 0) {
 						currentEvents = events.filter(event => {
-							if(event.start.date) return true;
+							if (event.start.date) return true;
 							return false
 						})
 					}
 
-					if(currentEvents.length == 1){
-						if(this.settings.useDefaultTemplate && this.settings.defaultFolder && this.settings.defaultFolder){
+					if (currentEvents.length == 1) {
+						if (this.settings.useDefaultTemplate && this.settings.defaultFolder && this.settings.defaultFolder) {
 							createNoteFromEvent(currentEvents[0], this.settings.defaultFolder, this.settings.defaultTemplate)
-						}else{
-							new CreateNotePromptModal(currentEvents[0], ()=>{}).open();
+						} else {
+							new CreateNotePromptModal(currentEvents[0], () => { }).open();
 						}
-					}else{
+					} else {
 						new EventListModal(currentEvents, "createNote").open();
 					}
 				});
@@ -387,7 +387,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Insert Google Event CodeBlock",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
-					"```gEvent\ndate: "+window.moment().format("YYYY-MM-DD")+"\ntype: day\n```",
+					"```gEvent\ndate: " + window.moment().format("YYYY-MM-DD") + "\ntype: day\n```",
 					editor.getCursor()
 				);
 			},
@@ -409,12 +409,12 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 			},
 		});
-		
+
 		/**
 		* This function will list all events of a day you can choose events to insert and decide if you want a list or a table
 		* as a table and inset the table into the currently open editor using the markdown format
 		* This functions is used to save your events into a static field creating a backup of the day independent from the API
-		*/	
+		*/
 		this.addCommand({
 			id: "insert-google-events",
 			name: "Insert Google events",
@@ -431,17 +431,17 @@ export default class GoogleCalendarPlugin extends Plugin {
 				if (!canRun) {
 					return;
 				}
-			
+
 				new InsertEventsModal(editor).open();
-			
+
 			},
 		});
 
 
-			
+
 		/**
 		 * This function will try to create a event from the yaml metadata of a file
-		*/	
+		*/
 		this.addCommand({
 			id: "create-google-calendar-event-from-frontmatter ",
 			name: "Create Google Calendar Event from frontmatter",
@@ -459,13 +459,13 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				if( !view.file) {
+				if (!view.file) {
 					return;
 				}
 
 
 				getEventFromFrontMatter(view).then(newEvent => {
-					if(!newEvent)return;
+					if (!newEvent) return;
 					googleCreateEvent(newEvent)
 				})
 			},
@@ -478,7 +478,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 			callback: () => {
 				const token = getRefreshToken();
-				if(token == undefined || token == ''){
+				if (token == undefined || token == '') {
 					new Notice("No Refresh Token. Please Login.")
 					return;
 				}
@@ -493,7 +493,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addSettingTab(this.settingsTab);
 
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
-			if(this.settings.useCustomClient) return;			
+			if (this.settings.useCustomClient) return;
 			setUserId(req['uid'])
 			setAccessToken(req['at']);
 			setExpirationTime(+new Date() + 3600000);
@@ -504,14 +504,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		
+
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
 
 
-		for(const event in this.events){
+		for (const event in this.events) {
 			this.app.vault.offref(event);
 		}
 		this.events = [];

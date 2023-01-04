@@ -7,32 +7,28 @@
     import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
-    import { Frequency, RRule, RRuleSet, Weekday } from "rrule";
-    import type { Options } from "rrule"
+    import { RRule, RRuleSet, rrulestr } from "rrule";
+    import _ from "lodash";
 	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
-  import type { TFile } from "obsidian";
+    import type { TFile } from "obsidian";
+    import { createNotice } from "src/helper/NoticeHelper";
+    import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
     let calendars: GoogleCalendar[];
     let loading = true;
     let fullDay:boolean;
-    let recurring: boolean;
-    let recurringType: Frequency;
-    let recurringInterval = 1;
-    let recurringEndType: string;
-    let recurringCount:number;
-    let recurringEndDate: string;
+
+
 
     let plugin = GoogleCalendarPlugin.getInstance();
 
     let inputStartDateTime:string;
     let inputEndDateTime:string;
     let inputStartDate:string;
+    let recurringText = "";
     let eventNote: TFile = app.vault.getFiles().find(file => file.basename == event.summary);
-    let listofWeekState:[Weekday,boolean][] = [[RRule.MO, true],[RRule.TU, true],[RRule.WE, true],[RRule.TH, true],[RRule.FR, true],[RRule.SA, true],[RRule.SU, true]]
-
-   
 
     function getEmptyDate() {
         const minutes = 15;
@@ -42,7 +38,9 @@
     }
 
 
-    function addEventDate(event: GoogleEvent) : GoogleEvent {
+    function addEventDate(_event: GoogleEvent) : GoogleEvent {
+
+        const event = _.cloneDeep(_event);
 
         if(fullDay){
             event.start.date = window.moment(inputStartDate).format("YYYY-MM-DD");
@@ -60,11 +58,11 @@
     }
 
     onMount(async () => {
-        calendars = await googleListCalendars();
-        loading = false;
 
         fullDay = event?.start?.dateTime == undefined && event?.start?.date !== undefined;
-        recurring = event?.recurringEventId !== undefined; 
+
+        calendars = await googleListCalendars();
+        loading = false;
 
         //New event all blank
         if(event.id == undefined){
@@ -76,7 +74,7 @@
                 event.parent = calendars[calendars.length - 1];
             }
        
-            recurring = false;
+            recurringText = "";
 
             const startTime = getEmptyDate();
             inputStartDateTime = startTime.format("YYYY-MM-DDTHH:mm");
@@ -95,7 +93,17 @@
             }
 
         }else {
-            //Add the missing time to the object for a better user expirince
+
+            const parentEvent = await googleGetEvent(event.recurringEventId ?? event.id, event.parent.id);
+   
+            if(parentEvent?.recurrence){
+                const rule = rrulestr(parentEvent.recurrence[0]);
+                recurringText = rule.toText();
+            }else {
+                recurringText = "";
+            }
+
+            //Add the missing time to the object for a better user experience
             if(fullDay){
             
                 const startTime     = getEmptyDate();
@@ -139,45 +147,24 @@
 
     const createEvent = async () => {
 
-        if(recurring){
+        if(recurringText && recurringText != ""){
+            try {
+                const rule = RRule.fromText(recurringText);
+                const ruleSet = new RRuleSet()
+                ruleSet.rrule(rule);
+                const ruleString = ruleSet.valueOf();
+                if(recurringText && ruleString[0] == ""){
+                    createNotice("Event not created. Error in recurrence text.", true)
+                    return;
+                }
 
-        let weekDays = listofWeekState.map((state) => {
-            if(state[1]){
-                return state[0]
+                event.recurrence = ruleString;
+                
+            } catch (err) {
+                createNotice("Event not created. Error in recurrence text.", true)
+                return;
             }
-        })
-
-        weekDays = weekDays.filter(day => day !== undefined)
-
-	    const rruleSet = new RRuleSet();
-
-
-        let options:Partial<Options>= {
-            freq: recurringType,
-            interval: recurringInterval,
         }
-
-        if(recurringEndType === "For"){
-            options.count = recurringCount;
-        }else if(recurringEndType === "Until"){
-            options.until = new Date(recurringEndDate);
-        }
-
-
-        if(recurringType === RRule.WEEKLY && weekDays.length){
-            options.byweekday = weekDays;
-        }
-
-        const rule = new RRule(options);
-
-        rruleSet.rrule(rule);
-
-        event.recurrence = rruleSet.valueOf()
-
-
-
-        }
-
         const newEvent = await googleCreateEvent(addEventDate(event))
    
         if(newEvent.id){
@@ -186,21 +173,21 @@
     }
 
     const deleteEvent = async(e) => {
-        let wasSucessfull = false;
+        let wasSuccessful = false;
         if(event.recurringEventId){
-            wasSucessfull = await googleRemoveEvent(event , true)
+            wasSuccessful = await googleRemoveEvent(event, true)
         }else{
-            wasSucessfull = await googleRemoveEvent(event)
+            wasSuccessful = await googleRemoveEvent(event)
         }
-        if(wasSucessfull){
+        if(wasSuccessful){
             closeFunction();
         }
     }
 
     const deleteAllEvents = async() => {
         
-        const wasSucessfull = await googleRemoveEvent(addEventDate(event))
-        if(wasSucessfull){
+        const wasSuccessful = await googleRemoveEvent(addEventDate(event))
+        if(wasSuccessful){
             closeFunction();
         }
     }
@@ -268,10 +255,10 @@ $: {
 
     <label for="calendar">Calendar</label>
     
-    <select name="calendar" class="dropdown" on:change="{changeCalendar}" disabled={event.id !== undefined}>
+    <select name="calendar" class="dropdown" on:change="{changeCalendar}" disabled={event?.id !== undefined}>
         
         {#each calendars as calendar}
-            <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id == event.parent.id}">{calendar.summary}</option>
+            <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id == event?.parent?.id}">{calendar.summary}</option>
         {/each}
     </select>
     
@@ -281,7 +268,6 @@ $: {
         <label for="fullDay">Full Day</label>
         <input type="checkbox" name="fullDay" bind:checked="{fullDay}" >
     </div>
-
 
     {#if fullDay}
         <label for="eventDate">Date</label>
@@ -294,71 +280,14 @@ $: {
         <input type="datetime-local" name="eventEndDate" bind:value="{inputEndDateTime}" min="{window.moment(inputStartDateTime).format('YYYY-MM-DDThh:mm')}">
     {/if}
 
-
-    {#if !event.id}
-
-    <div class="googleFullDayContainer">
-        <label for="reaccuring">Reccuring</label>
-        <input type="checkbox" name="reaccuring" bind:checked="{recurring}" >
-    </div>
-
-
-
-    {#if recurring}
-
-        <div>
-            <span>Repeat every</span>
-            <input type="number" name="recurringInterval" style:width="90px" step="1" min="1" bind:value="{recurringInterval}">
-            <select bind:value={recurringType} class="dropdown">
-                <option value="{Frequency.DAILY}">Days</option>
-                <option default value="{Frequency.WEEKLY}">Weeks</option>
-                <option value="{Frequency.MONTHLY}">Months</option>
-                <option value="{Frequency.YEARLY}">Years</option>
-            </select>
-            
-            <select bind:value={recurringEndType} class="dropdown">
-                <option default value="Forever">Forever</option>
-                <option value="Until">Until</option>
-                <option value="For">For</option>
-            </select>
-
-            {#if recurringEndType == 'Until'}
-
-                <input type="date" name="recurringEndDate" required bind:value="{recurringEndDate}">
-            {:else if recurringEndType == 'For'}
-
-                <input type="number" name="recurringCount" style:width="90px" step="1" min="1" required bind:value="{recurringCount}">
-                <span>times</span>
-            {/if}
-            <br>
-            {#if recurringType === Frequency.WEEKLY}
-
-                {#each listofWeekState as state}
-                    <button 
-                    
-                    class="{state[1] ? 'weekActive' : 'weekInActive'}"
-                    on:click="{() => {
-                        state[1] = !state[1];
-                        }
-                    }"
-                    >
-                        {state[0].toString()}
-                    </button>
-                {/each}
-
-            {/if}
-     
-
-        </div>
-
-    {/if}
-    {/if}
+    <label for="reoccurring">Reoccurring</label>
+    <input type="text" name="Reoccurring" bind:value="{recurringText}" disabled={event.id != null} >
 
     <div class="googleEventButtonContainer">
         {#if event.id}
 
             <div class="buttonRow">
-                {#if recurring }
+                {#if recurringText != "" }
                     <button on:click="{openInBrowser}">Show Recurring Event</button>
                 {:else}
                     <button on:click="{openInBrowser}">Show Single Event</button>
@@ -377,7 +306,7 @@ $: {
     
                 <button on:click="{deleteEvent}">Delete</button>
             </div>
-            {#if recurring }
+            {#if recurringText != "" }
                 <div class="buttonRow">
                     <button disabled class="disabled" on:click="{updateAllEvents}">Update All</button>
                     
@@ -395,14 +324,6 @@ $: {
 
 
 <style>
-
-    .weekActive{
-        background-color: rgb(61, 102, 214) !important;
-    }
-
-    .weekInActive {
-        background-color: #2a2a2a !important;
-    }
 
     .buttonRow{
         display: flex;

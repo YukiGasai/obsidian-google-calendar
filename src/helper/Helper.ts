@@ -5,7 +5,7 @@ import type { GoogleEvent } from "./types";
  * @param date to convert
  * @returns time of day as a number between 0 and 1
  */
- export function dateToPercent(date: Date): number {
+export function dateToPercent(date: Date): number {
 	return date.getHours() / 24 + date.getMinutes() / (60 * 24);
 }
 
@@ -24,10 +24,10 @@ export function getEventStartPosition(
 	event: GoogleEvent,
 	timeLineHeight: number
 ): number {
-	if(event.start.date || event?.eventType == "multiDay"){
+	if (event.start.date || event?.eventType == "multiDay") {
 		return 0;
 	}
-	
+
 	const startPercentage = dateToPercent(new Date(event.start.dateTime));
 	return timeLineHeight * startPercentage;
 }
@@ -45,7 +45,7 @@ export function getEventHeight(
 	event: GoogleEvent,
 	timeLineHeight: number
 ): number {
-	if(event.start.date || event?.eventType == "multiDay"){
+	if (event.start.date || event?.eventType == "multiDay") {
 		return 25;
 	}
 
@@ -55,6 +55,7 @@ export function getEventHeight(
 }
 
 
-export const getCurrentTheme = () => {
-    return (app.vault as any).config.theme ? ( (app.vault as any).config.theme == "obsidian" ? "dark" : "light" ) : "dark";
+export const getCurrentTheme = (): string => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	return (app.vault as any).config.theme ? ((app.vault as any).config.theme == "obsidian" ? "dark" : "light") : "dark";
 }

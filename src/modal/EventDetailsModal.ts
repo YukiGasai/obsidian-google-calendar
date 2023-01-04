@@ -20,11 +20,11 @@ export class EventDetailsModal extends Modal {
 	) {
 		super(GoogleCalendarPlugin.getInstance().app);
 		this.selectedEvent = selectedEvent;
-		if(closeFunction){
+		if (closeFunction) {
 			this.closeFunction = closeFunction;
 		}
 	}
-	
+
 
 	async onOpen(): Promise<void> {
 		const { contentEl } = this;
@@ -33,11 +33,11 @@ export class EventDetailsModal extends Modal {
 			props: {
 				event: this.selectedEvent,
 				closeFunction: () => {
-					if(this.closeFunction){
+					if (this.closeFunction) {
 						this.closeFunction();
 					}
 					this.close()
-				} 
+				}
 			},
 		});
 	}

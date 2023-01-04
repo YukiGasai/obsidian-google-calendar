@@ -20,12 +20,12 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	dailyNoteMap: Record<string, TFile>;
 	plugin = GoogleCalendarPlugin.getInstance()
 	constructor(
-		eventList: GoogleEvent[], 
+		eventList: GoogleEvent[],
 		modalSelectMode: ModalSelectMode,
-		currentDate:moment.Moment = window.moment(), 
-		eventsChanged = false, 
+		currentDate: moment.Moment = window.moment(),
+		eventsChanged = false,
 		closeFunction?: () => void
-		) {
+	) {
 		super(window.app);
 		this.eventList = [...eventList];
 		this.modalSelectMode = modalSelectMode;
@@ -33,46 +33,46 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.emptyStateText = "No events found enter to create a new one"
 		this.eventsChanged = eventsChanged;
 		this.currentDate = currentDate.clone();
-		if(closeFunction){
+		if (closeFunction) {
 			this.closeFunction = closeFunction
 		}
 
-		this.inputEl.addEventListener("keydown", async(ev)=>{
+		this.inputEl.addEventListener("keydown", async (ev) => {
 			let dateUpdated = false;
 			const list = this.getSuggestions(this.inputEl.value);
-			if(!list.length && ev.key == "Enter"){
+			if (!list.length && ev.key == "Enter") {
 				new EventDetailsModal({
 					summary: this.inputEl.value,
 					start: {
-						date:currentDate.format()
-					}, 
-					end:{}
-				},  () => {this.eventsChanged = true; this.close()}).open()
+						date: currentDate.format()
+					},
+					end: {}
+				}, () => { this.eventsChanged = true; this.close() }).open()
 			}
-			
-			if(ev.key == "ArrowRight") {
-				if (ev.ctrlKey){
+
+			if (ev.key == "ArrowRight") {
+				if (ev.ctrlKey) {
 					this.currentDate = this.currentDate.add(1, "month");
-				}else if(ev.shiftKey){
+				} else if (ev.shiftKey) {
 					this.currentDate = this.currentDate.add(1, "week");
-				}else{
+				} else {
 					this.currentDate = this.currentDate.add(1, "day");
 				}
 				dateUpdated = true;
-			}else if(ev.key == "ArrowLeft") {
-				if (ev.ctrlKey){
+			} else if (ev.key == "ArrowLeft") {
+				if (ev.ctrlKey) {
 					this.currentDate = this.currentDate.subtract(1, "month");
-				}else if(ev.shiftKey){
+				} else if (ev.shiftKey) {
 					this.currentDate = this.currentDate.subtract(1, "week");
-				}else{
+				} else {
 					this.currentDate = this.currentDate.subtract(1, "day");
 				}
 				dateUpdated = true;
 			}
 
-			if(dateUpdated){
+			if (dateUpdated) {
 				this.setPlaceholder("Loading");
-				this.eventList = await googleListEvents({startDate:this.currentDate});
+				this.eventList = await googleListEvents({ startDate: this.currentDate });
 				this.inputEl.dispatchEvent(new Event('input'));
 				this.setPlaceholder(`${this.currentDate.format("MM/DD/YYYY")} Arrow left and right to switch day`);
 			}
@@ -80,22 +80,22 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	getItems(): GoogleEvent[] {
-		if(this.plugin.settings.activateDailyNoteAddon){
-			return [{id:"xxx", start:null, end:null},...this.eventList];
+		if (this.plugin.settings.activateDailyNoteAddon) {
+			return [{ id: "xxx", start: null, end: null }, ...this.eventList];
 		}
 		return this.eventList;
 	}
 
 	getItemText(item: GoogleEvent): string {
-		if(item.id == "xxx"){
-			if(getSingleDailyNote(this.currentDate)){
+		if (item.id == "xxx") {
+			if (getSingleDailyNote(this.currentDate)) {
 				return "Open daily note"
 			}
 			return "Create daily note"
 		}
-		if(item.start.date) {
+		if (item.start.date) {
 			return `${item.start.date}\t\t | ${item.summary}\t`;
-		}else{
+		} else {
 
 			const dateTime = window.moment(item.start.dateTime).format("YYYY-MM-DD HH:mm");
 
@@ -104,29 +104,32 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 	}
 
 	async onChooseItem(item: GoogleEvent): Promise<void> {
-		if(item.id == "xxx"){
+		if (item.id == "xxx") {
 			let note = getSingleDailyNote(this.currentDate);
-			if(!note){
+			if (!note) {
 				note = await createDailyNote(this.currentDate)
 			}
-			app.workspace.getLeaf(true).openFile(note);
+
+			const leaf = app.workspace.getLeaf(false)
+
+			await leaf.openFile(note, { active: true });
 
 			return;
 		}
-		if(this.modalSelectMode == "details"){
+		if (this.modalSelectMode == "details") {
 			this.open();
 			new EventDetailsModal(item, () => this.eventsChanged = true).open();
-		}else if(this.modalSelectMode == "createNote"){
-			if(this.plugin.settings.useDefaultTemplate){
+		} else if (this.modalSelectMode == "createNote") {
+			if (this.plugin.settings.useDefaultTemplate) {
 				createNoteFromEvent(item, this.plugin.settings.defaultFolder, this.plugin.settings.defaultTemplate)
-			}else{
-				new CreateNotePromptModal(item, ()=>{}).open();
+			} else {
+				new CreateNotePromptModal(item, () => { }).open();
 			}
 		}
 	}
 
 	onClose(): void {
-		if(this.closeFunction && this.eventsChanged){
+		if (this.closeFunction && this.eventsChanged) {
 			this.closeFunction();
 		}
 	}

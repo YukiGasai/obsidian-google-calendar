@@ -6,9 +6,9 @@ import type { SvelteComponent } from "svelte";
 export class SvelteBuilder extends MarkdownRenderChild {
 
     comp: SvelteComponent;
-    a:any;
-    b:any;
-    constructor(a:any, containerEl: HTMLElement, b:any){
+    a: any;
+    b: any;
+    constructor(a: any, containerEl: HTMLElement, b: any) {
         super(containerEl)
         this.a = a;
         this.b = b;
@@ -20,7 +20,7 @@ export class SvelteBuilder extends MarkdownRenderChild {
             props: this.b,
         });
     }
-   
+
     unload(): void {
         this.comp.$destroy();
     }

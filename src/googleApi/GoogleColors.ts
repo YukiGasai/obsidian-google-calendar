@@ -13,20 +13,20 @@ import { createNotice } from "../helper/NoticeHelper";
 import { callRequest } from "src/helper/RequestWrapper";
 
 const calendarColors = new Map<string, string>();
-const eventColors    = new Map<string, string>();
+const eventColors = new Map<string, string>();
 
 /**
  * Get all possible colors from the google API and store them 
  * Run once on plugin startup
  */
-export async function getGoogleColors():Promise<void> {
+export async function getGoogleColors(): Promise<void> {
 
-	if(!settingsAreCompleteAndLoggedIn())return;
+	if (!settingsAreCompleteAndLoggedIn()) return;
 
 
 	const colorData = await callRequest(`https://www.googleapis.com/calendar/v3/colors`, "GET", null);
 
-	if(!colorData){
+	if (!colorData) {
 		createNotice("Error fetching color data from google");
 		return;
 	}
@@ -38,8 +38,8 @@ export async function getGoogleColors():Promise<void> {
 	Object.keys(colorData.event).forEach(key => {
 		eventColors.set(key, colorData.event[key].background);
 	});
-	
-} 
+
+}
 
 /**
  *  This function just returns the true color of an event
@@ -48,10 +48,10 @@ export async function getGoogleColors():Promise<void> {
  */
 export function getColorFromEvent(event: GoogleEvent): string {
 
-	if(event.colorId && eventColors.has(event.colorId)) {
+	if (event.colorId && eventColors.has(event.colorId)) {
 		return eventColors.get(event.colorId);
-		
-	}else if( event.parent.colorId && calendarColors.has(event.parent.colorId)){
+
+	} else if (event.parent.colorId && calendarColors.has(event.parent.colorId)) {
 		return calendarColors.get(event.parent.colorId);
 
 	} else {

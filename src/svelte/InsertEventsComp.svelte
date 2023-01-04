@@ -152,7 +152,7 @@
         <div class="input">
             <label for="insertType">Insert type</label>
             <select bind:value={insertType} class="dropdown">
-                <option default value="bullet">Bullet</option>
+                <option selected={true} value="bullet">Bullet</option>
                 <option value="table">Table</option>
             </select>
         </div>

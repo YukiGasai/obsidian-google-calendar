@@ -13,10 +13,10 @@ export function checkEditorForAtDates(
 ): void {
 	// Run functions until one of the functions returns true to stop the chain.
 	checkForWord("@today", editor) ||
-	checkForWord("@tomorrow", editor) ||
-	checkForWord("@yesterday", editor) ||
-	checkForWord("@REGEX", editor) ||
-	checkForWord("@YYYY-MM-DD", editor);
+		checkForWord("@tomorrow", editor) ||
+		checkForWord("@yesterday", editor) ||
+		checkForWord("@REGEX", editor) ||
+		checkForWord("@YYYY-MM-DD", editor);
 }
 
 function checkForWord(
@@ -32,14 +32,14 @@ function checkForWord(
 	if (word === "@REGEX") {
 		const realLine = editor.getLine(endPos.line);
 		//Lag prevention
-		if(realLine.length >50)return false;
+		if (realLine.length > 50) return false;
 
 		const match = realLine.match(/.*@([+,-])(\d+) /) ?? [];
 
 		if (match.length != 3) return false;
 
 		//Check that the final whitespace was just typed to trigger the modal
-		if(editor.getCursor().ch != match.index + match[0].length){
+		if (editor.getCursor().ch != match.index + match[0].length) {
 			return false;
 		}
 
@@ -59,10 +59,10 @@ function checkForWord(
 		startPos = { ...endPos, ch: endPos.ch - word.length };
 		realWord = editor.getRange(startPos, endPos);
 
-		if(realWord.length != "@YYYY-MM-DD".length)return false;
+		if (realWord.length != "@YYYY-MM-DD".length) return false;
 		if (!realWord.startsWith("@")) return false;
 
-		if(realWord.substring(1).length>100)return false;
+		if (realWord.substring(1).length > 100) return false;
 
 		const tmpDate = window.moment(realWord.substring(1));
 		if (tmpDate.isValid()) {
@@ -70,7 +70,7 @@ function checkForWord(
 		} else {
 			return false;
 		}
-		
+
 	} else {
 		startPos = { ...endPos, ch: endPos.ch - word.length };
 
@@ -95,7 +95,7 @@ function checkForWord(
 
 	}
 
-	googleListEvents({startDate:date}).then((events) => {
+	googleListEvents({ startDate: date }).then((events) => {
 		new EventSelectReplaceModal(
 			events,
 			editor,

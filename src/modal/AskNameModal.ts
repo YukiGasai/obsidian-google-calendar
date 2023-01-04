@@ -9,7 +9,7 @@ export class AskNameModal extends Modal {
     this.onSubmit = onSubmit;
   }
 
-  onOpen() {
+  onOpen(): void {
     const { contentEl } = this;
 
     contentEl.createEl("h1", { text: "Enter a name for the template" });
@@ -32,7 +32,7 @@ export class AskNameModal extends Modal {
           }));
   }
 
-  onClose() {
+  onClose(): void {
     const { contentEl } = this;
     contentEl.empty();
   }

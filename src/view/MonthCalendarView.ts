@@ -12,7 +12,7 @@ export class MonthCalendarView extends ItemView {
 	getViewType(): string {
 		return VIEW_TYPE_GOOGLE_CALENDAR_MONTH;
 	}
-	
+
 	getDisplayText(): string {
 		return "Calendar Month View";
 	}

@@ -12,7 +12,7 @@ export class ScheduleCalendarView extends ItemView {
 	getViewType(): string {
 		return VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE;
 	}
-	
+
 	getDisplayText(): string {
 		return "Schedule View";
 	}

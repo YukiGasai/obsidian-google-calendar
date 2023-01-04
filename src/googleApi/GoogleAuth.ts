@@ -33,22 +33,22 @@ const PORT = 42813
 
 function checkAccessTokenValid(): boolean {
 	//Check if the token exists
-	if(!getAccessToken() || getAccessToken() == "")return false;
+	if (!getAccessToken() || getAccessToken() == "") return false;
 
 	//Check if Expiration time is not set or default 0
-	if(!getExpirationTime())return false;
+	if (!getExpirationTime()) return false;
 
 	//Check if Expiration time is set to text
-	if(isNaN(getExpirationTime()))return false
-	
+	if (isNaN(getExpirationTime())) return false
+
 	//Check if Expiration time is in the past so the token is expired
-	if(getExpirationTime() < +new Date())return false;
+	if (getExpirationTime() < +new Date()) return false;
 
 	return true;
 }
 
 
-const refreshWithCustomClient = async (plugin:GoogleCalendarPlugin): Promise<boolean>  => {
+const refreshWithCustomClient = async (plugin: GoogleCalendarPlugin): Promise<boolean> => {
 
 	const refreshBody = {
 		client_id: plugin.settings.googleClientId,
@@ -59,19 +59,19 @@ const refreshWithCustomClient = async (plugin:GoogleCalendarPlugin): Promise<boo
 
 	const tokenData = await callRequest('https://oauth2.googleapis.com/token', "POST", refreshBody, true)
 
-	if(!tokenData){
+	if (!tokenData) {
 		createNotice("Error while refreshing authentication");
 		return false;
 	}
 
 	//Save new Access token and Expiration Time
 	setAccessToken(tokenData.access_token);
-	setExpirationTime(+new Date() + tokenData.expires_in*1000);
+	setExpirationTime(+new Date() + tokenData.expires_in * 1000);
 	return true;
 }
 
 
-const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<boolean>  => {
+const refreshWithDefaultClient = async (plugin: GoogleCalendarPlugin): Promise<boolean> => {
 
 	const refreshBody = {
 		uid: getUserId(),
@@ -79,14 +79,14 @@ const refreshWithDefaultClient = async (plugin:GoogleCalendarPlugin): Promise<bo
 
 	const tokenData = await callRequest(`${plugin.settings.googleOAuthServer}/api/google/refresh`, "POST", refreshBody, true)
 
-	if(!tokenData){
+	if (!tokenData) {
 		createNotice("Error while refreshing authentication");
 		return false;
 	}
 
 	//Save new Access token and Expiration Time
 	setAccessToken(tokenData.access_token);
-	setExpirationTime(+new Date() + tokenData.expires_in*1000);
+	setExpirationTime(+new Date() + tokenData.expires_in * 1000);
 	return true;
 }
 
@@ -108,14 +108,14 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
 		//Access token is no longer valid have to create a new one
 		if (getRefreshToken() != "" || getUserId() != "") {
 
-			if(plugin.settings.useCustomClient){
+			if (plugin.settings.useCustomClient) {
 
 				gotRefreshToken = await refreshWithCustomClient(plugin);
 
-				if(gotRefreshToken == false){
+				if (gotRefreshToken == false) {
 					gotRefreshToken = await refreshWithDefaultClient(plugin)
 				}
-			}else{
+			} else {
 				gotRefreshToken = await refreshWithDefaultClient(plugin)
 			}
 		}
@@ -188,7 +188,7 @@ export async function LoginGoogle(): Promise<void> {
 			.listen(PORT, async () => {
 				// open the browser to the authorize url to start the workflow
 				const cp = await open(authorizeUrl, { wait: false })
-				cp.unref()		
+				cp.unref()
 			});
 
 		destroyer(server);

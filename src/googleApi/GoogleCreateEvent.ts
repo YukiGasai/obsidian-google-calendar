@@ -11,9 +11,9 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
  * @param event The event we want to create at the api
  * @returns The created Event
  */
-export async function googleCreateEvent(event: GoogleEvent|any): Promise<GoogleEvent> {
+export async function googleCreateEvent(event: GoogleEvent | any): Promise<GoogleEvent> {
 
-	if(!settingsAreCompleteAndLoggedIn())return null;
+	if (!settingsAreCompleteAndLoggedIn()) return null;
 
 	const calenderId = event.parent.id;
 
@@ -27,7 +27,7 @@ export async function googleCreateEvent(event: GoogleEvent|any): Promise<GoogleE
 		createNotice("Could not create Google Event");
 		return null;
 	}
-		
+
 	createNotice(`Google Event ${createdEvent.summary} created`, true);
 
 	return createdEvent;

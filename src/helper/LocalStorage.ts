@@ -1,4 +1,3 @@
-import GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 //===================
 //GETTER
 //===================
@@ -33,7 +32,7 @@ export const getExpirationTime = (): number => {
  * get user Id from LocalStorage
  * @returns googleCalendarUserId
  */
- export const getUserId = (): string => {
+export const getUserId = (): string => {
 	return window.localStorage.getItem("googleCalendarUserId") ?? "";
 };
 
@@ -49,7 +48,7 @@ export const getExpirationTime = (): number => {
  * @returns googleAccessToken
  */
 export const setAccessToken = (googleAccessToken: string): void => {
-	if(googleAccessToken == "undefined")return;
+	if (googleAccessToken == "undefined") return;
 	window.localStorage.setItem("googleCalendarAccessToken", googleAccessToken);
 };
 
@@ -58,8 +57,8 @@ export const setAccessToken = (googleAccessToken: string): void => {
  * @param googleAccessToken user Id for OAuth server
  * @returns googleCalendarUserId
  */
- export const setUserId = (userId: string): void => {
-	if(userId == "undefined")return;
+export const setUserId = (userId: string): void => {
+	if (userId == "undefined") return;
 	window.localStorage.setItem("googleCalendarUserId", userId);
 };
 
@@ -69,7 +68,7 @@ export const setAccessToken = (googleAccessToken: string): void => {
  * @returns googleRefreshToken
  */
 export const setRefreshToken = (googleRefreshToken: string): void => {
-	if(googleRefreshToken == "undefined")return;
+	if (googleRefreshToken == "undefined") return;
 	window.localStorage.setItem("googleCalendarRefreshToken", googleRefreshToken);
 };
 
@@ -79,7 +78,7 @@ export const setRefreshToken = (googleRefreshToken: string): void => {
  * @returns googleExpirationTime
  */
 export const setExpirationTime = (googleExpirationTime: number): void => {
-	if(isNaN(googleExpirationTime))return;
+	if (isNaN(googleExpirationTime)) return;
 	window.localStorage.setItem(
 		"googleCalendarExpirationTime",
 		googleExpirationTime + ""
