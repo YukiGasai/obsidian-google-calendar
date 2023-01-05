@@ -52,6 +52,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	activateDailyNoteAddon: false,
 	dailyNoteDotColor: "#6aa1d8",
 	debugMode: false,
+	timelineHourFormat: 0
 };
 
 export default class GoogleCalendarPlugin extends Plugin {

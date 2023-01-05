@@ -10,6 +10,7 @@
     import {EventDetailsModal} from '../modal/EventDetailsModal'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
     import { onDestroy } from "svelte";
+    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
     interface Location {
         event:GoogleEvent;
@@ -31,8 +32,11 @@
     let events:GoogleEvent[] = [];
     let eventLocations:Location[] = [];
     let interval;
+    const plugin = GoogleCalendarPlugin.getInstance();
+    let hourFormat = plugin.settings.timelineHourFormat;
 
     const refeshData = async () => {
+        hourFormat = plugin.settings.timelineHourFormat;
         await getEvents()
         const dayPercentage = dateToPercent(new Date());
         timeDisplayPosition = Math.floor(height * dayPercentage);
@@ -41,7 +45,7 @@
     $: {
         //needed to update if the prop date changes i dont know why
         date = date;
-
+        
         if(interval){
             clearInterval(interval);
         }
@@ -80,8 +84,14 @@
                 latestEndDate = window.moment(events[0].end.dateTime)
             }
             events.forEach((event, i) => {
-                                
-                const indent = 30 + indentAmount * 10;
+                           
+                let spaceToHours = 30;
+
+                if(hourFormat == 2){
+                    spaceToHours = 50
+                }
+                
+                const indent = spaceToHours + indentAmount * 10;
 
                 const elementWidth = (width-indent) / events.length;
 
@@ -131,6 +141,30 @@
     onDestroy(() => {
         clearInterval(interval);
     })
+
+    const switchHourDisplay = () => {
+        hourFormat += 1;
+        if(hourFormat > 2){
+            hourFormat = 0;
+        }
+        plugin.settings.timelineHourFormat = hourFormat;
+        plugin.saveSettings();
+    }
+
+    const getHourText = (hour:number, hourFormat:number):string => {
+        const hourMoment = window.moment(`${hour}:00:00`, "H:mm:ss");
+
+        switch (hourFormat) {
+            case 0:
+                return hourMoment.format("HH"); 
+                
+            case 1:
+                return hourMoment.format("hh");
+            
+            case 2:
+                return hourMoment.format("hh A")
+        }
+    }
     
     </script>
 
@@ -148,7 +182,7 @@
 
         <div class="hourLineContainer">
         {#each {length: 24} as _, i }
-            <div class=hourLine style:height="{height/24}px" />
+            <div class={hourFormat == 2 ? "hourLine hourLineLarge" : "hourLine"} style:height="{height/24}px" />
         {/each}
         </div>  
     
@@ -156,9 +190,10 @@
         <div class="hourTextContainer" style:margin-top="-{height/52}px">
         {#each {length: 24} as _, i }
                 <span class=hourText
+                 on:click={switchHourDisplay}
                  style:height="{height/24}px"
                  style:font-size="{height/50}px" 
-                >{i}</span>
+                >{getHourText(i,hourFormat)}</span>
         {/each}
         </div>
     
@@ -215,8 +250,12 @@
             content: "";
             position: absolute;
             width: 90%;
-            left:25px;
+            left: 25px;
             border-bottom: 1px solid white;
+        }
+        .hourLineLarge::after{
+            width: 80%;
+            left: 50px;
         }
     
        .hourText{
