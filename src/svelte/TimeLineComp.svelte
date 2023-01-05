@@ -172,9 +172,9 @@
                 on:click={(e) => goToEvent(location.event,e)} 
                 class="
                     googleCalendarEvent
-                    googleCalendarColor_{location.event.parent.colorId}
-                    googleCalendarEventColor_{location.event.colorId}
-                    googleCalendarId_{location.event.parent.id}
+                    googleCalendarEvent_Calendar_Color_{location.event.parent.colorId}
+                    googleCalendarEvent_Event_Color_{location.event.parent.colorId}
+                    googleCalendarEvent_Id_{location.event.parent.id}
                     "
                 id="{location.event.id}"
                 style:top="{location.y}px"
@@ -183,7 +183,12 @@
                 style:height="{location.height}px"
                 style:background={getColorFromEvent(location.event)}
             >
-            <span class="googleCalendarName">{location.event.summary}</span>
+            <span class="
+                googleCalendarName
+                googleCalendarName_Calendar_Color_{location.event.parent.colorId}
+                googleCalendarName_Event_Color_{location.event.parent.colorId}
+                googleCalendarName_Id_{location.event.parent.id}
+                ">{location.event.summary}</span>
         </div>
         {/each}
 
