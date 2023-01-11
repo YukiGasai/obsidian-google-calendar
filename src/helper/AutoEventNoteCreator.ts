@@ -110,6 +110,21 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     const { vault } = app;
     const { adapter } = vault;
 
+    if (folderName) {
+
+        //check description for {{date}} string replace it with today's date
+        folderName = folderName.replace("{{date}}", window.moment().format("YYYY-MM-DD"));
+
+        //check description for {{event-date}} string replace with event start date
+        folderName = folderName.replace("{{event-date}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY-MM-DD"));
+
+        //check description for {{event-title}} string replace with event title
+        folderName = folderName.replace("{{event-title}}", event.summary ?? "event-title");
+
+    }
+
+    console.log(folderName)
+
     //Destination folder path
     let folderPath = app.fileManager.getNewFileParent("").path;
     if (folderName) {
@@ -119,9 +134,11 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
         folderName = "/" + folderName.split(/[/\\]/).join("/");
 
-        if (await adapter.exists(folderName)) {
-            folderPath = folderName;
+        if (! await adapter.exists(folderName)) {
+            await adapter.mkdir(folderName);
         }
+
+        folderPath = folderName;
     }
     const cleanEventSummary = event.summary
         .trim()
