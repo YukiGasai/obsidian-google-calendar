@@ -13,6 +13,7 @@
     import type { TFile } from "obsidian";
     import { createNotice } from "src/helper/NoticeHelper";
     import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
+  import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
@@ -220,7 +221,11 @@
     }
 
     const createNote = async () => {
-        new CreateNotePromptModal(event, (newNote:TFile) => eventNote = newNote).open();
+        if (plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder && plugin.settings.defaultFolder) {
+            createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
+        } else {
+            new CreateNotePromptModal(event, (newNote:TFile) => eventNote = newNote).open();
+        }
     }
     
     const openInBrowser = () => {
