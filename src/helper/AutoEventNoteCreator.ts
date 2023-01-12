@@ -122,7 +122,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         folderName = folderName.replace("{{date-month}}", window.moment().format("MM"));
 
         //check description for {{date-day}} string replace it with the current numeric day.
-        folderName = folderName.replace("{{date-day}}", window.moment().format(""));
+        folderName = folderName.replace("{{date-day}}", window.moment().format("DD"));
 
         //check description for {{event-date}} string replace with event start date
         folderName = folderName.replace("{{event-date}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY-MM-DD"));
