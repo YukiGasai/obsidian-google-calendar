@@ -27,6 +27,8 @@ export interface GoogleCalendarPluginSettings {
 	dailyNoteDotColor: string;
 	debugMode: boolean;
 	timelineHourFormat: number;
+	atAnnotationEnabled: boolean;
+	usDateFormat: boolean;
 }
 
 export interface Template {

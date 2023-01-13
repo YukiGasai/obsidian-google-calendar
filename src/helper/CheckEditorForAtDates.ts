@@ -7,21 +7,26 @@ import type { Editor } from "obsidian";
 
 import { EventSelectReplaceModal } from "../modal/EventSelectReplaceModal";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
+import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 export function checkEditorForAtDates(
 	editor: Editor,
+	plugin: GoogleCalendarPlugin
 ): void {
+	if (plugin.settings.atAnnotationEnabled == false) return;
+
 	// Run functions until one of the functions returns true to stop the chain.
-	checkForWord("@today", editor) ||
-		checkForWord("@tomorrow", editor) ||
-		checkForWord("@yesterday", editor) ||
-		checkForWord("@REGEX", editor) ||
-		checkForWord("@YYYY-MM-DD", editor);
+	checkForWord("@today", editor, plugin) ||
+		checkForWord("@tomorrow", editor, plugin) ||
+		checkForWord("@yesterday", editor, plugin) ||
+		checkForWord("@REGEX", editor, plugin) ||
+		checkForWord("@YYYY-MM-DD", editor, plugin);
 }
 
 function checkForWord(
 	word: string,
-	editor: Editor
+	editor: Editor,
+	plugin: GoogleCalendarPlugin
 ): boolean {
 
 	const endPos = editor.getCursor();
@@ -59,12 +64,17 @@ function checkForWord(
 		startPos = { ...endPos, ch: endPos.ch - word.length };
 		realWord = editor.getRange(startPos, endPos);
 
-		if (realWord.length != "@YYYY-MM-DD".length) return false;
-		if (!realWord.startsWith("@")) return false;
+		if (!realWord.startsWith("@") || realWord.length != "@YYYY-MM-DD".length) return false;
 
-		if (realWord.substring(1).length > 100) return false;
+		const usFormatArray = ["YYYY-MM-DD", "YYYY/MM/DD", "YYYY.MM.DD", "YYYY MM DD", "MM-DD-YYYY", "MM/DD/YYYY", "MM.DD.YYYY", "MM DD YYYY", "DD-MM-YYYY", "DD/MM/YYYY", "DD.MM.YYYY", "DD MM YYYY"];
+		const euFormatArray = ["DD-MM-YYYY", "DD/MM/YYYY", "DD.MM.YYYY", "DD MM YYYY", "YYYY-MM-DD", "YYYY/MM/DD", "YYYY.MM.DD", "YYYY MM DD", "MM-DD-YYYY", "MM/DD/YYYY", "MM.DD.YYYY", "MM DD YYYY"];
 
-		const tmpDate = window.moment(realWord.substring(1));
+		const tmpDate = window.moment(
+			realWord.substring(1),
+			plugin.settings.usDateFormat ? usFormatArray : euFormatArray,
+			true
+		);
+
 		if (tmpDate.isValid()) {
 			date = tmpDate;
 		} else {

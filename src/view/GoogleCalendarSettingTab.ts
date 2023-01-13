@@ -188,6 +188,41 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 
 		new Setting(containerEl)
+			.setName("Enable @ Annotations")
+			.setDesc("Will help you to easily link events from you calendar in your notes")
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.atAnnotationEnabled);
+				toggle.onChange(async (state) => {
+					this.plugin.settings.atAnnotationEnabled = state;
+					await this.plugin.saveSettings();
+					this.hide();
+					this.display();
+				});
+			});
+
+		if (this.plugin.settings.atAnnotationEnabled) {
+			new Setting(containerEl)
+				.setName("@ Annotation date format")
+				.setDesc("SWitch between mm/dd/yyyy and dd/mm/yyyy")
+				.setClass("SubSettings")
+				.addDropdown((dropdown) => {
+					dropdown.addOption("mm/dd/yyyy", "mm/dd/yyyy");
+					dropdown.addOption("dd/mm/yyyy", "dd/mm/yyyy");
+					dropdown.setValue(this.plugin.settings.usDateFormat ? "mm/dd/yyyy" : "dd/mm/yyyy");
+					dropdown.onChange(async (state) => {
+						if (state == "mm/dd/yyyy") {
+							this.plugin.settings.usDateFormat = true;
+						} else {
+							this.plugin.settings.usDateFormat = false;
+						}
+						await this.plugin.saveSettings();
+						this.hide();
+						this.display();
+					});
+				});
+		}
+
+		new Setting(containerEl)
 			.setName("Auto create Event Notes")
 			.setDesc("Will create new notes from a event if the description contains :obsidian:")
 			.addToggle((toggle) => {

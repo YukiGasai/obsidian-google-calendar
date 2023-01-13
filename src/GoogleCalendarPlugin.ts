@@ -52,7 +52,9 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	activateDailyNoteAddon: false,
 	dailyNoteDotColor: "#6aa1d8",
 	debugMode: false,
-	timelineHourFormat: 0
+	timelineHourFormat: 0,
+	atAnnotationEnabled: true,
+	usDateFormat: true,
 };
 
 export default class GoogleCalendarPlugin extends Plugin {
@@ -154,7 +156,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.workspace.on(
 				"editor-change",
 				(editor: Editor) => {
-					checkEditorForAtDates(editor);
+					checkEditorForAtDates(editor, this);
 					checkEditorForInsertedEvents(editor)
 				})
 		);
