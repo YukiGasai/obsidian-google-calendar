@@ -175,6 +175,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName("Daily dot color")
 				.setDesc("Color for daily note dots in month view")
+				.setClass("SubSettings")
 				.addText((toggle) => {
 					toggle.inputEl.type = "color"
 					toggle.setValue(this.plugin.settings.dailyNoteDotColor);

@@ -314,6 +314,7 @@ export interface CodeBlockOptions {
 	include?: string[];
 	exclude?: string[];
 	theme: string;
+	hourRange: number[];
 }
 
 

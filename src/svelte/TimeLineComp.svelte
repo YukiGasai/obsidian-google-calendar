@@ -3,7 +3,7 @@
     import type { GoogleEvent } from "../helper/types";
 
     import TreeMap from 'ts-treemap'
-    import { dateToPercent } from "../helper/Helper";
+    import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
     import {getEventStartPosition, getEventHeight} from "../helper/Helper";
     
     import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
@@ -26,6 +26,7 @@
     export let date = window.moment();
     export let include;
     export let exclude;
+    export let hourRange = [0, 24];
 
     let loading = true;
     let timeDisplayPosition = 0;
@@ -34,6 +35,7 @@
     let interval;
     const plugin = GoogleCalendarPlugin.getInstance();
     let hourFormat = plugin.settings.timelineHourFormat;
+
 
     const refeshData = async () => {
         hourFormat = plugin.settings.timelineHourFormat;
@@ -45,7 +47,6 @@
     $: {
         //needed to update if the prop date changes i dont know why
         date = date;
-        
         if(interval){
             clearInterval(interval);
         }
@@ -53,8 +54,6 @@
         interval = setInterval(refeshData, 5000);
         refeshData();
     }
-
-   
 
     const getLocationArray = () => {
         const startMap = new TreeMap<string, GoogleEvent[]>();
@@ -177,6 +176,7 @@
     <div 
         style:height="{height}px"
         style:width="{width}px"
+        style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
         class="timeline"
         >
 
@@ -236,7 +236,7 @@
             padding:10px;
             padding-top: 0;
             position: absolute;
-         
+            cursor: pointer;
             width:150px;
             left:40px;
             border-radius: 5px;

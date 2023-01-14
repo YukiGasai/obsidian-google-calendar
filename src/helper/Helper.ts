@@ -54,6 +54,13 @@ export function getEventHeight(
 	return timeLineHeight * (endPercentage - startPercentage);
 }
 
+export function getStartHeightOfHour(timeLineHeight: number, hour: number): number {
+	return (timeLineHeight / 24) * hour;
+}
+
+export function getEndHeightOfHour(timeLineHeight: number, hour: number): number {
+	return timeLineHeight - (timeLineHeight / 24) * hour;
+}
 
 export const getCurrentTheme = (): string => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

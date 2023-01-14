@@ -3,8 +3,8 @@
 	color: red;
 }
 
-input[type="date"],
-input[type="datetime-local"] {
+input[type='date'],
+input[type='datetime-local'] {
 	background: var(--background-modifier-form-field);
 	border: 1px solid var(--background-modifier-border);
 	color: var(--text-normal);
@@ -21,18 +21,22 @@ input[type="datetime-local"] {
 	flex-direction: column;
 }
 
-.SubSettings{
+.SubSettings {
 	margin-left: 40px;
 }
 
-.suggestionText{
+.suggestionText {
 	font-size: 20px;
 }
 
 .templater_search {
-    width: calc(100% - 20px);
+	width: calc(100% - 20px);
 }
 
-.googleCalendarDailyDot{
-    fill: var(--daily-dot-color) !important;
+.googleCalendarDailyDot {
+	fill: var(--daily-dot-color) !important;
+}
+
+.block-language-gEvent {
+	padding: 0px;
 }

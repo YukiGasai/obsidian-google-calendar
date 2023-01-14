@@ -10,6 +10,7 @@ export let date:moment.Moment = undefined;
 export let navigation:boolean = false;
 export let include;
 export let exclude;
+export let hourRange: number[] = undefined; 
 
 let dateOffset = 0;
 const minusOneWeek = () => dateOffset-= 7;
@@ -43,7 +44,9 @@ $: date = navigation ? window.moment().local().add(dateOffset, "days") : date;
         <button class="fixedSizeButton" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
     </div>
     {/if}
-    <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} />
+    <div style="overflow: hidden">
+        <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} />
+    </div>
 </div>
 
 <style>
