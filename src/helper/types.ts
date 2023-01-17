@@ -25,6 +25,7 @@ export interface GoogleCalendarPluginSettings {
 	defaultFolder: string;
 	activateDailyNoteAddon: boolean;
 	dailyNoteDotColor: string;
+	useWeeklyNotes: boolean;
 	debugMode: boolean;
 	timelineHourFormat: number;
 	atAnnotationEnabled: boolean;

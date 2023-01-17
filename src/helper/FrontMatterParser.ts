@@ -8,7 +8,6 @@ import RRule, { RRuleSet } from "rrule";
 
 
 const extractHeaderContent = (index: number, headers, fileContent: string): string => {
-    console.log(index);
     if (index < 0) {
         index = headers.length + index;
     }
@@ -152,8 +151,6 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
                 }
             })
 
-            console.log(contentList);
-
             if (contentList.contains(-1)) {
                 createNotice("Event not created.A Header in the header list is out of range", true);
                 return;
@@ -181,8 +178,6 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
         frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format();
     }
-    console.log(frontmatter)
-
 
     //Special replacement for recurrence
     if (frontmatter.recurrence) {

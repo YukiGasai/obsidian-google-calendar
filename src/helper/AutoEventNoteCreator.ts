@@ -141,8 +141,6 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     }
 
-    console.log(folderName)
-
     //Destination folder path
     let folderPath = app.fileManager.getNewFileParent("").path;
     if (folderName) {

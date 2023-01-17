@@ -13,6 +13,7 @@ import { getRefreshToken, getUserId, setAccessToken, setExpirationTime, setRefre
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
+import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -172,6 +173,24 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 
 		if (this.plugin.settings.activateDailyNoteAddon) {
+
+			new Setting(containerEl)
+				.setName("Use Weekly Notes")
+				.setDesc("Will show week numbers with weekly note dots")
+				.setClass("SubSettings")
+				.addToggle((toggle) => {
+					toggle.setValue(this.plugin.settings.useWeeklyNotes);
+					toggle.onChange(async (state) => {
+						this.plugin.settings.useWeeklyNotes = state;
+						if (state) {
+							checkForNewWeeklyNotes(this.plugin)
+						}
+						await this.plugin.saveSettings();
+						this.hide();
+						this.display();
+					});
+				});
+
 			new Setting(containerEl)
 				.setName("Daily dot color")
 				.setDesc("Color for daily note dots in month view")

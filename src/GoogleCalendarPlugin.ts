@@ -23,7 +23,7 @@ import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
 import { getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
-import { checkForNewDailyNotes } from "./helper/DailyNoteHelper";
+import { checkForNewDailyNotes, checkForNewWeeklyNotes } from "./helper/DailyNoteHelper";
 import { googleCreateEvent } from "../src/googleApi/GoogleCreateEvent";
 import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 
@@ -51,6 +51,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	defaultFolder: (app.vault as any).config.newFileFolderPath,
 	activateDailyNoteAddon: false,
 	dailyNoteDotColor: "#6aa1d8",
+	useWeeklyNotes: false,
 	debugMode: false,
 	timelineHourFormat: 0,
 	atAnnotationEnabled: true,
@@ -95,7 +96,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 	onLayoutReady = (): void => {
 		checkForNewDailyNotes(this);
-
+		checkForNewWeeklyNotes(this);
 		//Get the template plugin to run their commands
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const coreTemplatePlugin = (this.app as any).internalPlugins?.plugins["templates"];
@@ -121,9 +122,18 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
 
-		this.events.push(this.app.vault.on("create", () => checkForNewDailyNotes(this)));
-		this.events.push(this.app.vault.on("delete", () => checkForNewDailyNotes(this)));
-		this.events.push(this.app.vault.on("rename", () => checkForNewDailyNotes(this)));
+		this.events.push(this.app.vault.on("create", () => {
+			checkForNewDailyNotes(this);
+			checkForNewWeeklyNotes(this)
+		}));
+		this.events.push(this.app.vault.on("delete", () => {
+			checkForNewDailyNotes(this);
+			checkForNewWeeklyNotes(this)
+		}));
+		this.events.push(this.app.vault.on("rename", () => {
+			checkForNewDailyNotes(this);
+			checkForNewWeeklyNotes(this)
+		}));
 		this.events.forEach(event => {
 			this.registerEvent(event);
 		});
