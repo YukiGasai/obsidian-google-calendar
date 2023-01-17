@@ -140,7 +140,6 @@ export async function LoginGoogle(): Promise<void> {
 		if (!settingsAreComplete()) return;
 		const { OAuth2Client } = require("google-auth-library");
 		const http = require("http");
-		const open = require("open");
 		const url = require("url");
 		const destroyer = require("server-destroy");
 		const oAuth2Client = new OAuth2Client(
@@ -187,8 +186,7 @@ export async function LoginGoogle(): Promise<void> {
 			})
 			.listen(PORT, async () => {
 				// open the browser to the authorize url to start the workflow
-				const cp = await open(authorizeUrl, { wait: false })
-				cp.unref()
+				window.open(authorizeUrl);
 			});
 
 		destroyer(server);
