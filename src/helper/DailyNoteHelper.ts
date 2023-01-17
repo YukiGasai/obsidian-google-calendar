@@ -14,6 +14,7 @@ export const dailyNotesUpdated = new Event('dailyNoteUpdate', {
 
 
 export const checkForNewDailyNotes = async (plugin: GoogleCalendarPlugin): Promise<void> => {
+
     if (app.workspace.layoutReady && plugin.settings.activateDailyNoteAddon) {
         let newNotes: Record<string, TFile> = {};
         try {

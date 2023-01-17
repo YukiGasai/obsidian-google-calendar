@@ -1,5 +1,5 @@
 import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
-import { Editor, EventRef, MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import { Editor, EventRef, MarkdownView, Notice, Plugin, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -21,11 +21,13 @@ import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEve
 import { TemplateSuggest } from "./suggest/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
-import { getCurrentTheme } from "./helper/Helper";
+import { findEventNote, getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 import { checkForNewDailyNotes } from "./helper/DailyNoteHelper";
 import { googleCreateEvent } from "../src/googleApi/GoogleCreateEvent";
 import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
+import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
+import { createNotification } from "src/helper/NotificationHelper";
 
 
 
@@ -37,6 +39,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	useCustomClient: true,
 	googleOAuthServer: "https://obsidian-google-calendar.vercel.app",
 	refreshInterval: 10,
+	useNotification: true,
 	showNotice: true,
 	autoCreateEventNotes: true,
 	autoCreateEventKeepOpen: false,
@@ -76,6 +79,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 	settingsTab: GoogleCalendarSettingTab;
 
 	events: EventRef[] = [];
+
 
 	initView = async (viewId: string): Promise<void> => {
 		if (
@@ -127,6 +131,28 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.events.forEach(event => {
 			this.registerEvent(event);
 		});
+
+
+		if (this.settings.useNotification) {
+			const notificationInterval = window.setInterval(async () => {
+
+				const events = await googleListEvents();
+
+				const currentMoment = window.moment()
+
+				const currentEvents = events.filter(event => {
+					if (event.start.date) return false;
+
+					const startMoment = window.moment(event.start.dateTime);
+
+					return startMoment.isSame(currentMoment, "minute");
+				});
+				currentEvents.forEach(event => {
+					createNotification(event);
+				})
+			}, 1000 * 60)
+			this.registerInterval(notificationInterval)
+		}
 
 		this.registerMarkdownCodeBlockProcessor("gEvent", (text, el, ctx) =>
 			checkEditorForCodeBlocks(text, el, ctx)
@@ -504,6 +530,24 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 			this.settingsTab.display();
 		});
+
+		this.registerObsidianProtocolHandler("googleOpenNote", async (req) => {
+			if (!req['event']) return;
+
+			const [event_id, calendar_id] = req['event'].split("::");
+
+			const event = await googleGetEvent(event_id, calendar_id);
+			let eventNote: TFile = findEventNote(event);
+			if (eventNote) {
+				app.workspace.getLeaf(true).openFile(eventNote);
+			} else {
+				if (this.settings.useDefaultTemplate && this.settings.defaultFolder && this.settings.defaultFolder) {
+					createNoteFromEvent(event, this.settings.defaultFolder, this.settings.defaultTemplate)
+				} else {
+					new CreateNotePromptModal(event, (newNote: TFile) => eventNote = newNote).open();
+				}
+			}
+		});
 	}
 
 	onunload(): void {
@@ -518,7 +562,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.vault.offref(event);
 		}
 		this.events = [];
-
 	}
 
 	async loadSettings(): Promise<void> {

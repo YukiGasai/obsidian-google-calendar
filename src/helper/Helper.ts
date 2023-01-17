@@ -1,4 +1,5 @@
 
+import type { TFile } from "obsidian";
 import type { GoogleEvent } from "./types";
 
 /**
@@ -65,4 +66,24 @@ export function getEndHeightOfHour(timeLineHeight: number, hour: number): number
 export const getCurrentTheme = (): string => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return (app.vault as any).config.theme ? ((app.vault as any).config.theme == "obsidian" ? "dark" : "light") : "dark";
+}
+
+
+export const sanitizeFileName = (name: string): string => {
+	return name.trim()
+		.replace('<', 'lt')
+		.replace('>', 'gt')
+		.replace('"', '\'\'')
+		.replace('\\', '-')
+		.replace('/', '-')
+		.replace(':', '-')
+		.replace('|', '-')
+		.replace('*', '')
+		.replace('?', '');
+}
+
+export const findEventNote = (event: GoogleEvent): TFile => {
+	return app.vault.getFiles().find(file =>
+		file.basename === sanitizeFileName(event.summary)
+	)
 }

@@ -6,6 +6,7 @@ import { normalizePath, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import _ from "lodash";
+import { sanitizeFileName } from "./Helper";
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -141,8 +142,6 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     }
 
-    console.log(folderName)
-
     //Destination folder path
     let folderPath = app.fileManager.getNewFileParent("").path;
     if (folderName) {
@@ -158,18 +157,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
         folderPath = folderName;
     }
-    const cleanEventSummary = event.summary
-        .trim()
-        .replace('<', 'lt')
-        .replace('>', 'gt')
-        .replace('"', '\'\'')
-        .replace('\\', '-')
-        .replace('/', '-')
-        .replace(':', '-')
-        .replace('|', '-')
-        .replace('*', '')
-        .replace('?', '');
-
+    const cleanEventSummary = sanitizeFileName(event.summary)
     const filePath = normalizePath(`${folderPath}/${cleanEventSummary}.md`);
 
     //check if file already exists

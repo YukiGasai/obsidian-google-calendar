@@ -143,6 +143,22 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				})
 			});
 
+
+		new Setting(containerEl)
+			.setName("Use event Notification")
+			.setDesc("Will send notification when an event starts")
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.useNotification);
+				toggle.onChange(async (state) => {
+					this.plugin.settings.useNotification = state;
+					await this.plugin.saveSettings();
+					this.hide();
+					this.display();
+				});
+			});
+
+
+
 		new Setting(containerEl)
 			.setName("Default webview theme")
 			.addDropdown(async (dropdown) => {
