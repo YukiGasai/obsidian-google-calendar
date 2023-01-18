@@ -39,7 +39,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	useCustomClient: true,
 	googleOAuthServer: "https://obsidian-google-calendar.vercel.app",
 	refreshInterval: 10,
-	useNotification: true,
+	useNotification: false,
 	showNotice: true,
 	autoCreateEventNotes: true,
 	autoCreateEventKeepOpen: false,
