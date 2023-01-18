@@ -30,6 +30,7 @@ export const checkForNewWeeklyNotes = async (plugin: GoogleCalendarPlugin): Prom
     if (!app.workspace.layoutReady || !plugin.settings.activateDailyNoteAddon || !plugin.settings.useWeeklyNotes) {
         return;
     }
+
     let newNotes: Record<string, TFile> = {};
     try {
         newNotes = getAllWeeklyNotes();

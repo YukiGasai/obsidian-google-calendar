@@ -11,9 +11,11 @@
     import _ from "lodash";
 	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
     import type { TFile } from "obsidian";
-    import { createNotice } from "src/helper/NoticeHelper";
+    import { createNotice } from "../helper/NoticeHelper";
+    import { findEventNote } from "../helper/Helper";
     import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
-  import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
+    import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
+    import { createNotification } from "src/helper/NotificationHelper";
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
@@ -23,13 +25,14 @@
 
 
 
+    
     let plugin = GoogleCalendarPlugin.getInstance();
 
     let inputStartDateTime:string;
     let inputEndDateTime:string;
     let inputStartDate:string;
     let recurringText = "";
-    let eventNote: TFile = app.vault.getFiles().find(file => file.basename == event.summary);
+    let eventNote: TFile = findEventNote(event);
 
     function getEmptyDate() {
         const minutes = 15;
@@ -94,7 +97,7 @@
             }
 
         }else {
-
+            createNotification(event);
             const parentEvent = await googleGetEvent(event.recurringEventId ?? event.id, event.parent.id);
    
             if(parentEvent?.recurrence){
