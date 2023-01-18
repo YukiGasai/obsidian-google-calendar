@@ -8,7 +8,8 @@
     import { onDestroy } from "svelte";
     import _ from "lodash"
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-    import { getDailyNotes, getSingleDailyNote } from "../helper/DailyNoteHelper";
+    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote } from "../helper/DailyNoteHelper";
+  import { createWeeklyNote } from "obsidian-daily-notes-interface";
 
 
     export let displayedMonth = window.moment();
@@ -51,6 +52,19 @@
 
         events = eventsInMonth;
         const customTagsSource: ICalendarSource = {
+            getWeeklyMetadata: async (week: moment.Moment): Promise<IDayMetadata> => {
+                let dots:IDot[] = [];
+                if(plugin.settings.activateDailyNoteAddon && plugin.settings.useWeeklyNotes){
+                    const note = getSingleWeeklyNote(week);
+                    if(note){
+                        dots = [{isFilled: true, className: "googleCalendarDailyDot", color: "default"}]
+                    }
+                }
+                return {
+                    dataAttributes: {"amount": dots.length + ""},
+                    dots: dots,
+                };
+            },
             getDailyMetadata: async (day: moment.Moment): Promise<IDayMetadata> => {
 
                 let dots:IDot[] = [];
@@ -103,7 +117,17 @@
             googleClearCachedEvents();
             displayedMonth = displayedMonth
         }).open();
+    }
     
+    const onClickWeek = async (week: moment.Moment, isMenu:boolean) => {
+
+        let weeklyNote = getSingleWeeklyNote(week)
+        if(!weeklyNote){
+            weeklyNote = await createWeeklyNote(week);
+        }
+
+        const leaf = app.workspace.getLeaf(false)
+        await leaf.openFile(weeklyNote, { active: true });
     }
     $: {
         if(interval){
@@ -133,8 +157,9 @@
         {:else} 
             <div style="--daily-dot-color: {plugin.settings.dailyNoteDotColor}">
                 <CalendarBase
-                    showWeekNums={false}
+                    showWeekNums={plugin.settings.useWeeklyNotes}
                     {onClickDay}
+                    {onClickWeek}
                     bind:sources
                     bind:displayedMonth
                     bind:today
