@@ -547,7 +547,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			const [event_id, calendar_id] = req['event'].split("::");
 
 			const event = await googleGetEvent(event_id, calendar_id);
-			let eventNote: TFile = findEventNote(event);
+			let { file: eventNote } = findEventNote(event);
 			if (eventNote) {
 				app.workspace.getLeaf(true).openFile(eventNote);
 			} else {

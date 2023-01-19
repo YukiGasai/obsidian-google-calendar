@@ -2,11 +2,12 @@ import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListEvents } from "../googleApi/GoogleListEvents";
-import { normalizePath, TFile } from "obsidian";
+import { normalizePath, Pos, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import _ from "lodash";
 import { sanitizeFileName } from "./Helper";
+import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -50,6 +51,31 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
             await createNoteFromEvent(events[i], match[1], match[2])
         }
     }
+}
+
+const insertEventIdInFrontmatter = (event: GoogleEvent, fileContent: string, position: Pos): string => {
+
+    const start = position?.start?.offset ?? 0;
+    const end = position?.end?.offset ?? 0;
+
+    let frontmatterText = fileContent.substring(start, end);
+
+    //event-id is already in the frontmatter
+    if (frontmatterText.contains("event-id:")) {
+        return fileContent;
+    }
+    //no frontmatter exists yet so we create one with the event-id
+    if (!frontmatterText.contains("---")) {
+        frontmatterText = `---\nevent-id: ${event.id}\n---\n`;
+    } else {
+        //frontmatter exists but no event-id so we add it
+        frontmatterText = frontmatterText.replace("---", `---\nevent-id: ${event.id}`);
+    }
+
+    //replace the old frontmatter with the new one
+    fileContent = fileContent.substring(0, start) + frontmatterText + fileContent.substring(end);
+
+    return fileContent;
 }
 
 const injectEventDetails = (event: GoogleEvent, inputText: string): string => {
@@ -162,16 +188,33 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     //check if file already exists
     if (await adapter.exists(filePath)) {
-        return vault.getAbstractFileByPath(filePath) as TFile;
+        let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
+        createNotice(`EventNote ${event.summary} already exists.`)
+        new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
+        return existingFile
     }
 
     //Create file with no content
     const file = await vault.create(filePath, '');
     createNotice(`EventNote ${event.summary} created.`)
 
-    //check if the template plugin is active
+
+
+    //check if the template plugin is active and a template name is given
     if ((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName) {
-        return vault.getAbstractFileByPath(filePath) as TFile;
+
+        const fileContent = insertEventIdInFrontmatter(event, "", null);
+
+        await adapter.write(filePath, fileContent);
+
+        const newFile = vault.getAbstractFileByPath(filePath) as TFile;
+
+        if (plugin.settings.autoCreateEventKeepOpen) {
+            await app.workspace.getLeaf(true).openFile(newFile)
+        }
+
+        return newFile
+
     }
 
     //Check if the template name has a file extension
@@ -218,6 +261,8 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     return vault.getAbstractFileByPath(filePath) as TFile;
 
+
+
     async function insertTemplate(useTemplater: boolean): Promise<boolean> {
 
         //Get the default template path from the plugin settings
@@ -251,10 +296,11 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         //Read in templatefile
         if (!(templateFile instanceof TFile)) return false;
 
-        const result = await vault.cachedRead(templateFile);
+        const originalTemplateFileContent = await vault.cachedRead(templateFile);
 
         //Get template with injected event data
-        const newContent = injectEventDetails(event, result);
+        let newContent = insertEventIdInFrontmatter(event, originalTemplateFileContent, app.metadataCache.getFileCache(templateFile).frontmatter?.position);
+        newContent = injectEventDetails(event, newContent);
 
         if (useTemplater && newContent.contains("{{") && newContent.contains("}}")) {
             return false;
@@ -277,6 +323,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
             } else {
                 await plugin.coreTemplatePlugin.instance.insertTemplate(tmpTemplateFile);
             }
+
             adapter.remove(tmpTemplateFilePath);
             return true;
         } catch {

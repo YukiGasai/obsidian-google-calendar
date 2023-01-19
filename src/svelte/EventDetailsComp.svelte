@@ -15,7 +15,7 @@
     import { findEventNote } from "../helper/Helper";
     import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
     import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
-    import { createNotification } from "src/helper/NotificationHelper";
+
     export let event: GoogleEvent;
     export let closeFunction :() => void;
 
@@ -32,7 +32,7 @@
     let inputEndDateTime:string;
     let inputStartDate:string;
     let recurringText = "";
-    let eventNote: TFile = findEventNote(event);
+    let eventNoteQueryResult = findEventNote(event);
 
     function getEmptyDate() {
         const minutes = 15;
@@ -97,7 +97,7 @@
             }
 
         }else {
-            createNotification(event);
+
             const parentEvent = await googleGetEvent(event.recurringEventId ?? event.id, event.parent.id);
    
             if(parentEvent?.recurrence){
@@ -219,7 +219,7 @@
     }
 
     const openNote = async () => {
-        app.workspace.getLeaf(true).openFile(eventNote);
+        app.workspace.getLeaf(true).openFile(eventNoteQueryResult.file);
         closeFunction();
     }
 
@@ -227,7 +227,7 @@
         if (plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder && plugin.settings.defaultFolder) {
             createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
         } else {
-            new CreateNotePromptModal(event, (newNote:TFile) => eventNote = newNote).open();
+            new CreateNotePromptModal(event, (newNote:TFile) => eventNoteQueryResult.file = newNote).open();
         }
     }
     
@@ -301,7 +301,10 @@ $: {
                     <button on:click="{openInBrowser}">Show Single Event</button>
                 {/if}
 
-                {#if eventNote}
+                {#if eventNoteQueryResult.file}
+                    {#if eventNoteQueryResult.match == "title"}
+                        <button on:click="{createNote}">Create Event Note for this date</button>
+                    {/if}
                     <button on:click="{openNote}">Open Event Note</button>
                 {:else}
                     <button on:click="{createNote}">Create Event Note</button>

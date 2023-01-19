@@ -1,5 +1,4 @@
 import type { GoogleEvent } from "../helper/types";
-import type { TFile } from "obsidian";
 import { findEventNote } from "src/helper/Helper";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -8,7 +7,7 @@ const { remote } = require('electron');
 export const createNotification = async (event: GoogleEvent): Promise<void> => {
 
     //check if event note exists
-    const eventNote: TFile = findEventNote(event)
+    const { file: eventNote } = findEventNote(event)
 
     const buttonContent = eventNote ? "Open Note" : "Create Note";
 

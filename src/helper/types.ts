@@ -3,6 +3,8 @@
  * Most types come from the Calendar API 
  */
 
+import type { TFile } from "obsidian";
+
 
 export interface GoogleCalendarPluginSettings {
 	googleClientId: string;
@@ -320,4 +322,9 @@ export interface CodeBlockOptions {
 }
 
 
-export type ModalSelectMode = "details" | "createNote";
+
+export type EventNoteQueryResult = {
+	event: GoogleEvent;
+	file: TFile | null;
+	match: "id" | "title";
+}

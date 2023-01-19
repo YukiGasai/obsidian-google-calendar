@@ -1,6 +1,4 @@
-
-import type { TFile } from "obsidian";
-import type { GoogleEvent } from "./types";
+import type { EventNoteQueryResult, GoogleEvent } from "./types";
 
 /**
  * @param date to convert
@@ -82,8 +80,19 @@ export const sanitizeFileName = (name: string): string => {
 		.replace('?', '');
 }
 
-export const findEventNote = (event: GoogleEvent): TFile => {
-	return app.vault.getFiles().find(file =>
+export const findEventNote = (event: GoogleEvent): EventNoteQueryResult => {
+	const filesWithName = app.vault.getFiles().filter(file =>
 		file.basename === sanitizeFileName(event.summary)
 	)
+	const filesWithId = filesWithName.filter(file => {
+		const frontmatter = app.metadataCache.getFileCache(file).frontmatter;
+		return frontmatter?.['event-id'] === event.id;
+	});
+
+
+	return {
+		event: event,
+		file: filesWithId[0] || filesWithName[0] || null,
+		match: filesWithId.length > 0 ? "id" : "title"
+	}
 }

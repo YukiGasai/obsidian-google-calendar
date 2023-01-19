@@ -33,7 +33,6 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
 
     //Use a copy to prevent problems when running the command multiple times
     const frontmatter: any = _.cloneDeep(app?.metadataCache?.getFileCache(view.file).frontmatter) ?? {};
-    console.log(app.metadataCache.getFileCache(view.file))
     //Get dataview frontmatter form the file
     const regexp = /\[([^[]*)::([^[]*)\]/gm;
     let matches;
