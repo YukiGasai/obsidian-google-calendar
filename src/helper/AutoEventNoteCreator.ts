@@ -41,14 +41,13 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     const events = await googleListEvents({ startDate, endDate });
 
     // check every event from the trigger text :obsidian:
-
     for (let i = 0; i < events.length; i++) {
         //regex will check for text and extract a template name if it exists
         const match = events[i].description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
 
         if (match.length == 3) {
             //the trigger text was found and a new note will be created
-            await createNoteFromEvent(events[i], match[1], match[2])
+            await createNoteFromEvent(events[i], match[1], match[2], true)
         }
     }
 }
@@ -125,6 +124,75 @@ const injectEventDetails = (event: GoogleEvent, inputText: string): string => {
 }
 
 
+
+function replacePathPlaceholders(event: GoogleEvent, folderName: string): string {
+    //check description for {{date}} string replace it with today's date
+    folderName = folderName.replace("{{date}}", window.moment().format("YYYY-MM-DD"));
+
+    //check description for {{date-year}} string replace it with the current year.
+    folderName = folderName.replace("{{date-year}}", window.moment().format("YYYY"));
+
+    //check description for {{date-month}} string replace it with the current month.
+    folderName = folderName.replace("{{date-month}}", window.moment().format("MM"));
+
+    //check description for {{date-day}} string replace it with the current numeric day.
+    folderName = folderName.replace("{{date-day}}", window.moment().format("DD"));
+
+    //check description for {{event-date}} string replace with event start date
+    folderName = folderName.replace("{{event-date}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY-MM-DD"));
+
+    //check description for {{event-year}} string replace with event start date's year.
+    folderName = folderName.replace("{{event-year}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY"));
+
+    //check description for {{event-month}} string replace with event start date's month.
+    folderName = folderName.replace("{{event-month}}", window.moment(event.start.date ?? event.start.dateTime).format("MM"));
+
+    //check description for {{event-day}} string replace with event start date's numeric day.
+    folderName = folderName.replace("{{event-day}}", window.moment(event.start.date ?? event.start.dateTime).format("DD"));
+
+    //check description for {{event-title}} string replace with event title
+    folderName = folderName.replace("{{event-title}}", event.summary ?? "event-title");
+    return folderName;
+}
+
+async function getEventNoteFilePath(fileName: string, folderPath: string) {
+    const { adapter } = app.vault;
+
+    if (folderPath) {
+        //Remover he last - from :-obsidian-: if the new file uses a template
+        if (folderPath.endsWith("-")) {
+            folderPath = folderPath.slice(0, -1);
+        }
+
+        //Replace path backslashes with forward slashes to allow path to work on all OS
+        folderPath = "/" + folderPath.split(/[/\\]/).join("/");
+
+        //If the folder doesn't exist create it with all the parent folders
+        if (! await adapter.exists(folderPath)) {
+            await adapter.mkdir(folderPath);
+        }
+    } else {
+        //Default to the root folder
+        folderPath = app.fileManager.getNewFileParent("").path;
+    }
+
+    const sanitizedFileName = sanitizeFileName(fileName)
+    return normalizePath(`${folderPath}/${sanitizedFileName}.md`);
+}
+
+async function checkIfFileExists(event: GoogleEvent, filePath: string): Promise<TFile> | null {
+    const { vault } = app;
+    const { adapter } = vault;
+
+    if (await adapter.exists(filePath)) {
+        let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
+        createNotice(`EventNote ${event.summary} already exists.`)
+        new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
+        return existingFile
+    }
+    return;
+}
+
 /**
  * This function will create a new Note in the vault of the user if a template name is given the plugin will access the 
  * Templates plugin to try and include the selected Template into the newly created file
@@ -132,72 +200,26 @@ const injectEventDetails = (event: GoogleEvent, inputText: string): string => {
  * @param fileName The name of the new Note
  * @param templateName  The used Template to fill the file
  */
-export const createNoteFromEvent = async (event: GoogleEvent, folderName?: string, templateName?: string): Promise<TFile> => {
+export const createNoteFromEvent = async (event: GoogleEvent, folderName?: string, templateName?: string, isAutoCreated = false): Promise<TFile> => {
     const plugin = GoogleCalendarPlugin.getInstance();
     const { vault } = app;
     const { adapter } = vault;
 
     if (folderName) {
-
-        //check description for {{date}} string replace it with today's date
-        folderName = folderName.replace("{{date}}", window.moment().format("YYYY-MM-DD"));
-
-        //check description for {{date-year}} string replace it with the current year.
-        folderName = folderName.replace("{{date-year}}", window.moment().format("YYYY"));
-
-        //check description for {{date-month}} string replace it with the current month.
-        folderName = folderName.replace("{{date-month}}", window.moment().format("MM"));
-
-        //check description for {{date-day}} string replace it with the current numeric day.
-        folderName = folderName.replace("{{date-day}}", window.moment().format("DD"));
-
-        //check description for {{event-date}} string replace with event start date
-        folderName = folderName.replace("{{event-date}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY-MM-DD"));
-
-        //check description for {{event-year}} string replace with event start date's year.
-        folderName = folderName.replace("{{event-year}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY"));
-
-        //check description for {{event-month}} string replace with event start date's month.
-        folderName = folderName.replace("{{event-month}}", window.moment(event.start.date ?? event.start.dateTime).format("MM"));
-
-        //check description for {{event-day}} string replace with event start date's numeric day.
-        folderName = folderName.replace("{{event-day}}", window.moment(event.start.date ?? event.start.dateTime).format("DD"));
-
-        //check description for {{event-title}} string replace with event title
-        folderName = folderName.replace("{{event-title}}", event.summary ?? "event-title");
-
+        folderName = replacePathPlaceholders(event, folderName);
     }
 
-    //Destination folder path
-    let folderPath = app.fileManager.getNewFileParent("").path;
-    if (folderName) {
-        if (folderName.endsWith("-")) {
-            folderName = folderName.slice(0, -1);
-        }
+    const filePath = await getEventNoteFilePath(event.summary, folderName);
 
-        folderName = "/" + folderName.split(/[/\\]/).join("/");
-
-        if (! await adapter.exists(folderName)) {
-            await adapter.mkdir(folderName);
-        }
-
-        folderPath = folderName;
-    }
-    const cleanEventSummary = sanitizeFileName(event.summary)
-    const filePath = normalizePath(`${folderPath}/${cleanEventSummary}.md`);
-
-    //check if file already exists
-    if (await adapter.exists(filePath)) {
-        let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
-        createNotice(`EventNote ${event.summary} already exists.`)
-        new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
-        return existingFile
+    if (!isAutoCreated) {
+        //check if file already exists
+        const existingFile = await checkIfFileExists(event, filePath);
+        if (existingFile) return existingFile;
     }
 
     //Create file with no content
     const file = await vault.create(filePath, '');
     createNotice(`EventNote ${event.summary} created.`)
-
 
 
     //check if the template plugin is active and a template name is given
@@ -214,7 +236,6 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         }
 
         return newFile
-
     }
 
     //Check if the template name has a file extension
@@ -222,17 +243,15 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         templateName = templateName + ".md";
     }
 
-    const editModeState = {
-        state: { mode: "source" },
-        active: true
-    };
-
     //Open file in active panel needed to insert template
     const newLeaf = await app.workspace.getLeaf(true)
     await newLeaf.setViewState({ type: "MarkdownView" })
     await app.workspace.setActiveLeaf(newLeaf, false, true)
 
-    await newLeaf.openFile(file, editModeState);
+    await newLeaf.openFile(file, {
+        state: { mode: "source" },
+        active: true
+    });
 
     if (plugin.templaterPlugin && plugin.coreTemplatePlugin) {
         const wasInserted = await insertTemplate(true);

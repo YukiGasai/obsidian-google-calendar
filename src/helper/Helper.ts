@@ -84,15 +84,22 @@ export const findEventNote = (event: GoogleEvent): EventNoteQueryResult => {
 	const filesWithName = app.vault.getFiles().filter(file =>
 		file.basename === sanitizeFileName(event.summary)
 	)
-	const filesWithId = filesWithName.filter(file => {
+	const [filesWithId, filesWithOutId, withWrongID] = filesWithName.reduce(([withID, withOutID, withWrongID], file) => {
 		const frontmatter = app.metadataCache.getFileCache(file).frontmatter;
-		return frontmatter?.['event-id'] === event.id;
-	});
+		if (frontmatter?.['event-id'] === event.id) {
+			return [[...withID, file], withOutID, withWrongID]
+		} else if (frontmatter?.['event-id']) {
+			return [withID, withOutID, [...withWrongID, file]]
+		} else {
+			return [withID, [...withOutID, file], withWrongID]
+		}
+	}, [[], [], []]);
+
 
 
 	return {
 		event: event,
-		file: filesWithId[0] || filesWithName[0] || null,
+		file: filesWithId[0] || filesWithOutId[0] || null,
 		match: filesWithId.length > 0 ? "id" : "title"
 	}
 }
