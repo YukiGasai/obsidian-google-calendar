@@ -4,7 +4,7 @@
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
     import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-    import { googleRemoveEvent } from "../googleApi/GoogleRemoveEvent";
+    import { googleDeleteEvent } from "../googleApi/GoogleDeleteEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
     import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
     import { RRule, RRuleSet, rrulestr } from "rrule";
@@ -179,9 +179,9 @@
     const deleteEvent = async(e) => {
         let wasSuccessful = false;
         if(event.recurringEventId){
-            wasSuccessful = await googleRemoveEvent(event, true)
+            wasSuccessful = await googleDeleteEvent(event)
         }else{
-            wasSuccessful = await googleRemoveEvent(event)
+            wasSuccessful = await googleDeleteEvent(event)
         }
         if(wasSuccessful){
             closeFunction();
@@ -190,7 +190,7 @@
 
     const deleteAllEvents = async() => {
         
-        const wasSuccessful = await googleRemoveEvent(addEventDate(event))
+        const wasSuccessful = await googleDeleteEvent(addEventDate(event), true)
         if(wasSuccessful){
             closeFunction();
         }
@@ -201,7 +201,7 @@
         const cleanEvent = addEventDate(event);
         let updatedEvent;
         if(cleanEvent.recurringEventId){
-            updatedEvent = await googleUpdateEvent(cleanEvent , true)
+            updatedEvent = await googleUpdateEvent(cleanEvent)
         }else{
             updatedEvent = await googleUpdateEvent(cleanEvent)
         }
@@ -212,7 +212,7 @@
 
     const updateAllEvents = async () => {
         
-        const updatedEvent = await googleUpdateEvent(addEventDate(event))
+        const updatedEvent = await googleUpdateEvent(addEventDate(event), true)
         if(updatedEvent.id){
             closeFunction();
         }
@@ -319,7 +319,7 @@ $: {
             </div>
             {#if recurringText != "" }
                 <div class="buttonRow">
-                    <button disabled class="disabled" on:click="{updateAllEvents}">Update All</button>
+                    <button on:click="{updateAllEvents}">Update All</button>
                     
                     <button on:click="{deleteAllEvents}">Delete All</button>
                 </div>
@@ -353,10 +353,6 @@ $: {
         font-size: 35px;
         text-align: center;
     }
-
-    .disabled{
-        opacity: 0.2;
-    } 
 
     label{
         margin-top: 5px;

@@ -299,6 +299,9 @@ export interface IGoogleCalendarPluginApi {
 	getEvent: (id: string, calendarId: string) => Promise<GoogleEvent>,
 	getEvents: (input: ListOptions) => Promise<GoogleEvent[]>,
 	getCalendars: () => Promise<GoogleCalendar[]>,
+    createEvent: (input:GoogleEvent) => Promise<GoogleEvent>,
+    deleteEvent: (event:GoogleEvent, deleteAll:boolean) => Promise<boolean>,
+    updateEvent: (event:GoogleEvent, updateSingle: boolean) => Promise<GoogleEvent>,
 }
 
 export enum CodeBlockTypes {
@@ -327,4 +330,13 @@ export type EventNoteQueryResult = {
 	event: GoogleEvent;
 	file: TFile | null;
 	match: "id" | "title";
+}
+
+
+export type CustomTask = {
+    event: GoogleEvent;
+    steps: number;
+    goal: number;
+    current: number;
+    done: boolean;
 }

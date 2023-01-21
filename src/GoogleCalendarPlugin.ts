@@ -28,6 +28,7 @@ import { googleCreateEvent } from "../src/googleApi/GoogleCreateEvent";
 import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
+import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
 
 
 
@@ -360,6 +361,28 @@ export default class GoogleCalendarPlugin extends Plugin {
 			},
 		});
 
+
+        this.addCommand({
+			id: "google-calendar-get-todays-tasks",
+			name: "Get todays google calendar tasks",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				getTodaysCustomTasks().then((tasks) => {
+					console.log(tasks)
+				});
+			},
+		});
+
 		this.addCommand({
 			id: "google-calendar-create-event-note-current-event",
 			name: "Create Event Note for current event",
@@ -503,7 +526,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 				}
 
 
-				getEventFromFrontMatter(view).then(newEvent => {
+				getEventFromFrontMatter(view).then((newEvent) => {
 					if (!newEvent) return;
 					googleCreateEvent(newEvent)
 				})
