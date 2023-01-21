@@ -68,6 +68,7 @@ export const getCurrentTheme = (): string => {
 
 
 export const sanitizeFileName = (name: string): string => {
+    if(!name) return "";
 	return name.trim()
 		.replace('<', 'lt')
 		.replace('>', 'gt')
@@ -84,7 +85,7 @@ export const findEventNote = (event: GoogleEvent): EventNoteQueryResult => {
 	const filesWithName = app.vault.getFiles().filter(file =>
 		file.basename === sanitizeFileName(event.summary)
 	)
-	const [filesWithId, filesWithOutId, withWrongID] = filesWithName.reduce(([withID, withOutID, withWrongID], file) => {
+	const [filesWithId, filesWithOutId] = filesWithName.reduce(([withID, withOutID, withWrongID], file) => {
 		const frontmatter = app.metadataCache.getFileCache(file).frontmatter;
 		if (frontmatter?.['event-id'] === event.id) {
 			return [[...withID, file], withOutID, withWrongID]

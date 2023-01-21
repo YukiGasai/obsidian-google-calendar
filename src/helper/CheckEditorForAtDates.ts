@@ -37,7 +37,7 @@ function checkForWord(
 	if (word === "@REGEX") {
 		const realLine = editor.getLine(endPos.line);
 		//Lag prevention
-		if (realLine.length > 50) return false;
+		if (realLine.length > 2000) return false;
 
 		const match = realLine.match(/.*@([+,-])(\d+) /) ?? [];
 
