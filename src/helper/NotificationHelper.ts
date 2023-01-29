@@ -1,10 +1,17 @@
+import { Platform } from "obsidian";
 import type { GoogleEvent } from "../helper/types";
 import { findEventNote } from "src/helper/Helper";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { remote } = require('electron');
-
 export const createNotification = async (event: GoogleEvent): Promise<void> => {
+
+    // Notifications are not supported on mobile because electron is no used
+    if(Platform.isMobile) {
+        return;
+    }
+
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { remote } = require('electron');
 
     //check if event note exists
     const { file: eventNote } = findEventNote(event)
