@@ -171,7 +171,7 @@
         }
         const newEvent = await googleCreateEvent(addEventDate(event))
    
-        if(newEvent.id){
+        if(newEvent?.id){
             closeFunction();
         }
     }

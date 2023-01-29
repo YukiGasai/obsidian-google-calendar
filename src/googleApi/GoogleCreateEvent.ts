@@ -11,7 +11,7 @@ function dateToGoogleDate(date: string): string {
 }
 
 function dateTimeToGoogleDateTime(date: string): string {
-    return window.moment(date).format("YYYY-MM-DD HH:mm:ss")
+    return window.moment(date).format()
 }
 
 
@@ -45,7 +45,6 @@ export async function googleCreateEvent(event: GoogleEvent | any): Promise<Googl
         delete event.parent;
     }else{
         calenderId = plugin.settings.defaultCalendar;
-        console.log(calenderId)
     }
 
     if(calenderId === ""){
