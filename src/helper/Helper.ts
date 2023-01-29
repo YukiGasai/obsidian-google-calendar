@@ -54,11 +54,11 @@ export function getEventHeight(
 }
 
 export function getStartHeightOfHour(timeLineHeight: number, hour: number): number {
-	return (timeLineHeight / 24) * hour;
+	return (timeLineHeight / 24) * hour - 10;
 }
 
 export function getEndHeightOfHour(timeLineHeight: number, hour: number): number {
-	return timeLineHeight - (timeLineHeight / 24) * hour;
+	return timeLineHeight - (timeLineHeight / 24) * hour - 10;
 }
 
 export const getCurrentTheme = (): string => {
