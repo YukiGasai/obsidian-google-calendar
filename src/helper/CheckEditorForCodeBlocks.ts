@@ -10,6 +10,7 @@ import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
 import CalendarComp from "../svelte/CalendarComp.svelte";
 import ScheduleComp from "../svelte/ScheduleComp.svelte"
+import WeekViewComp from "../svelte/WeekViewComp.svelte"
 import { SvelteBuilder } from "../svelte/SvelteBuilder";
 
 
@@ -33,9 +34,10 @@ export async function checkEditorForCodeBlocks(
 	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
 	const parsedYaml = parseYaml(text);
-	const { height, width, date, navigation, timespan, exclude, include, theme, hourRange }: CodeBlockOptions = parsedYaml
+	const { height, width, date, navigation, timespan, exclude, include, theme, hourRange, dayOffset }: CodeBlockOptions = parsedYaml
 	let { type }: CodeBlockOptions = parsedYaml;
 
+	// Id no type is set, default to day view
 	if (!type) {
 		type = CodeBlockTypes.day;
 	}
@@ -119,6 +121,21 @@ export async function checkEditorForCodeBlocks(
 					date: blockDate,
 					include: include,
 					exclude: exclude,
+				})
+			);
+		} else if (type == CodeBlockTypes.week) {
+			ctx.addChild(
+				new SvelteBuilder(WeekViewComp, el, {
+					height: height,
+					width: width,
+					date: blockDate,
+					navigation: navigation,
+					include: include,
+					exclude: exclude,
+					hourRange: hourRange,
+					dayOffset: dayOffset,
+					timespan: timespan, 
+				
 				})
 			);
 		}

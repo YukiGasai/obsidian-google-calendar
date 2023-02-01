@@ -27,6 +27,7 @@
     export let include;
     export let exclude;
     export let hourRange = [0, 24];
+    export let showTimeDisplay = true;
 
     let loading = true;
     let timeDisplayPosition = 0;
@@ -186,17 +187,17 @@
         {/each}
         </div>  
     
-    
-        <div class="hourTextContainer" style:margin-top="-{height/52}px">
-        {#each {length: 24} as _, i }
-                <span class=hourText
-                 on:click={switchHourDisplay}
-                 style:height="{height/24}px"
-                 style:font-size="{height/50}px" 
-                >{getHourText(i,hourFormat)}</span>
-        {/each}
-        </div>
-    
+        {#if showTimeDisplay}
+            <div class="hourTextContainer" style:margin-top="-{height/52}px">
+            {#each {length: 24} as _, i }
+                    <span class=hourText
+                    on:click={switchHourDisplay}
+                    style:height="{height/24}px"
+                    style:font-size="{height/50}px" 
+                    >{getHourText(i,hourFormat)}</span>
+            {/each}
+            </div>
+        {/if}
     
     {#if window.moment().isSame(date, 'day')}
         <div class="timeDisplay" style:top="{timeDisplayPosition}px" style:width="{width}px"/>
@@ -269,6 +270,7 @@
               
        .timeDisplay{
            position: absolute;
+           width: 100%;
            height:3px;
            background:red;
            overflow: visible;

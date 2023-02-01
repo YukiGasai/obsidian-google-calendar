@@ -309,6 +309,7 @@ export enum CodeBlockTypes {
 	month = "month",
 	day = "day",
 	schedule = "schedule",
+	week = "week",
 }
 
 export interface CodeBlockOptions {
@@ -320,8 +321,9 @@ export interface CodeBlockOptions {
 	timespan?: number;
 	include?: string[];
 	exclude?: string[];
-	theme: string;
-	hourRange: number[];
+	theme?: string;
+	hourRange?: number[];
+	dayOffset?: number;
 }
 
 
