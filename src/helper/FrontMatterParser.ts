@@ -172,7 +172,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
 
     if (frontmatter.start.date) {
         frontmatter.start.date = window.moment(frontmatter.start.date).format("YYYY-MM-DD");
-        frontmatter.end.date = window.moment(frontmatter.end.date).clone().add(1, "day").format("YYYY-MM-DD");
+        frontmatter.end.date = window.moment(frontmatter.end.date).format("YYYY-MM-DD");
     } else {
         frontmatter.start.dateTime = window.moment(frontmatter.start.dateTime).format();
         frontmatter.end.dateTime = window.moment(frontmatter.end.dateTime).format();
