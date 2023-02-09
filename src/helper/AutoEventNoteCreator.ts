@@ -125,7 +125,11 @@ const injectEventDetails = (event: GoogleEvent, inputText: string): string => {
 
 
 
-function replacePathPlaceholders(event: GoogleEvent, folderName: string): string {
+function replacePathPlaceholders(plugin: GoogleCalendarPlugin, event: GoogleEvent, folderName: string): string {
+
+    //check description for {{prefix}} string replace it with the prefix from the settings
+    folderName = folderName.replace("{{prefix}}", plugin.settings.optionalNotePrefix);
+
     //check description for {{date}} string replace it with today's date
     folderName = folderName.replace("{{date}}", window.moment().format("YYYY-MM-DD"));
 
@@ -155,7 +159,7 @@ function replacePathPlaceholders(event: GoogleEvent, folderName: string): string
     return folderName;
 }
 
-async function getEventNoteFilePath(fileName: string, folderPath: string) {
+async function getEventNoteFilePath(plugin: GoogleCalendarPlugin, event: GoogleEvent, folderPath: string) {
     const { adapter } = app.vault;
 
     if (folderPath) {
@@ -176,7 +180,7 @@ async function getEventNoteFilePath(fileName: string, folderPath: string) {
         folderPath = app.fileManager.getNewFileParent("").path;
     }
 
-    const sanitizedFileName = sanitizeFileName(fileName)
+    const sanitizedFileName = replacePathPlaceholders(plugin, event, sanitizeFileName(plugin.settings.eventNoteNameFormat))
     return normalizePath(`${folderPath}/${sanitizedFileName}.md`);
 }
 
@@ -206,10 +210,10 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     const { adapter } = vault;
 
     if (folderName) {
-        folderName = replacePathPlaceholders(event, folderName);
+        folderName = replacePathPlaceholders(plugin, event, folderName);
     }
 
-    const filePath = await getEventNoteFilePath(event.summary, folderName);
+    const filePath = await getEventNoteFilePath(plugin, event, folderName);
 
     if (!isAutoCreated) {
         //check if file already exists

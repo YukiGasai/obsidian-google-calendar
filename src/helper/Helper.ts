@@ -1,4 +1,6 @@
+import type { TFile } from "obsidian";
 import type { EventNoteQueryResult, GoogleEvent } from "./types";
+import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 /**
  * @param date to convert
@@ -81,13 +83,12 @@ export const sanitizeFileName = (name: string): string => {
 		.replace('?', '');
 }
 
-export const findEventNote = (event: GoogleEvent): EventNoteQueryResult => {
-	const filesWithName = app.vault.getFiles().filter(file =>
-		file.basename === sanitizeFileName(event.summary)
-	)
-	const [filesWithId, filesWithOutId] = filesWithName.reduce(([withID, withOutID, withWrongID], file) => {
+
+
+const checkNotesForEventId = (files, eventId: string): [TFile[], TFile[], TFile[]] => {
+    return files.reduce(([withID, withOutID, withWrongID], file) => {
 		const frontmatter = app.metadataCache.getFileCache(file).frontmatter;
-		if (frontmatter?.['event-id'] === event.id) {
+		if (frontmatter?.['event-id'] === eventId) {
 			return [[...withID, file], withOutID, withWrongID]
 		} else if (frontmatter?.['event-id']) {
 			return [withID, withOutID, [...withWrongID, file]]
@@ -95,12 +96,64 @@ export const findEventNote = (event: GoogleEvent): EventNoteQueryResult => {
 			return [withID, [...withOutID, file], withWrongID]
 		}
 	}, [[], [], []]);
+}
 
-
+const findEventNoteByTitle = (event: GoogleEvent): EventNoteQueryResult => {
+	const filesWithName = app.vault.getFiles().filter(file =>
+		file.basename == sanitizeFileName(event.summary)
+	)
+	
+    const [filesWithId, filesWithOutId] = checkNotesForEventId(filesWithName, event.id)
 
 	return {
 		event: event,
 		file: filesWithId[0] || filesWithOutId[0] || null,
 		match: filesWithId.length > 0 ? "id" : "title"
 	}
+}
+
+const findEventNoteForAllFiles = (event: GoogleEvent): EventNoteQueryResult => {
+	const files = app.vault.getFiles();
+	
+    for (let index = 0; index < files.length; index++) {
+        const frontmatter = app.metadataCache.getFileCache(files[index]).frontmatter;
+        if(frontmatter?.['event-id'] === event.id) {
+            return {
+                event: event,
+                file: files[index],
+                match: "id"
+            }
+        }
+    }
+
+	return {
+		event: event,
+		file: null,
+		match: "id"
+	}
+}
+
+
+const findEventNoteForAllPrefixedFiles = (event: GoogleEvent, plugin: GoogleCalendarPlugin): EventNoteQueryResult => {
+	const filesWithName = app.vault.getFiles().filter(file =>
+    	file.basename.startsWith(plugin.settings.optionalNotePrefix)
+	)
+    const [filesWithId, filesWithOutId] = checkNotesForEventId(filesWithName, event.id)
+
+	return {
+		event: event,
+		file: filesWithId[0] || filesWithOutId[0] || null,
+		match: filesWithId.length > 0 ? "id" : "title"
+	}
+}
+
+export const findEventNote = (event: GoogleEvent, plugin: GoogleCalendarPlugin): EventNoteQueryResult => {
+    //First check with good performance for file title for the event note
+    const titleResult = findEventNoteByTitle(event);
+    if(titleResult.match == "id" && titleResult.file) return titleResult;
+
+    //Bad performance, check every file for the event id
+    const finalResult = findEventNoteForAllPrefixedFiles(event, plugin);
+
+    return finalResult;
 }

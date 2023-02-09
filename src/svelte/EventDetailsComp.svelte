@@ -32,7 +32,7 @@
     let inputEndDateTime:string;
     let inputStartDate:string;
     let recurringText = "";
-    let eventNoteQueryResult = findEventNote(event);
+    let eventNoteQueryResult = findEventNote(event, plugin);
 
     function getEmptyDate() {
         const minutes = 15;

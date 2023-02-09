@@ -46,6 +46,8 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,
+    optionalNotePrefix: "",
+    eventNoteNameFormat: "{{prefix}}{{event-title}}",
 	defaultCalendar: "",
 	calendarBlackList: [],
 	insertTemplates: [],
@@ -570,7 +572,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			const [event_id, calendar_id] = req['event'].split("::");
 
 			const event = await googleGetEvent(event_id, calendar_id);
-			let { file: eventNote } = findEventNote(event);
+			let { file: eventNote } = findEventNote(event, this);
 			if (eventNote) {
 				app.workspace.getLeaf(true).openFile(eventNote);
 			} else {

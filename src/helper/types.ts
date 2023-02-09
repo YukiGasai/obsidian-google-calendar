@@ -7,33 +7,48 @@ import type { TFile } from "obsidian";
 
 
 export interface GoogleCalendarPluginSettings {
-	googleClientId: string;
-	googleClientSecret: string;
-	googleRefreshToken: string;
+    // Authentication settings
 	useCustomClient: boolean;
-	googleOAuthServer: string;
-	refreshInterval: number;
-	useNotification: boolean;
+    googleOAuthServer: string;
+    googleClientId: string;
+    googleClientSecret: string;
+    googleRefreshToken: string;
+	
+    // Notification settings
+    useNotification: boolean;
 	showNotice: boolean;
-	autoCreateEventNotes: boolean,
-	autoCreateEventKeepOpen: boolean,
-	importStartOffset: number,
-	importEndOffset: number,
-	defaultCalendar: string,
-	calendarBlackList: [string, string][];
-	insertTemplates: Template[];
-	webViewDefaultColorMode: string;
-	useDefaultTemplate: boolean;
-	defaultTemplate: string;
+	
+    // Event note settings
+    eventNoteNameFormat: string,
+    optionalNotePrefix: string,
+    defaultTemplate: string;
 	defaultFolder: string;
-	activateDailyNoteAddon: boolean;
-	dailyNoteDotColor: string;
-	useWeeklyNotes: boolean;
-	debugMode: boolean;
-	timelineHourFormat: number;
-	atAnnotationEnabled: boolean;
-	usDateFormat: boolean;
-}
+    autoCreateEventNotes: boolean,
+        autoCreateEventKeepOpen: boolean,
+        importStartOffset: number,
+        importEndOffset: number,
+
+    // Calendar settings
+    defaultCalendar: string,
+    calendarBlackList: [string, string][];
+    insertTemplates: Template[];
+    useDefaultTemplate: boolean;
+    
+    // Daily note settings
+    activateDailyNoteAddon: boolean;
+    dailyNoteDotColor: string;
+    useWeeklyNotes: boolean;
+    
+    // Hidden settings
+    timelineHourFormat: number;
+    usDateFormat: boolean;
+
+    // General settings
+    refreshInterval: number;
+    webViewDefaultColorMode: string;
+    atAnnotationEnabled: boolean;
+    debugMode: boolean;
+    }
 
 export interface Template {
 	name: string,

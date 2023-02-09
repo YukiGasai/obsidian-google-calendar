@@ -315,6 +315,30 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 
 
+        new Setting(containerEl)
+            .setName("Event Note Prefix")
+            .setDesc("Optional prefix for event notes to improve performance")
+            .setClass("SubSettings")
+            .addText(text => {
+                text.setValue(this.plugin.settings.optionalNotePrefix);
+                text.onChange(async value => {
+                    this.plugin.settings.optionalNotePrefix = value;
+                    await this.plugin.saveSettings();
+                });   
+            })
+
+        new Setting(containerEl)
+            .setName("Event Note Name Format")
+            .setDesc("Define how the event note name should look like")
+            .setClass("SubSettings")
+            .addText(text => {
+                text.setValue(this.plugin.settings.eventNoteNameFormat);
+                text.onChange(async value => {
+                    this.plugin.settings.eventNoteNameFormat = value;
+                    await this.plugin.saveSettings();
+                });   
+            })
+
 		new Setting(containerEl)
 			.setName("Debug Mode")
 			.setDesc("Enable if something is not working")

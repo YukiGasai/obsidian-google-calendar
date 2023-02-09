@@ -1,6 +1,7 @@
 import { Platform } from "obsidian";
 import type { GoogleEvent } from "../helper/types";
 import { findEventNote } from "src/helper/Helper";
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 export const createNotification = async (event: GoogleEvent): Promise<void> => {
 
@@ -9,12 +10,13 @@ export const createNotification = async (event: GoogleEvent): Promise<void> => {
         return;
     }
 
+    const plugin = GoogleCalendarPlugin.getInstance();
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { remote } = require('electron');
 
     //check if event note exists
-    const { file: eventNote } = findEventNote(event)
+    const { file: eventNote } = findEventNote(event, plugin)
 
     const buttonContent = eventNote ? "Open Note" : "Create Note";
 
