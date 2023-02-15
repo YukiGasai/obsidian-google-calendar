@@ -3,7 +3,7 @@
  * Most types come from the Calendar API 
  */
 
-import type { TFile } from "obsidian";
+import type { SplitDirection, TFile } from "obsidian";
 
 
 export interface GoogleCalendarPluginSettings {
@@ -356,4 +356,10 @@ export type CustomTask = {
     goal: number;
     current: number;
     done: boolean;
+}
+
+export interface OpenDailyNoteOptions {
+	date?: moment.Moment;
+	openToRight?: SplitDirection;
+	openInNewTab?: boolean;
 }

@@ -1,8 +1,9 @@
 import type { TFile } from 'obsidian';
 import type moment from "moment";
-import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-import { getAllDailyNotes, getAllWeeklyNotes, getDailyNote, getWeeklyNote, } from "obsidian-daily-notes-interface"
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { createDailyNote, getAllDailyNotes, getAllWeeklyNotes, getDailyNote, getWeeklyNote, } from "obsidian-daily-notes-interface"
 import _ from "lodash";
+import type { OpenDailyNoteOptions } from 'src/helper/types';
 
 let allDailyNotes: Record<string, TFile> = {};
 let allWeeklyNotes: Record<string, TFile> = {};
@@ -60,3 +61,31 @@ export const getSingleWeeklyNote = (week: moment.Moment): TFile => {
     return getWeeklyNote(week, allWeeklyNotes);
 }
 
+export const openDailyNote = async (openOptions:OpenDailyNoteOptions): Promise<void> => {
+    let note = getSingleDailyNote(openOptions.date ?? window.moment());
+    if (!note) {
+        // If no daily note exists, create one
+        note = await createDailyNote(openOptions.date ?? window.moment())
+        const plugin = GoogleCalendarPlugin.getInstance();
+        checkForNewDailyNotes(plugin);
+    }
+    const leaf = app.workspace.getLeaf(openOptions.openInNewTab ?? false, openOptions.openToRight ?? "horizontal" );
+
+    await leaf.openFile(note, { active: true });
+
+}
+
+export const openDailyNoteInNewWindow = async (date: moment.Moment = window.moment()): Promise<void> => {
+    let note = getSingleDailyNote(date);
+    if (!note) {
+        // If no daily note exists, create one
+        note = await createDailyNote(date)
+        const plugin = GoogleCalendarPlugin.getInstance();
+        checkForNewDailyNotes(plugin);
+    }
+
+    const leaf = app.workspace.openPopoutLeaf();
+
+    await leaf.openFile(note, { active: true });
+
+}

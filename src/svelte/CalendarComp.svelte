@@ -8,8 +8,11 @@
     import { onDestroy } from "svelte";
     import _ from "lodash"
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote } from "../helper/DailyNoteHelper";
-  import { createWeeklyNote } from "obsidian-daily-notes-interface";
+    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote, openDailyNote, openDailyNoteInNewWindow } from "../helper/DailyNoteHelper";
+    import { createWeeklyNote } from "obsidian-daily-notes-interface";
+	import { Menu, Platform } from "obsidian";
+	import { DayCalendarView } from "../view/DayCalendarView";
+	import { ScheduleCalendarView } from "../view/ScheduleCalendarView";
 
 
     export let displayedMonth = window.moment();
@@ -129,6 +132,104 @@
         const leaf = app.workspace.getLeaf(false)
         await leaf.openFile(weeklyNote, { active: true });
     }
+
+    const onContextMenuDay = (date: moment.Moment, event: MouseEvent): boolean => {
+        console.log({date, event})
+
+        if(event.ctrlKey){
+            openDailyNote({date, openInNewTab: true});
+        }else if(event.shiftKey){
+            openDailyNote({date, openInNewTab: false});
+        }else{
+            const note = getSingleDailyNote(date);
+            const menu = new Menu();
+
+            if(!note){
+                menu.addItem((item) => {
+                    item.setTitle("Create Daily Note")
+                    item.setIcon("create-new")
+                    item.onClick(() => {
+                        openDailyNote({date, openInNewTab: false});
+                    })
+                })
+                menu.addItem((item) => {
+                    item.setTitle("Create Daily Note Split Right")
+                    item.setIcon("vertical-split")
+                    item.onClick(() => {
+                        openDailyNote({date, openInNewTab: true, openToRight: "horizontal"});
+                    })
+                })
+                menu.addItem((item) => {
+                    item.setTitle("Create Daily Note Split Down")
+                    item.setIcon("horizontal-split")
+                    item.onClick(() => {
+                        openDailyNote({date, openInNewTab: true, openToRight: "vertical"});
+                    })
+                })
+            }else{
+
+                menu.addItem((item) => {
+                    item.setTitle("Open Daily Note")
+                    item.setIcon("file")
+                    item.onClick(() => {
+                        openDailyNote({date, openInNewTab: false});
+                    })
+                })
+                menu.addItem((item) => {
+                    item.setTitle("Open Daily Note Split Right")
+                    item.setIcon("vertical-split")
+                    item.onClick(() => {
+                        openDailyNote({date, openInNewTab: true, openToRight: "horizontal"});
+                    })
+                })
+                menu.addItem((item) => {
+                    item.setTitle("Open Daily Note Split Down")
+                    item.setIcon("horizontal-split")
+                    item.onClick(() => {
+                        openDailyNote({date, openInNewTab: true, openToRight: "vertical"});
+                    })
+                })
+                //Make sure plugin wont crash on mobile
+                if(Platform.isDesktop) {
+                    menu.addItem((item) => {
+                        item.setTitle("Open Daily Note in new Window")
+                        item.setIcon("fullscreen")
+                        item.onClick(() => {
+                            openDailyNoteInNewWindow(date);
+                        })
+                    })
+                }
+            }
+
+            menu.addSeparator()
+
+            menu.addItem((item) => {
+                item.setTitle("Open Timeline View")
+                item.setIcon("calendar")
+                item.onClick(async () => {
+                    const leaf = app.workspace.getLeaf(true)
+                    await leaf.open(new DayCalendarView(leaf, date));
+                    app.workspace.setActiveLeaf(leaf);
+                });
+            })
+
+            menu.addItem((item) => {
+                item.setTitle("Open Schedule View")
+                item.setIcon("bullet-list")
+                item.onClick(async () => {
+                    const leaf = app.workspace.getLeaf(true)
+                    await leaf.open(new ScheduleCalendarView(leaf, date));
+                    app.workspace.setActiveLeaf(leaf);
+                });
+            })
+
+        menu.showAtPosition({ x: event.clientX, y: event.clientY });
+
+        }
+
+        return true;
+    }
+
     $: {
         if(interval){
             clearInterval(interval);
@@ -160,6 +261,7 @@
                     showWeekNums={plugin.settings.useWeeklyNotes}
                     {onClickDay}
                     {onClickWeek}
+                    {onContextMenuDay}
                     bind:sources
                     bind:displayedMonth
                     bind:today

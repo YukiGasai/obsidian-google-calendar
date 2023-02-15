@@ -6,7 +6,7 @@ import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
 
 export let height:number = undefined;
 export let width:number = undefined;
-export let date:moment.Moment = undefined;
+export let date:moment.Moment = window.moment();
 export let navigation:boolean = false;
 export let include;
 export let exclude;
@@ -27,7 +27,7 @@ const openNewEventDialog = (event) => {
     }).open()
 }
 
-$: date = navigation ? window.moment().local().add(dateOffset, "days") : date;
+$: date = navigation ? date.local().add(dateOffset, "days") : date;
 
 </script>
 <div style="padding-left: 10px;">

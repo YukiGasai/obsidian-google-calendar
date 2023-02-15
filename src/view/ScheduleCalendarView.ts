@@ -4,9 +4,11 @@ import ScheduleComp from "../svelte/ScheduleComp.svelte";
 export const VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE = "google-calendar-view-schedule";
 export class ScheduleCalendarView extends ItemView {
 	calendar: ScheduleComp;
+	startDate: moment.Moment;
 
-	constructor(leaf: WorkspaceLeaf) {
+	constructor(leaf: WorkspaceLeaf, startDate: moment.Moment = window.moment()) {
 		super(leaf);
+		this.startDate = startDate;
 	}
 
 	getViewType(): string {
@@ -24,7 +26,7 @@ export class ScheduleCalendarView extends ItemView {
 	async onOpen(): Promise<void> {
 		this.calendar = new ScheduleComp({
 			target: this.contentEl,
-			props: {},
+			props: {date: this.startDate},
 		});
 	}
 	async onClose(): Promise<void> {
