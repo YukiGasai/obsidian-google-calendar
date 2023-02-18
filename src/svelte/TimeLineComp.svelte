@@ -38,7 +38,7 @@
     let hourFormat = plugin.settings.timelineHourFormat;
 
 
-    const refeshData = async () => {
+    const refreshData = async () => {
         hourFormat = plugin.settings.timelineHourFormat;
         await getEvents()
         const dayPercentage = dateToPercent(new Date());
@@ -46,14 +46,14 @@
     } 
 
     $: {
-        //needed to update if the prop date changes i dont know why
+        //needed to update if the prop date changes i don't know why
         date = date;
         if(interval){
             clearInterval(interval);
         }
         loading = true;
-        interval = setInterval(refeshData, 5000);
-        refeshData();
+        interval = setInterval(refreshData, 5000);
+        refreshData();
     }
 
     const getLocationArray = () => {

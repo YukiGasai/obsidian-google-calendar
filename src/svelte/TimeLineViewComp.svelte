@@ -6,7 +6,7 @@ import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
 
 export let height:number = undefined;
 export let width:number = undefined;
-export let date:moment.Moment = window.moment();
+export let startDate:moment.Moment = window.moment();
 export let navigation:boolean = false;
 export let include;
 export let exclude;
@@ -18,6 +18,7 @@ const minusOneDay  = () => dateOffset-= 1;
 const backToday    = () => dateOffset = 0;
 const plusOneWeek  = () => dateOffset+= 7;
 const plusOneDay   = () => dateOffset+= 1;
+let date;
 
 const openNewEventDialog = (event) => {  
 
@@ -27,7 +28,7 @@ const openNewEventDialog = (event) => {
     }).open()
 }
 
-$: date = navigation ? date.local().add(dateOffset, "days") : date;
+$: date = navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
 
 </script>
 <div style="padding-left: 10px;">
@@ -39,7 +40,7 @@ $: date = navigation ? date.local().add(dateOffset, "days") : date;
     <div class="navigationContainer">
         <button class="fixedSizeButton" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
         <button class="fixedSizeButton" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
-        <button class="fixedSizeButton" aria-label="Jump to today"  on:click={backToday}>Today</button>
+        <button class="fixedSizeButton" aria-label="Jump to start"  on:click={backToday}>Start</button>
         <button class="fixedSizeButton" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
         <button class="fixedSizeButton" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
     </div>

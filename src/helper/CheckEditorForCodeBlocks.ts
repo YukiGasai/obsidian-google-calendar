@@ -94,7 +94,7 @@ export async function checkEditorForCodeBlocks(
 				new SvelteBuilder(TimeLineViewComp, el, {
 					height: height,
 					width: width,
-					date: blockDate,
+					startDate: blockDate,
 					navigation: navigation,
 					include: include,
 					exclude: exclude,

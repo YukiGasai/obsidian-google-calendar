@@ -140,7 +140,7 @@
             openDailyNote({date, openInNewTab: true});
         }else if(event.shiftKey){
             openDailyNote({date, openInNewTab: false});
-        }else if(event.altKey){
+        }else if(event.altKey && Platform.isDesktop){  
             openDailyNoteInNewWindow(date);
         }else{
             const note = getSingleDailyNote(date);
