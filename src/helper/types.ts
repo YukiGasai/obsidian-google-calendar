@@ -46,6 +46,7 @@ export interface GoogleCalendarPluginSettings {
     // General settings
     refreshInterval: number;
     webViewDefaultColorMode: string;
+	webViewDefaultView: "week" | "day" | "month" | "agenda" | "year";
     atAnnotationEnabled: boolean;
     debugMode: boolean;
     }
@@ -336,6 +337,7 @@ export interface CodeBlockOptions {
 	timespan?: number;
 	include?: string[];
 	exclude?: string[];
+	view?: string;
 	theme?: string;
 	hourRange?: number[];
 	dayOffset?: number;

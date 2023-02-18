@@ -34,7 +34,7 @@ export async function checkEditorForCodeBlocks(
 	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
 	const parsedYaml = parseYaml(text);
-	const { height, width, date, navigation, timespan, exclude, include, theme, hourRange, dayOffset }: CodeBlockOptions = parsedYaml
+	const { height, width, date, navigation, timespan, exclude, include, theme, view, hourRange, dayOffset }: CodeBlockOptions = parsedYaml
 	let { type }: CodeBlockOptions = parsedYaml;
 
 	// Id no type is set, default to day view
@@ -82,9 +82,10 @@ export async function checkEditorForCodeBlocks(
 			if (Platform.isDesktopApp) {
 				ctx.addChild(
 					new SvelteBuilder(WebFrameComp, el, {
-						height: height ?? 500,
-						width: width ?? 500,
+						height: height,
+						width: width,
 						date: blockDate,
+						view: view,
 						theme: theme ?? "auto"
 					})
 				);

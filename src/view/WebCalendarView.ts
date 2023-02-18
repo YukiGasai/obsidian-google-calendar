@@ -22,6 +22,9 @@ export class WebCalendarView extends ItemView {
 	async onOpen(): Promise<void> {
 		this.calendar = new WebFrameComp({
 			target: this.contentEl,
+			props: {
+				witdh: -1
+			}
 		});
 	}
 	async onClose(): Promise<void> {

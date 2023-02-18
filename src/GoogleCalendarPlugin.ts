@@ -50,6 +50,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	calendarBlackList: [],
 	insertTemplates: [],
 	webViewDefaultColorMode: getCurrentTheme(),
+	webViewDefaultView: "day",
 	useDefaultTemplate: false,
 	defaultTemplate: "",
 	defaultFolder: (app.vault as any).config.newFileFolderPath,

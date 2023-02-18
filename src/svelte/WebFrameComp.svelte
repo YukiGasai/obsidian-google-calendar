@@ -6,19 +6,20 @@
 const plugin = GoogleCalendarPlugin.getInstance();
 
 export let date   = window.moment();
+export let view   = plugin.settings.webViewDefaultView;
 export let width  = 0;
-export let height = 0;
+export let height = 500;
 export let theme  = plugin.settings.webViewDefaultColorMode;
 let frame;
 let webUrl:string = ""
 
 //If date is not valid default to toady
 if(!date.isValid()){
-    webUrl = "https://calendar.google.com/calendar/u/0/r/day/"
+    webUrl = `https://calendar.google.com/calendar/u/0/r/${view}/`
 
 }else{
     const dateString = date.format("yyyy/M/D");
-    webUrl = `https://calendar.google.com/calendar/u/0/r/day/${dateString}`;
+    webUrl = `https://calendar.google.com/calendar/u/0/r/${view}/${dateString}`;
 }
 
 onMount(() => {
@@ -27,13 +28,14 @@ onMount(() => {
     }
 
     if(theme == "dark"){
-        frame.addEventListener("dom-ready", () => {
-            frame.insertCSS(`
-                html {
-                    filter: hue-rotate(180deg)invert(100)contrast(93%) !important;
+        frame.addEventListener("dom-ready", (e) => {
+            frame.executeJavaScript(`
+                const menu = document.querySelectorAll('[aria-label][aria-expanded]')[0]
+                if(menu.getAttribute("aria-expanded") == "true"){
+                    menu.click();
                 }
-            
-            `);
+            `)
+            frame.insertCSS(`html { filter: hue-rotate(180deg)invert(100)contrast(93%) !important; }`);
         });
     }
 })
@@ -42,11 +44,18 @@ onMount(() => {
 
 <div class="box">
     <div class="content">
-    {#if width == 0}
+    {#if width == -1}
     <webview 
         src={webUrl}
         allowpopups
         class="fullSize"
+        bind:this={frame}
+    />
+    {:else if width == 0}
+    <webview 
+        src={webUrl}
+        allowpopups
+        style:height="{height}px"
         bind:this={frame}
     />
     {:else}
