@@ -9,6 +9,7 @@ import { CalendarsListModal } from "./modal/CalendarsListModal";
 import { googleClearCachedEvents, googleListEvents } from "./googleApi/GoogleListEvents";
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
+import { WeekCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEEK } from "./view/WeekCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
@@ -29,9 +30,6 @@ import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
-
-
-
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -178,6 +176,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 			(leaf: WorkspaceLeaf) => new DayCalendarView(leaf)
 		);
 		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR_WEEK,
+			(leaf: WorkspaceLeaf) => new WeekCalendarView(leaf)
+		);
+		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_MONTH,
 			(leaf: WorkspaceLeaf) => new MonthCalendarView(leaf)
 		);
@@ -206,6 +208,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Open Google Calendar timeline view",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_DAY)
+		});
+
+		//Open Week view
+		this.addCommand({
+			id: "open-google-calendar-week-view",
+			name: "Open Google Calendar week view",
+			callback: () =>
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEEK)
 		});
 
 		//Open Month view
@@ -588,6 +598,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 	onunload(): void {
 
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEEK);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);

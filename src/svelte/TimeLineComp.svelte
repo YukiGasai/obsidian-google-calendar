@@ -85,16 +85,9 @@
             }
             events.forEach((event, i) => {
                            
-                let spaceToHours = 30;
+                const indent = indentAmount * 5;
 
-                if(hourFormat == 2){
-                    spaceToHours = 50
-                }
-                
-                const indent = spaceToHours + indentAmount * 10;
-
-                const elementWidth = (width-indent) / events.length;
-
+                const elementWidth = (100-indent) / events.length;
                 eventLocations = [...eventLocations, {
                     event: event,
                     x: indent + elementWidth*i,
@@ -200,7 +193,7 @@
         {/if}
     
     {#if window.moment().isSame(date, 'day')}
-        <div class="timeDisplay" style:top="{timeDisplayPosition}px" style:width="{width}px"/>
+        <div class="timeDisplay" style:top="{timeDisplayPosition}px"/>
     {/if}
 
         {#each eventLocations as location, i}
@@ -214,8 +207,8 @@
                     "
                 id="{location.event.id}"
                 style:top="{location.y}px"
-                style:left="{location.x}px"
-                style:width="{location.width}px"
+                style:left="calc(25px + {location.x}%)"
+                style:width="{location.width}%"
                 style:height="{location.height}px"
                 style:background={getColorFromEvent(location.event)}
             >
@@ -270,8 +263,9 @@
               
        .timeDisplay{
            position: absolute;
-           width: 100%;
+           width: calc(100% - 25px);
            height:3px;
+           margin-left: 25px;
            background:red;
            overflow: visible;
     

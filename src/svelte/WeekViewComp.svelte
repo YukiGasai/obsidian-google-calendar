@@ -60,13 +60,12 @@
         <div class="googleWeekContainer" style="overflow: hidden">
             {#each getDatesToDisplay(date) as day, i}
        
-                    <span class="dayDisplay">{day.format('D')}</span>
                     {#if i == 0}
                         <TimeLine date={day} height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} /> 
                     {:else}
                         <TimeLine date={day} height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} showTimeDisplay={false}/> 
                     {/if}
-          
+                    <span class="dayDisplay">{day.format('D')}</span>
             {/each}
         </div>
     </div>
