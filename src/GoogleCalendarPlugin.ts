@@ -89,7 +89,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
 		) {
-			if(Platform.isMobile) {
+			if(Platform.isMobile || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEB || viewId === VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE) {
 				await this.app.workspace.getLeaf(true).setViewState({
 					type: viewId
 				});
