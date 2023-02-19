@@ -11,8 +11,8 @@
     import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote, openDailyNote, openDailyNoteInNewWindow } from "../helper/DailyNoteHelper";
     import { createWeeklyNote } from "obsidian-daily-notes-interface";
 	import { Menu, Platform } from "obsidian";
-	import { DayCalendarView } from "../view/DayCalendarView";
-	import { ScheduleCalendarView } from "../view/ScheduleCalendarView";
+	import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "../view/DayCalendarView";
+	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../view/ScheduleCalendarView";
 
 
     export let displayedMonth = window.moment();
@@ -208,9 +208,10 @@
                 item.setTitle("Open Timeline View")
                 item.setIcon("calendar")
                 item.onClick(async () => {
-                    const leaf = app.workspace.getLeaf(true)
-                    await leaf.open(new DayCalendarView(leaf, date));
-                    app.workspace.setActiveLeaf(leaf);
+                    const leaf = await plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
+                    if (leaf.view instanceof DayCalendarView) {
+                        leaf.view.setDate(date);
+                    }                  
                 });
             })
 
@@ -218,9 +219,10 @@
                 item.setTitle("Open Schedule View")
                 item.setIcon("bullet-list")
                 item.onClick(async () => {
-                    const leaf = app.workspace.getLeaf(true)
-                    await leaf.open(new ScheduleCalendarView(leaf, date));
-                    app.workspace.setActiveLeaf(leaf);
+                    const leaf = await plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
+                    if (leaf.view instanceof ScheduleCalendarView) {
+                        leaf.view.setDate(date);
+                    }     
                 });
             })
 

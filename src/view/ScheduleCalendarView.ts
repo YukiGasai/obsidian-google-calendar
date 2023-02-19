@@ -23,6 +23,12 @@ export class ScheduleCalendarView extends ItemView {
 		return "calendar-with-checkmark";
 	}
 
+	setDate = (date: moment.Moment) => {
+		this.startDate = date
+		this.onClose();
+		this.onOpen();
+	}
+
 	async onOpen(): Promise<void> {
 		this.calendar = new ScheduleComp({
 			target: this.contentEl,

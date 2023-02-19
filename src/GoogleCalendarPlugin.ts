@@ -84,12 +84,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 	events: EventRef[] = [];
 
 
-	initView = async (viewId: string): Promise<void> => {
+	initView = async (viewId: string): Promise<WorkspaceLeaf> => {
 		if (
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
 		) {
-			console.log(Platform.isMobile)
 			if(Platform.isMobile) {
 				await this.app.workspace.getLeaf(true).setViewState({
 					type: viewId
@@ -100,11 +99,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 				});
 			}
 		}
-		this.app.workspace.revealLeaf(
-			this.app.workspace
-				.getLeavesOfType(viewId)
-				.first()
-		);
+
+		const leaf = this.app.workspace
+			.getLeavesOfType(viewId)
+			.first()
+
+		this.app.workspace.revealLeaf(leaf);
+
+		return leaf 
 	};
 
 	onLayoutReady = (): void => {
