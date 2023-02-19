@@ -8,7 +8,7 @@
     import { onDestroy } from "svelte";
     
     
-    export let timeSpan = 7;
+    export let timeSpan = 6;
     export let date = window.moment();
     export let include;
     export let exclude;

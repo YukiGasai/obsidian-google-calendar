@@ -23,12 +23,14 @@ export class WeekCalendarView extends ItemView {
 
 	setDate = (date: moment.Moment) => {
 		this.startDate = date
+		this.onClose();
+		this.onOpen();
 	}
 
 	async onOpen(): Promise<void> {
 		this.calendar = new WeekViewComp({
 			target: this.contentEl,
-			props: { navigation: true, date: this.startDate },
+			props: { navigation: true, startDate: this.startDate },
 		});
 	}
 	async onClose(): Promise<void> {

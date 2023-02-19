@@ -7,7 +7,7 @@
     
     export let height:number = undefined;
     export let width:number = undefined;
-    export let date:moment.Moment = window.moment();
+    export let startDate:moment.Moment = window.moment();
     export let navigation:boolean = false;
     export let include;
     export let exclude;
@@ -30,7 +30,7 @@
         }).open()
     }
 
-    $: date = navigation ? window.moment().local().add(dateOffset, "days") : date;
+    $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
     
     const getDatesToDisplay = (date) => {
         let datesToDisplay = [];

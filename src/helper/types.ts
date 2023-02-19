@@ -360,8 +360,9 @@ export type CustomTask = {
     done: boolean;
 }
 
-export interface OpenDailyNoteOptions {
+export interface OpenPeriodicNoteOptions {
 	date?: moment.Moment;
 	openToRight?: SplitDirection;
 	openInNewTab?: boolean;
+	type?: "daily" | "weekly" | "monthly" | "yearly";
 }

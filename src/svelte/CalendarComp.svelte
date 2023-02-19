@@ -8,11 +8,12 @@
     import { onDestroy } from "svelte";
     import _ from "lodash"
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote, openDailyNote, openDailyNoteInNewWindow } from "../helper/DailyNoteHelper";
+    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote, openPeriodicNote, openPeriodicNoteInNewWindow } from "../helper/DailyNoteHelper";
     import { createWeeklyNote } from "obsidian-daily-notes-interface";
 	import { Menu, Platform } from "obsidian";
 	import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "../view/DayCalendarView";
 	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../view/ScheduleCalendarView";
+	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../view/WeekCalendarView";
 
 
     export let displayedMonth = window.moment();
@@ -133,75 +134,84 @@
         await leaf.openFile(weeklyNote, { active: true });
     }
 
-    const onContextMenuDay = (date: moment.Moment, event: MouseEvent): boolean => {
-
+    const onContextMenuHotKey = (date: moment.Moment, event: MouseEvent, type: 'daily' | 'weekly'): boolean => {
         if(event.ctrlKey){
-            openDailyNote({date, openInNewTab: true});
-        }else if(event.shiftKey){
-            openDailyNote({date, openInNewTab: false});
-        }else if(event.altKey && Platform.isDesktop){  
-            openDailyNoteInNewWindow(date);
+            openPeriodicNote({date, openInNewTab: true, type});
+            return false;
+        }
+        if(event.shiftKey){
+            openPeriodicNote({date, openInNewTab: false, type});
+            return false;
+        }
+        if(event.altKey && Platform.isDesktop){  
+            openPeriodicNoteInNewWindow({date, type});
+            return false;
+        }
+
+        return true;
+    }
+
+    const onContextMenu = (date: moment.Moment, type: 'daily' | 'weekly'): Menu => {
+        const note = type === "daily" ? getSingleDailyNote(date) : getSingleWeeklyNote(date);
+        const menu = new Menu();
+
+        if(!note){
+            menu.addItem((item) => {
+                item.setTitle(`Create ${type} Note`)
+                item.setIcon("create-new")
+                item.onClick(() => {
+                    openPeriodicNote({date, openInNewTab: false, type});
+                })
+            })
+            menu.addItem((item) => {
+                item.setTitle(`Create ${type} Note Split Right`)
+                item.setIcon("vertical-split")
+                item.onClick(() => {
+                    openPeriodicNote({date, openInNewTab: true, openToRight: "horizontal", type});
+                })
+            })
+            menu.addItem((item) => {
+                item.setTitle(`Create ${type} Note Split Down`)
+                item.setIcon("horizontal-split")
+                item.onClick(() => {
+                    openPeriodicNote({date, openInNewTab: true, openToRight: "vertical", type});
+                })
+            })
         }else{
-            const note = getSingleDailyNote(date);
-            const menu = new Menu();
-
-            if(!note){
+            menu.addItem((item) => {
+                item.setTitle(`Open ${type} Note`)
+                item.setIcon("file")
+                item.onClick(() => {
+                    openPeriodicNote({date, openInNewTab: false, type});
+                })
+            })
+            menu.addItem((item) => {
+                item.setTitle(`Open ${type} Note Split Right`)
+                item.setIcon("vertical-split")
+                item.onClick(() => {
+                    openPeriodicNote({date, openInNewTab: true, openToRight: "horizontal", type});
+                })
+            })
+            menu.addItem((item) => {
+                item.setTitle(`Open ${type} Note Split Down`)
+                item.setIcon("horizontal-split")
+                item.onClick(() => {
+                    openPeriodicNote({date, openInNewTab: true, openToRight: "vertical", type});
+                })
+            })
+            //Make sure plugin wont crash on mobile
+            if(Platform.isDesktop) {
                 menu.addItem((item) => {
-                    item.setTitle("Create Daily Note")
-                    item.setIcon("create-new")
+                    item.setTitle(`Open ${type} Note in new Window`)
+                    item.setIcon("fullscreen")
                     item.onClick(() => {
-                        openDailyNote({date, openInNewTab: false});
+                        openPeriodicNoteInNewWindow({date, type});
                     })
                 })
-                menu.addItem((item) => {
-                    item.setTitle("Create Daily Note Split Right")
-                    item.setIcon("vertical-split")
-                    item.onClick(() => {
-                        openDailyNote({date, openInNewTab: true, openToRight: "horizontal"});
-                    })
-                })
-                menu.addItem((item) => {
-                    item.setTitle("Create Daily Note Split Down")
-                    item.setIcon("horizontal-split")
-                    item.onClick(() => {
-                        openDailyNote({date, openInNewTab: true, openToRight: "vertical"});
-                    })
-                })
-            }else{
-
-                menu.addItem((item) => {
-                    item.setTitle("Open Daily Note")
-                    item.setIcon("file")
-                    item.onClick(() => {
-                        openDailyNote({date, openInNewTab: false});
-                    })
-                })
-                menu.addItem((item) => {
-                    item.setTitle("Open Daily Note Split Right")
-                    item.setIcon("vertical-split")
-                    item.onClick(() => {
-                        openDailyNote({date, openInNewTab: true, openToRight: "horizontal"});
-                    })
-                })
-                menu.addItem((item) => {
-                    item.setTitle("Open Daily Note Split Down")
-                    item.setIcon("horizontal-split")
-                    item.onClick(() => {
-                        openDailyNote({date, openInNewTab: true, openToRight: "vertical"});
-                    })
-                })
-                //Make sure plugin wont crash on mobile
-                if(Platform.isDesktop) {
-                    menu.addItem((item) => {
-                        item.setTitle("Open Daily Note in new Window")
-                        item.setIcon("fullscreen")
-                        item.onClick(() => {
-                            openDailyNoteInNewWindow(date);
-                        })
-                    })
-                }
             }
-
+        }
+        // Add extra function for daily notes
+        if(type === "daily") {
             menu.addSeparator()
 
             menu.addItem((item) => {
@@ -225,11 +235,45 @@
                     }     
                 });
             })
+        }else {
+            menu.addSeparator()
 
-        menu.showAtPosition({ x: event.clientX, y: event.clientY });
+            menu.addItem((item) => {
+                item.setTitle("Open Weekly View")
+                item.setIcon("calendar")
+                item.onClick(async () => {
+                    const leaf = await plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEEK);
+                    if (leaf.view instanceof WeekCalendarView) {
+                        leaf.view.setDate(date);
+                    }                  
+                });
+            })
 
+            menu.addItem((item) => {
+                item.setTitle("Open Schedule View")
+                item.setIcon("bullet-list")
+                item.onClick(async () => {
+                    const leaf = await plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
+                    if (leaf.view instanceof ScheduleCalendarView) {
+                        leaf.view.setDate(date);
+                    }     
+                });
+            })
         }
+        return menu;
+    }
 
+    const onContextMenuDay = (date: moment.Moment, event: MouseEvent): boolean => {
+        if(onContextMenuHotKey(date, event, "daily")){
+            onContextMenu(date, "daily").showAtPosition({ x: event.clientX, y: event.clientY });
+        }
+        return true;
+    }
+
+    const onContextMenuWeek = (date: moment.Moment, event: MouseEvent): boolean => {
+        if(onContextMenuHotKey(date, event, "weekly")){
+            onContextMenu(date, "weekly").showAtPosition({ x: event.clientX, y: event.clientY });
+        }
         return true;
     }
 
@@ -265,6 +309,7 @@
                     {onClickDay}
                     {onClickWeek}
                     {onContextMenuDay}
+                    {onContextMenuWeek}
                     bind:sources
                     bind:displayedMonth
                     bind:today

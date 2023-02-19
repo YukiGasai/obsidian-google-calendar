@@ -1,9 +1,9 @@
 import type { TFile } from 'obsidian';
 import type moment from "moment";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-import { createDailyNote, getAllDailyNotes, getAllWeeklyNotes, getDailyNote, getWeeklyNote, } from "obsidian-daily-notes-interface"
+import { createDailyNote, createWeeklyNote, getAllDailyNotes, getAllWeeklyNotes, getDailyNote, getWeeklyNote, } from "obsidian-daily-notes-interface"
 import _ from "lodash";
-import type { OpenDailyNoteOptions } from 'src/helper/types';
+import type { OpenPeriodicNoteOptions } from 'src/helper/types';
 
 let allDailyNotes: Record<string, TFile> = {};
 let allWeeklyNotes: Record<string, TFile> = {};
@@ -61,31 +61,42 @@ export const getSingleWeeklyNote = (week: moment.Moment): TFile => {
     return getWeeklyNote(week, allWeeklyNotes);
 }
 
-export const openDailyNote = async (openOptions:OpenDailyNoteOptions): Promise<void> => {
-    let note = getSingleDailyNote(openOptions.date ?? window.moment());
-    if (!note) {
-        // If no daily note exists, create one
+const getPeriodicNote = async (openOptions:OpenPeriodicNoteOptions): Promise<TFile> => {
+    
+    if(!openOptions.type || openOptions.type === "daily") {
+        let note = getSingleDailyNote(openOptions.date ?? window.moment());
+        if(note)
+            return note
+
         note = await createDailyNote(openOptions.date ?? window.moment())
-        const plugin = GoogleCalendarPlugin.getInstance();
-        checkForNewDailyNotes(plugin);
+        checkForNewDailyNotes(GoogleCalendarPlugin.getInstance());
+        return note
     }
+
+    
+    if (openOptions.type === "weekly") {
+        let note = getSingleWeeklyNote(openOptions.date ?? window.moment());
+        if(note)
+            return note
+
+        note = await createWeeklyNote(openOptions.date ?? window.moment())
+        checkForNewWeeklyNotes(GoogleCalendarPlugin.getInstance());
+        return note
+    }
+}
+
+export const openPeriodicNote = async (openOptions:OpenPeriodicNoteOptions): Promise<void> => {
+    const note = await getPeriodicNote(openOptions);
+    
     const leaf = app.workspace.getLeaf(openOptions.openInNewTab ?? false, openOptions.openToRight ?? "horizontal" );
 
     await leaf.openFile(note, { active: true });
-
 }
 
-export const openDailyNoteInNewWindow = async (date: moment.Moment = window.moment()): Promise<void> => {
-    let note = getSingleDailyNote(date);
-    if (!note) {
-        // If no daily note exists, create one
-        note = await createDailyNote(date)
-        const plugin = GoogleCalendarPlugin.getInstance();
-        checkForNewDailyNotes(plugin);
-    }
-
+export const openPeriodicNoteInNewWindow = async (openOptions:OpenPeriodicNoteOptions): Promise<void> => {
+    const note = await getPeriodicNote(openOptions);
+    
     const leaf = app.workspace.openPopoutLeaf();
 
     await leaf.openFile(note, { active: true });
-
 }
