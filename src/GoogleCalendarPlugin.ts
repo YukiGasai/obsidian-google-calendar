@@ -1,5 +1,5 @@
 import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
-import { Editor, EventRef, MarkdownView, Notice, Plugin, TFile, WorkspaceLeaf } from "obsidian";
+import { Editor, EventRef, MarkdownView, Notice, Platform, Plugin, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
@@ -89,9 +89,16 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
 		) {
-			await this.app.workspace.getRightLeaf(false).setViewState({
-				type: viewId,
-			});
+			console.log(Platform.isMobile)
+			if(Platform.isMobile) {
+				await this.app.workspace.getLeaf(true).setViewState({
+					type: viewId
+				});
+			}else{
+				await this.app.workspace.getRightLeaf(false).setViewState({
+					type: viewId,
+				});
+			}
 		}
 		this.app.workspace.revealLeaf(
 			this.app.workspace
