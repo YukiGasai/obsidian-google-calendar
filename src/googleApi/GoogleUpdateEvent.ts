@@ -19,9 +19,7 @@ export async function googleUpdateEvent(
 
 	//Check if the user wants to update all events from a recurring task
 	if (updateAllOccurrences && event.recurringEventId) {
-        console.log("REOCCURING")
         const recurringEvent = await googleGetEvent(event.recurringEventId, event.parent.id);
-        console.log(recurringEvent)
    
         event = {
 
@@ -45,7 +43,6 @@ export async function googleUpdateEvent(
         delete event.recurringEventId;
         delete event.originalStartTime
 
-        console.log(event)
     }
 
 

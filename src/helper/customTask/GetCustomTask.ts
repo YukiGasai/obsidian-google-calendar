@@ -13,8 +13,6 @@ export const getCustomTasks = async (listOptions: ListOptions = {}): Promise<Cus
         const cleanDescription = event.description.replace(/<br>/g, "\n").replace(/<\/?[^>]+(>|$)/g, "");
         const foundTaskOptions = parseYaml(cleanDescription);
 
-        console.log(foundTaskOptions)
-
         const foundTask:CustomTask = {
             event: event,
             current: foundTaskOptions.current || 0,

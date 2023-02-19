@@ -134,7 +134,6 @@
     }
 
     const onContextMenuDay = (date: moment.Moment, event: MouseEvent): boolean => {
-        console.log({date, event})
 
         if(event.ctrlKey){
             openDailyNote({date, openInNewTab: true});

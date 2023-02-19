@@ -23,7 +23,7 @@ export class WebCalendarView extends ItemView {
 		this.calendar = new WebFrameComp({
 			target: this.contentEl,
 			props: {
-				witdh: -1
+				width: -1
 			}
 		});
 	}
