@@ -1,32 +1,48 @@
 # Obsidian Google Calendar Api
 
-This Api  is allowing anyone to access the CRUD functions of this plugin.
+This [Api](https://en.wikipedia.org/wiki/API) is allowing access to the CRUD functions of this plugin.
 
-This is helpful when creating complex Templater or Dataview functionalities.
+This is useful when creating complex Templater or Dataview.js functionalities.
 
-> The usage is currently limited to reading
+> Please be careful when using this function as it is still in development
 
+## The CRUD functions
 
+- [Creating events with the API](/Api/Create.md)
+- [Reading events with the API](/Api/Read.md)
+- [Updating events with the API](/Api/Update.md)
+- [Deleting events with the API](/Api/Delete.md)
 
-## 
-The argument for the getEvents function is a object now to allow named params
+## Other helpful functions
 
-|name|description|type|default|
-|---|---|---|---|
-|startDate| Define the start moment of the query range | moment | today |
-|endDate| Define the end moment of the query range | moment | tomorrow |
-|exclude| A list of calendar names or ids to exclude from the query result | string[] | []
-|include| A list of calendar names or ids to include in the query result | string[] | []
+### Get all calendars
 
-when not using include, exclude the result will contain all your calendars except the black listed ones from the settings page
+To get a list of all non black listed calendars use the `getCalendars` function.
 
-~~~
-Example:
+#### Example
+
+~~~markdown
 <%*
-const {getEvents} = this.app.plugins.plugins["google-calendar"].api;
-const theEvents = await getEvents({
-startDate: window.moment("12/06/2022")
-});
-tR = theEvents.reduce((text, event )=> text += "\n" + event.summary, "");
+const {getCalendars} = this.app.plugins.plugins["google-calendar"].api;
+const calendars = await getCalendars();
+tR = calendars.reduce((text, calendar )=> text += "\n" + calendar.summary, "");
+%>
+~~~
+
+### Get a single Event
+
+To get a single event from an id you can use the `getEvent` function.
+This function takes to arguments.
+
+1. the event id
+2. the calendar id
+
+#### Example
+
+~~~markdown
+<%*
+const {getEvent} = this.app.plugins.plugins["google-calendar"].api;
+const event = await getEvent("25t2r0005cnbxoev871o5ll4ls","d74f57c01c85828d747bc3afbc4dd79603e9e552a4218ae2509589d6f25c2d162@group.calendar.google.com");
+tR = JSON.stringify(event);
 %>
 ~~~
