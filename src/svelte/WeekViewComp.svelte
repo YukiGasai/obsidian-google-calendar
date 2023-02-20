@@ -1,6 +1,7 @@
 <script lang="ts" >
 
     import TimeLine from "./TimeLineComp.svelte";
+    import TimeLineHourText from "./TimeLineHourText.svelte";
     import {EventDetailsModal} from "../modal/EventDetailsModal"
     import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
     import { onMount } from "svelte";
@@ -45,41 +46,100 @@
     </script>
     <div style="padding-left: 10px;">
         {#if navigation && date}
-        <div class="titleContainer">
-            <button aria-label="Create Event" on:click={openNewEventDialog}>+</button>
-            <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
+        <div class="gcal-title-container">
+            <h3 class="gcal-view-description">gCal Week View</h3>
+            <div class="gcal-date-container">
+                <h3 class="gcal-date-dayofweek">{date.format("dddd")}</h3>
+                <h1 class="gcal-date-main">{date.format("MMMM DD, YYYY")}</h1>
+                <div class="gcal-nav-container">
+                    <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;</button>
+                    <button class="gcal-nav-button" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
+                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>Today</button>
+                    <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
+                    <button class="gcal-nav-button" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
+                </div>
+            </div>
+            <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+ New Event</button>
         </div>
-        <div class="navigationContainer">
-            <button class="fixedSizeButton" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
-            <button class="fixedSizeButton" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
-            <button class="fixedSizeButton" aria-label="Jump to today"  on:click={backToday}>Today</button>
-            <button class="fixedSizeButton" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
-            <button class="fixedSizeButton" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
-        </div>
+        
         {/if}
-        <div class="googleWeekContainer" style="overflow: hidden">
+        <div class="gcal-week-container">
+            <div>
+                <span class="invisible">Test</span>
+            </div>
+            <TimeLineHourText />
             {#each getDatesToDisplay(date) as day, i}
-       
-                    {#if i == 0}
-                        <TimeLine date={day} height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} /> 
-                    {:else}
-                        <TimeLine date={day} height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} showTimeDisplay={false}/> 
-                    {/if}
-                    <span class="dayDisplay">{day.format('D')}</span>
+                <div class="gcal-day-container">
+                    <span class="gcal-dayofweek">{day.format('ddd')}</span>
+                    <span class="gcal-day">{day.format('D')}</span>
+                </div>
+                <TimeLine date={day} {height} {width} {include} {exclude} {hourRange} showTimeDisplay={false}/> 
             {/each}
         </div>
     </div>
     
-    <style>
+<style>
 
-    .googleWeekContainer{
+    .gcal-title-container {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        grid-column-gap: 1em;
+        margin-bottom: 1em;
+    }
+
+    .gcal-view-description {
+        margin: 0px;
+    }
+
+    .gcal-date-dayofweek, .gcal-date-main {
+        margin: 0px;
+    }
+    
+    .gcal-new-event-button {
+        margin-left: auto;
+    }
+
+    .gcal-nav-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1em;
+    }
+
+    /* .gcal-week-container{
         position: relative;
         display: flex;
         flex-direction: row;
         overflow-x: scroll;
-        overflow-y: hidden;
+        width: 100%;
         height: 100%;
+    } */
+
+    .invisible {
+        display: none;
+    }
+
+    .gcal-week-container{
+        position: relative;
+        display: grid;
+        grid-template-columns: auto repeat(7, minmax(0,1fr));
+        grid-template-rows: auto 1fr;
+        grid-auto-flow: column;
+    }
+
+    .gcal-day-container {
+        display: grid;
+        justify-content: center;
+    }
+
+    .gcal-day, .gcal-dayofweek {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gcal-day {
+        font-weight: 700;
+        font-size: large;
     }
     
-    </style>
-    
+</style>

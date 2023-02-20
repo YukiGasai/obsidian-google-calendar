@@ -170,6 +170,7 @@
     <div 
         style:height="{height}px"
         style:width="{width}px"
+        style:max-width="100%"
         style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
         class="timeline"
         >
@@ -207,7 +208,7 @@
                     "
                 id="{location.event.id}"
                 style:top="{location.y}px"
-                style:left="calc(25px + {location.x}%)"
+                style:left="{location.x}%"
                 style:width="{location.width}%"
                 style:height="{location.height}px"
                 style:background={getColorFromEvent(location.event)}
@@ -227,15 +228,13 @@
     <style>
         .googleCalendarEvent{
             display: flex;
-            padding:10px;
-            padding-top: 0;
+            padding: 0 repeat(3, 10px);
             position: absolute;
             cursor: pointer;
-            width:150px;
-            left:40px;
+            width: 150px;
             border-radius: 5px;
-            color:black;
-            font-size: 0.5em;
+            color: black;
+            font-size: x-small;
             box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
             overflow: hidden;
         }
@@ -243,9 +242,8 @@
         .hourLine::after{
             content: "";
             position: absolute;
-            width: 90%;
-            left: 25px;
-            border-bottom: 1px solid white;
+            width: 100%;
+            border-bottom: 1px solid grey;
         }
         .hourLineLarge::after{
             width: 80%;
@@ -253,8 +251,8 @@
         }
     
        .hourText{
-        display:block;
-        font-family: "consolas";
+            display:block;
+            font-family: "consolas";
        }
 
        .timeline, .hourText, .hourTextContainer{
@@ -263,12 +261,10 @@
               
        .timeDisplay{
            position: absolute;
-           width: calc(100% - 25px);
+           width: 95%;
            height:3px;
-           margin-left: 25px;
            background:red;
            overflow: visible;
-    
        }
     
        .timeline{
@@ -276,8 +272,7 @@
            display: flex;
            flex-direction: row;
            overflow: visible;
-       
-           /*border: 1px solid green;*/
+           border-right: 0.5px solid gray;
        }
     
     </style>
