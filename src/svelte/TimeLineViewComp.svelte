@@ -31,19 +31,22 @@ const openNewEventDialog = (event) => {
 $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
 
 </script>
-<div style="padding-left: 10px;">
+<div style="padding-left: 10px; position: relative;">
     {#if navigation && date}
-    <div class="titleContainer">
-        <button aria-label="Create Event" on:click={openNewEventDialog}>+</button>
-        <h3>Google Calendar {date.format("YYYY-MM-DD")}</h3>
-    </div>
-    <div class="navigationContainer">
-        <button class="fixedSizeButton" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
-        <button class="fixedSizeButton" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
-        <button class="fixedSizeButton" aria-label="Jump to start"  on:click={backToday}>Start</button>
-        <button class="fixedSizeButton" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
-        <button class="fixedSizeButton" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
-    </div>
+        <div class="gcal-title-container">
+            <div class="gcal-date-container">
+                <h3 class="gcal-date-dayofweek">{date.format("dddd")}</h3>
+                <h1 class="gcal-date-main">{date.format("MMMM DD, YYYY")}</h1>
+                <div class="gcal-nav-container">
+                    <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
+                    <button class="gcal-nav-button" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
+                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>Today</button>
+                    <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
+                    <button class="gcal-nav-button" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
+                </div>
+            </div>    
+            <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+</button>
+        </div>
     {/if}
     <div style="overflow: hidden">
         <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} />
@@ -52,27 +55,26 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
 
 <style>
 
-    .fixedSizeButton {
-        
-        text-align: center;
-        padding: 10px 5%;
-        margin: 0;
+    .gcal-title-container {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-column-gap: 1em;
+        margin-bottom: 1em;
     }
 
-    .titleContainer{
+    .gcal-date-dayofweek, .gcal-date-main {
+        margin: 0px;
+    }
+    
+    .gcal-new-event-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .gcal-nav-container {
         display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
+        margin-bottom: 1em;
     }
-
-    .navigationContainer{
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-around;
-        flex-wrap: wrap;
-        padding-bottom: 30px;
-    }
-
 </style>

@@ -40,7 +40,6 @@
     .gcal-hour-text-container {
         display: flex;
         flex-direction: column;
-        margin-right: 0.5em;
     }
 
     .gcal-hour-text {

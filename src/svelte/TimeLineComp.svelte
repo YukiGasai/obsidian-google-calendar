@@ -11,6 +11,7 @@
     import {getColorFromEvent} from '../googleApi/GoogleColors'
     import { onDestroy } from "svelte";
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+	import TimeLineHourText from "./TimeLineHourText.svelte";
 
     interface Location {
         event:GoogleEvent;
@@ -172,29 +173,22 @@
         style:width="{width}px"
         style:max-width="100%"
         style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
-        class="timeline"
+        class="gcal-timeline"
         >
 
-        <div class="hourLineContainer">
-        {#each {length: 24} as _, i }
-            <div class={hourFormat == 2 ? "hourLine hourLineLarge" : "hourLine"} style:height="{height/24}px" />
-        {/each}
-        </div>  
-    
-        {#if showTimeDisplay}
-            <div class="hourTextContainer" style:margin-top="-{height/52}px">
-            {#each {length: 24} as _, i }
-                    <span class=hourText
-                    on:click={switchHourDisplay}
-                    style:height="{height/24}px"
-                    style:font-size="{height/50}px" 
-                    >{getHourText(i,hourFormat)}</span>
-            {/each}
-            </div>
-        {/if}
+        <div class="gcal-timeline-container">
+            {#if showTimeDisplay}
+                    <TimeLineHourText />
+                {/if}
+            <div class="gcal-hour-line-container">
+                {#each {length: 24} as _, i }
+                    <div class={hourFormat == 2 ? "gcal-hour-line gcal-hour-line-large" : "gcal-hour-line"} style:height="{height/24}px" />
+                {/each}
+            </div>  
+        </div>
     
     {#if window.moment().isSame(date, 'day')}
-        <div class="timeDisplay" style:top="{timeDisplayPosition}px"/>
+        <div class="gcal-time-display" style:top="{timeDisplayPosition}px"/>
     {/if}
 
         {#each eventLocations as location, i}
@@ -228,38 +222,37 @@
     <style>
         .googleCalendarEvent{
             display: flex;
-            padding: 0 repeat(3, 10px);
+            padding: 0 10px 10px;
             position: absolute;
             cursor: pointer;
             width: 150px;
             border-radius: 5px;
             color: black;
-            font-size: x-small;
+            font-size: small;
             box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
             overflow: hidden;
         }
+
+        .gcal-timeline-container {
+            display: grid;
+        }
     
-        .hourLine::after{
+        .gcal-hour-line::after{
             content: "";
             position: absolute;
             width: 100%;
             border-bottom: 1px solid grey;
         }
-        .hourLineLarge::after{
+        .gcal-hour-line-large::after{
             width: 80%;
             left: 50px;
         }
-    
-       .hourText{
-            display:block;
-            font-family: "consolas";
-       }
 
-       .timeline, .hourText, .hourTextContainer{
+       .gcal-timeline, .hourText{
            overflow: hidden;
        }
               
-       .timeDisplay{
+       .gcal-time-display{
            position: absolute;
            width: 95%;
            height:3px;
@@ -267,12 +260,11 @@
            overflow: visible;
        }
     
-       .timeline{
+       .gcal-timeline{
            position:relative;
            display: flex;
            flex-direction: row;
            overflow: visible;
-           border-right: 0.5px solid gray;
        }
     
     </style>

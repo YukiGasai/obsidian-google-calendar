@@ -52,7 +52,7 @@
                 <h3 class="gcal-date-dayofweek">{date.format("dddd")}</h3>
                 <h1 class="gcal-date-main">{date.format("MMMM DD, YYYY")}</h1>
                 <div class="gcal-nav-container">
-                    <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;</button>
+                    <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
                     <button class="gcal-nav-button" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
                     <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>Today</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
@@ -105,15 +105,6 @@
         margin-bottom: 1em;
     }
 
-    /* .gcal-week-container{
-        position: relative;
-        display: flex;
-        flex-direction: row;
-        overflow-x: scroll;
-        width: 100%;
-        height: 100%;
-    } */
-
     .invisible {
         display: none;
     }
@@ -123,6 +114,7 @@
         display: grid;
         grid-template-columns: auto repeat(7, minmax(0,1fr));
         grid-template-rows: auto 1fr;
+        column-gap: 1em;
         grid-auto-flow: column;
     }
 
@@ -135,11 +127,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: medium;
     }
 
     .gcal-day {
         font-weight: 700;
-        font-size: large;
+        font-size: x-large;
     }
     
 </style>
