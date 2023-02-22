@@ -1,270 +1,272 @@
 <script lang="ts" >
 
-    import type { GoogleEvent } from "../helper/types";
+import type { GoogleEvent } from "../helper/types";
 
-    import TreeMap from 'ts-treemap'
-    import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
-    import {getEventStartPosition, getEventHeight} from "../helper/Helper";
-    
-    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
-    import {EventDetailsModal} from '../modal/EventDetailsModal'
-    import {getColorFromEvent} from '../googleApi/GoogleColors'
-    import { onDestroy } from "svelte";
-    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-	import TimeLineHourText from "./TimeLineHourText.svelte";
+import TreeMap from 'ts-treemap'
+import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
+import {getEventStartPosition, getEventHeight} from "../helper/Helper";
 
-    interface Location {
-        event:GoogleEvent;
-        x:number;
-        y:number;
-        width:number;
-        height:number; 
-        fullDay:boolean;
-    }
+import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+import {EventDetailsModal} from '../modal/EventDetailsModal'
+import {getColorFromEvent} from '../googleApi/GoogleColors'
+import { onDestroy } from "svelte";
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import TimeLineHourText from "./TimeLineHourText.svelte";
 
-    export let height = 700;
-    export let width = 300;
-    export let date = window.moment();
-    export let include;
-    export let exclude;
-    export let hourRange = [0, 24];
-    export let showTimeDisplay = true;
+interface Location {
+    event:GoogleEvent;
+    x:number;
+    y:number;
+    width:number;
+    height:number; 
+    fullDay:boolean;
+}
 
-    let loading = true;
-    let timeDisplayPosition = 0;
-    let events:GoogleEvent[] = [];
-    let eventLocations:Location[] = [];
-    let interval;
-    const plugin = GoogleCalendarPlugin.getInstance();
-    let hourFormat = plugin.settings.timelineHourFormat;
+export let height = 700;
+export let width = 300;
+export let date = window.moment();
+export let include;
+export let exclude;
+export let hourRange = [0, 24];
+export let showTimeDisplay = true;
+
+let loading = true;
+let timeDisplayPosition = 0;
+let events:GoogleEvent[] = [];
+let eventLocations:Location[] = [];
+let interval;
+const plugin = GoogleCalendarPlugin.getInstance();
+let hourFormat = plugin.settings.timelineHourFormat;
 
 
-    const refreshData = async () => {
-        hourFormat = plugin.settings.timelineHourFormat;
-        await getEvents()
-        const dayPercentage = dateToPercent(new Date());
-        timeDisplayPosition = Math.floor(height * dayPercentage);
-    } 
+const refreshData = async () => {
+    hourFormat = plugin.settings.timelineHourFormat;
+    await getEvents()
+    const dayPercentage = dateToPercent(new Date());
+    timeDisplayPosition = Math.floor(height * dayPercentage);
+} 
 
-    $: {
-        //needed to update if the prop date changes i don't know why
-        date = date;
-        if(interval){
-            clearInterval(interval);
-        }
-        loading = true;
-        interval = setInterval(refreshData, 5000);
-        refreshData();
-    }
-
-    const getLocationArray = () => {
-        const startMap = new TreeMap<string, GoogleEvent[]>();
-        events.forEach((event) => {
-            const start = event.start.date || event.start.dateTime;
-            if(startMap.has(start)){
-                startMap.get(start).push(event)
-            }else{
-                startMap.set(start, [event])
-            }
-        });
-
-        let indentAmount = 0;
-        let latestEndDate = null; 
-
-        for (let events of startMap.values()) {
-    
-            if(events[0].start.dateTime){
-                const startDate = window.moment(events[0].start.dateTime)
-                
-                if(latestEndDate && startDate.isBefore(latestEndDate, "minutes")){
-                    indentAmount++;
-                }else{
-                    indentAmount = 0;
-                }
-
-                latestEndDate = window.moment(events[0].end.dateTime)
-            }
-            events.forEach((event, i) => {
-                           
-                const indent = indentAmount * 5;
-
-                const elementWidth = (100-indent) / events.length;
-                eventLocations = [...eventLocations, {
-                    event: event,
-                    x: indent + elementWidth*i,
-                    y: getEventStartPosition(event, height),
-                    width: elementWidth,
-                    height: getEventHeight(event, height),
-                    fullDay: event.start.date != undefined
-                }]     
-            })
-        }
-    }
-
-    const getEvents = async() => {
-        
-        if(!date.isValid()){
-            return;
-        }
-   
-        const newEvents = await googleListEvents({
-            startDate:date,
-            include,
-            exclude
-        }); 
-
-        if(JSON.stringify(newEvents) != JSON.stringify(events)){
-            events = newEvents;
-            eventLocations = [];
-            getLocationArray()
-        }
-        loading = false;
-    }
-
-    const goToEvent = (event:GoogleEvent, e:any) => {
-        if(e.shiftKey){
-            window.open(event.htmlLink);
-        }else{
-            new EventDetailsModal(event, () => {
-                googleClearCachedEvents();
-                date = date
-            }).open();
-        }
-    }
-
-    onDestroy(() => {
+$: {
+    //needed to update if the prop date changes i don't know why
+    date = date;
+    if(interval){
         clearInterval(interval);
-    })
-
-    const switchHourDisplay = () => {
-        hourFormat += 1;
-        if(hourFormat > 2){
-            hourFormat = 0;
-        }
-        plugin.settings.timelineHourFormat = hourFormat;
-        plugin.saveSettings();
     }
+    loading = true;
+    interval = setInterval(refreshData, 5000);
+    refreshData();
+}
 
-    const getHourText = (hour:number, hourFormat:number):string => {
-        const hourMoment = window.moment(`${hour}:00:00`, "H:mm:ss");
+const getLocationArray = () => {
+    const startMap = new TreeMap<string, GoogleEvent[]>();
+    events.forEach((event) => {
+        const start = event.start.date || event.start.dateTime;
+        if(startMap.has(start)){
+            startMap.get(start).push(event)
+        }else{
+            startMap.set(start, [event])
+        }
+    });
 
-        switch (hourFormat) {
-            case 0:
-                return hourMoment.format("HH"); 
-                
-            case 1:
-                return hourMoment.format("hh");
+    let indentAmount = 0;
+    let latestEndDate = null; 
+
+    for (let events of startMap.values()) {
+
+        if(events[0].start.dateTime){
+            const startDate = window.moment(events[0].start.dateTime)
             
-            case 2:
-                return hourMoment.format("hh A")
+            if(latestEndDate && startDate.isBefore(latestEndDate, "minutes")){
+                indentAmount++;
+            }else{
+                indentAmount = 0;
+            }
+
+            latestEndDate = window.moment(events[0].end.dateTime)
         }
+        events.forEach((event, i) => {
+                        
+            const indent = indentAmount * 5;
+
+            const elementWidth = (100-indent) / events.length;
+            eventLocations = [...eventLocations, {
+                event: event,
+                x: indent + elementWidth*i,
+                y: getEventStartPosition(event, height),
+                width: elementWidth,
+                height: getEventHeight(event, height),
+                fullDay: event.start.date != undefined
+            }]     
+        })
     }
+}
+
+const getEvents = async() => {
     
-    </script>
+    if(!date.isValid()){
+        return;
+    }
 
- 
+    const newEvents = await googleListEvents({
+        startDate:date,
+        include,
+        exclude
+    }); 
 
-    {#if loading}
-        <p>Loading</p>
-    {:else} 
-    
-    <div 
-        style:height="{height}px"
-        style:width="{width}px"
-        style:max-width="100%"
-        style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
-        class="gcal-timeline"
-        >
+    if(JSON.stringify(newEvents) != JSON.stringify(events)){
+        events = newEvents;
+        eventLocations = [];
+        getLocationArray()
+    }
+    loading = false;
+}
 
-        <div class="gcal-timeline-container">
-            {#if showTimeDisplay}
-                    <TimeLineHourText />
-                {/if}
-            <div class="gcal-hour-line-container">
-                {#each {length: 24} as _, i }
-                    <div class={hourFormat == 2 ? "gcal-hour-line gcal-hour-line-large" : "gcal-hour-line"} style:height="{height/24}px" />
-                {/each}
-            </div>  
-        </div>
-    
-    {#if window.moment().isSame(date, 'day')}
-        <div class="gcal-time-display" style:top="{timeDisplayPosition}px"/>
-    {/if}
+const goToEvent = (event:GoogleEvent, e:any) => {
+    if(e.shiftKey){
+        window.open(event.htmlLink);
+    }else{
+        new EventDetailsModal(event, () => {
+            googleClearCachedEvents();
+            date = date
+        }).open();
+    }
+}
 
-        {#each eventLocations as location, i}
-            <div 
-                on:click={(e) => goToEvent(location.event,e)} 
-                class="
-                    googleCalendarEvent
-                    googleCalendarEvent_Calendar_Color_{location.event.parent.colorId}
-                    googleCalendarEvent_Event_Color_{location.event.parent.colorId}
-                    googleCalendarEvent_Id_{location.event.parent.id}
-                    "
-                id="{location.event.id}"
-                style:top="{location.y}px"
-                style:left="{location.x}%"
-                style:width="{location.width}%"
-                style:height="{location.height}px"
-                style:background={getColorFromEvent(location.event)}
-            >
-            <span class="
-                googleCalendarName
-                googleCalendarName_Calendar_Color_{location.event.parent.colorId}
-                googleCalendarName_Event_Color_{location.event.parent.colorId}
-                googleCalendarName_Id_{location.event.parent.id}
-                ">{location.event.summary}</span>
-        </div>
-        {/each}
+onDestroy(() => {
+    clearInterval(interval);
+})
 
+const switchHourDisplay = () => {
+    hourFormat += 1;
+    if(hourFormat > 2){
+        hourFormat = 0;
+    }
+    plugin.settings.timelineHourFormat = hourFormat;
+    plugin.saveSettings();
+}
+
+const getHourText = (hour:number, hourFormat:number):string => {
+    const hourMoment = window.moment(`${hour}:00:00`, "H:mm:ss");
+
+    switch (hourFormat) {
+        case 0:
+            return hourMoment.format("HH"); 
+            
+        case 1:
+            return hourMoment.format("hh");
+        
+        case 2:
+            return hourMoment.format("hh A")
+    }
+}
+
+</script>
+
+
+
+{#if loading}
+    <p>Loading</p>
+{:else} 
+
+<div 
+    style:height="{height}px"
+    style:width="{width}px"
+    style:max-width="100%"
+    style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
+    class="gcal-timeline"
+    >
+
+    <div class="gcal-timeline-container">
+        {#if showTimeDisplay}
+                <TimeLineHourText />
+            {/if}
+        <div class="gcal-hour-line-container">
+            {#each {length: 24} as _, i }
+                <div class={hourFormat == 2 ? "gcal-hour-line gcal-hour-line-large" : "gcal-hour-line"} style:height="{height/24}px" />
+            {/each}
+        </div>  
     </div>
-    {/if}
 
-    <style>
-        .googleCalendarEvent{
-            display: flex;
-            padding: 0 10px 10px;
-            position: absolute;
-            cursor: pointer;
-            width: 150px;
-            border-radius: 5px;
-            color: black;
-            font-size: small;
-            box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
-            overflow: hidden;
-        }
+{#if window.moment().isSame(date, 'day')}
+    <div class="gcal-time-display" style:top="{timeDisplayPosition}px"/>
+{/if}
 
-        .gcal-timeline-container {
-            display: grid;
-        }
-    
-        .gcal-hour-line::after{
-            content: "";
-            position: absolute;
-            width: 100%;
-            border-bottom: 1px solid grey;
-        }
-        .gcal-hour-line-large::after{
-            width: 80%;
-            left: 50px;
-        }
+    {#each eventLocations as location, i}
+        <div 
+            on:click={(e) => goToEvent(location.event,e)} 
+            class="
+                googleCalendarEvent
+                googleCalendarEvent_Calendar_Color_{location.event.parent.colorId}
+                googleCalendarEvent_Event_Color_{location.event.parent.colorId}
+                googleCalendarEvent_Id_{location.event.parent.id}
+                "
+            id="{location.event.id}"
+            style:top="{location.y}px"
+            style:left="{location.x}%"
+            style:width="{location.width}%"
+            style:height="{location.height}px"
+            style:background={getColorFromEvent(location.event)}
+        >
+        <span class="
+            googleCalendarName
+            googleCalendarName_Calendar_Color_{location.event.parent.colorId}
+            googleCalendarName_Event_Color_{location.event.parent.colorId}
+            googleCalendarName_Id_{location.event.parent.id}
+            ">{location.event.summary}</span>
+    </div>
+    {/each}
 
-       .gcal-timeline, .hourText{
-           overflow: hidden;
-       }
-              
-       .gcal-time-display{
-           position: absolute;
-           width: 95%;
-           height:3px;
-           background:red;
-           overflow: visible;
-       }
-    
-       .gcal-timeline{
-           position:relative;
-           display: flex;
-           flex-direction: row;
-           overflow: visible;
-       }
-    
-    </style>
+</div>
+{/if}
+
+<style>
+    .googleCalendarEvent{
+        display: flex;
+        padding: 0 10px 10px;
+        position: absolute;
+        cursor: pointer;
+        width: 150px;
+        border-radius: 5px;
+        color: black;
+        font-size: small;
+        box-shadow: 3px 2px 8px 4px rgba(0,0,0,0.36);
+        overflow: hidden;
+    }
+
+    .gcal-timeline-container {
+        display: flex;
+        gap: 5px;
+    }
+
+    .gcal-hour-line::after{
+        content: "";
+        position: absolute;
+        width: 100%;
+        border-bottom: 1px solid grey;
+    }
+    .gcal-hour-line-large::after{
+        width: 80%;
+        left: 50px;
+    }
+
+    .gcal-timeline, .hourText{
+        overflow: hidden;
+    }
+            
+    .gcal-time-display{
+        position: absolute;
+        width: 95%;
+        height: 3px;
+        background:red;
+        overflow: visible;
+    }
+
+    .gcal-timeline{
+        position:relative;
+        display: flex;
+        flex-direction: row;
+        overflow: visible;
+        padding-top: 5px;
+    }
+
+</style>
