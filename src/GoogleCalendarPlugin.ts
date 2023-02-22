@@ -215,7 +215,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open Timeline view
 		this.addCommand({
 			id: "open-google-calendar-timline-view",
-			name: "Open Google Calendar timeline view",
+			name: "Open gCal Timeline View",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_DAY)
 		});
@@ -223,7 +223,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open Week view
 		this.addCommand({
 			id: "open-google-calendar-week-view",
-			name: "Open Google Calendar week view",
+			name: "Open gCal week view",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEEK)
 		});
@@ -231,7 +231,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open Month view
 		this.addCommand({
 			id: "open-google-calendar-month-view",
-			name: "Open Google Calendar month view",
+			name: "Open gCal month view",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_MONTH)
 		});
@@ -239,7 +239,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open web view
 		this.addCommand({
 			id: "open-google-calendar-web-view",
-			name: "Open Google Calendar web view",
+			name: "Open gCal Web View",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEB)
 		});
@@ -247,37 +247,15 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open schedule view
 		this.addCommand({
 			id: "open-google-calendar-schedule-view",
-			name: "Open Google Calendar schedule view",
+			name: "Open gCal Schedule View",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE)
-		});
-
-		//List events command
-		this.addCommand({
-			id: "list-google-calendars",
-			name: "List Google Calendars",
-
-			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn();
-
-				if (checking) {
-					return canRun;
-				}
-
-				if (!canRun) {
-					return;
-				}
-
-				googleListCalendars().then((calendars) => {
-					new CalendarsListModal(calendars).open();
-				});
-			},
 		});
 
 		//Create event command
 		this.addCommand({
 			id: "create-google-calendar-event",
-			name: "Create Google Calendar Event",
+			name: "Create gCal Event",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -386,7 +364,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
         this.addCommand({
 			id: "google-calendar-get-todays-tasks",
-			name: "Get todays google calendar tasks",
+			name: "Get Today's gCal Tasks",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -407,7 +385,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "google-calendar-create-event-note-current-event",
-			name: "Create Event Note for current event",
+			name: "Create Event Note for Current Event",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -528,7 +506,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		*/
 		this.addCommand({
 			id: "create-google-calendar-event-from-frontmatter ",
-			name: "Create Google Calendar Event from frontmatter",
+			name: "Create gCal Event From Frontmatter",
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor,
