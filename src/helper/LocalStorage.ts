@@ -28,15 +28,6 @@ export const getExpirationTime = (): number => {
 	return parseInt(expirationTimeString, 10);
 };
 
-/**
- * get user Id from LocalStorage
- * @returns googleCalendarUserId
- */
-export const getUserId = (): string => {
-	return window.localStorage.getItem("googleCalendarUserId") ?? "";
-};
-
-
 
 //===================
 //SETTER
@@ -48,18 +39,7 @@ export const getUserId = (): string => {
  * @returns googleAccessToken
  */
 export const setAccessToken = (googleAccessToken: string): void => {
-	if (googleAccessToken == "undefined") return;
 	window.localStorage.setItem("googleCalendarAccessToken", googleAccessToken);
-};
-
-/**
- * set user Id into LocalStorage
- * @param googleAccessToken user Id for OAuth server
- * @returns googleCalendarUserId
- */
-export const setUserId = (userId: string): void => {
-	if (userId == "undefined") return;
-	window.localStorage.setItem("googleCalendarUserId", userId);
 };
 
 /**

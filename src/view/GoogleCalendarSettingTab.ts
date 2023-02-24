@@ -9,7 +9,7 @@ import {
 	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import { getRefreshToken, getUserId, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "../helper/LocalStorage";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
@@ -26,7 +26,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 
-		const isLoggedIn = (getRefreshToken() || getUserId());
+		const isLoggedIn = getRefreshToken();
 
 		containerEl.empty();
 
@@ -116,7 +116,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					.onClick(() => {
 						if (isLoggedIn) {
 							setRefreshToken("");
-							setUserId("");
 							setAccessToken("");
 							setExpirationTime(0);
 							this.hide();
@@ -125,7 +124,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							if (this.plugin.settings.useCustomClient) {
 								LoginGoogle()
 							} else {
-								window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+								//window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+								LoginGoogle()
 							}
 						}
 					})
@@ -524,8 +524,10 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 export function settingsAreComplete(): boolean {
 	const plugin = GoogleCalendarPlugin.getInstance();
 	if (
-		plugin.settings.googleClientId == "" ||
-		plugin.settings.googleClientSecret == ""
+		plugin.settings.useCustomClient && (
+			plugin.settings.googleClientId == "" ||
+			plugin.settings.googleClientSecret == ""
+		)
 	) {
 		createNotice("Google Calendar missing settings");
 		return false;
@@ -552,7 +554,7 @@ export function settingsAreCorret(): boolean {
 
 export function settingsAreCompleteAndLoggedIn(): boolean {
 
-	if ((!getRefreshToken() || getRefreshToken() == "") && (!getUserId() || getUserId() == "")) {
+	if (!getRefreshToken() || getRefreshToken() == "") {
 		createNotice(
 			"Google Calendar missing settings or not logged in"
 		);
