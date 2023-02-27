@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "node esbuild.config.mjs production",
-		"docs" : "npx docsify-cli serve docs"
+		"docs": "npx docsify-cli serve docs"
 	},
 	"keywords": [],
 	"author": "YukiGasai",
@@ -51,6 +51,7 @@
 		"open": "^8.4.0",
 		"rrule": "^2.7.0",
 		"server-destroy": "^1.0.1",
+		"socket.io-client": "^4.6.1",
 		"ts-treemap": "^1.1.0"
 	}
 }

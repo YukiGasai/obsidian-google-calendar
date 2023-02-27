@@ -121,10 +121,13 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							this.hide();
 							this.display();
 						} else {
-							if (this.plugin.settings.useCustomClient) {
-								LoginGoogle()
+							if (Platform.isMobileApp) {
+								if(this.plugin.settings.useCustomClient){
+									setRefreshToken(this.plugin.settings.googleRefreshToken);
+								}else{
+									window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+								}
 							} else {
-								//window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
 								LoginGoogle()
 							}
 						}

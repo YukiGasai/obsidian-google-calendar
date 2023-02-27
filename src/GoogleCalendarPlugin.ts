@@ -14,7 +14,7 @@ import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/Month
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { getRefreshToken, setAccessToken, setExpirationTime } from "./helper/LocalStorage";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -577,8 +577,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addSettingTab(this.settingsTab);
 
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
-			if (this.settings.useCustomClient) return;
+			//Only allow login on mobile
+			if(Platform.isDesktop)return;
 			setAccessToken(req['at']);
+			setRefreshToken(req['rt']);
 			setExpirationTime(+new Date() + 3600000);
 			new Notice("Login successful!");
 
