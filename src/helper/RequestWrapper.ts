@@ -31,7 +31,7 @@ export const callRequest = async (url: string, method: string, body: any, noAuth
             headers: requestHeaders
         })
 
-        if (response.status >= 400) {
+        if (response.status >= 300) {
             return;
         }
 
@@ -45,22 +45,25 @@ export const callRequest = async (url: string, method: string, body: any, noAuth
 
 
     //Normal request
-    const response = await requestUrl({
-        method: method,
-        url: url,
-        body: body ? JSON.stringify(body) : null,
-        headers: requestHeaders
-    });
+    try{
+        const response = await requestUrl({
+            method: method,
+            url: url,
+            body: body ? JSON.stringify(body) : null,
+            headers: requestHeaders,
+            throw: true
+        });
 
+        if (response.status >= 300) {
+            return;
+        }
 
-    if (response.status >= 400) {
+        if (method.toLowerCase() == "delete") {
+            return { status: "success" };
+        }
+
+        return (await response.json);
+    }catch(err){
         return;
     }
-
-    if (method.toLowerCase() == "delete") {
-        return { status: "success" };
-    }
-
-    return (await response.json);
-
 }

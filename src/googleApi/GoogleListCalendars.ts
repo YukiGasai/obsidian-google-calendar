@@ -7,6 +7,7 @@ import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
 let cachedCalendars: GoogleCalendar[] = []
+let lock = false;
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
@@ -41,6 +42,10 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 		return filterCalendarsByBlackList(plugin, cachedCalendars);
 	}
 
+	// Added a lock to prevent multiple requests at the same time
+	if(lock) return [];
+	lock = true;
+
 	//Make sure the colors for calendar and events are loaded before getting the first calendar
 	await getGoogleColors();
 
@@ -55,5 +60,6 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
 	const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
 
+	lock = false;
 	return calendars;
 }

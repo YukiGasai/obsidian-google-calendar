@@ -40,6 +40,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				toggle
 					.setValue(this.plugin.settings.useCustomClient)
 					.onChange(async (value) => {
+						setRefreshToken("");
+						setAccessToken("");
+						setExpirationTime(0);
 						this.plugin.settings.useCustomClient = value;
 						await this.plugin.saveSettings();
 						this.display();
@@ -139,9 +142,10 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			.setDesc("Time in seconds between refresh request from google server")
 			.addSlider(cb => {
 				cb.setValue(this.plugin.settings.refreshInterval)
-				cb.setLimits(10, 360, 1);
+				cb.setLimits(this.plugin.settings.useCustomClient ? 10 : 60, 360, 1);
 				cb.setDynamicTooltip();
 				cb.onChange(async value => {
+					if(value < 60 && !this.plugin.settings.useCustomClient)return;
 					this.plugin.settings.refreshInterval = value;
 					await this.plugin.saveSettings();
 				})

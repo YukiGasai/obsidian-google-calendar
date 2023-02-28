@@ -22,7 +22,7 @@ const eventColors = new Map<string, string>();
 export async function getGoogleColors(): Promise<void> {
 
 	if (!settingsAreCompleteAndLoggedIn()) return;
-
+	if (calendarColors.size) return;
 
 	const colorData = await callRequest(`https://www.googleapis.com/calendar/v3/colors`, "GET", null);
 
