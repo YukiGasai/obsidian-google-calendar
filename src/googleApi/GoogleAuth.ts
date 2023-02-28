@@ -29,7 +29,7 @@ import * as crypto from "crypto";
 
 
 const PORT = 42813;
-const REDIRECT_URL = `http://localhost:${PORT}/callback`;
+const REDIRECT_URL = `http://127.0.0.1:${PORT}/callback`;
 const PUBLIC_CLIENT_ID = `783376961232-v90b17gr1mj1s2mnmdauvkp77u6htpke.apps.googleusercontent.com`
 
 let lastRefreshTryMoment = window.moment().subtract(100, "seconds");
@@ -85,7 +85,7 @@ const refreshAccessToken = async (plugin: GoogleCalendarPlugin): Promise<string>
 		headers: {'content-type': 'application/json'},
 		body: JSON.stringify(refreshBody)
 	})
-	
+
 	if (!tokenData) {
 		createNotice("Error while refreshing authentication");
 		return;
@@ -122,15 +122,14 @@ const exchangeCodeForTokenCustom = async (plugin: GoogleCalendarPlugin, state: s
 	+ `&code_verifier=${verifier}`
 	+ `&code=${code}`
 	+ `&state=${state}`
-	+ `&redirect_uri=http://localhost:42813/callback`
+	+ `&redirect_uri=${REDIRECT_URL}`
 
-	const response = await requestUrl({
-		url,
+	const response = await fetch(url,{
 		method: 'POST',
 		headers: {'content-type': 'application/x-www-form-urlencoded'},
 	});
 
-	return await response.json;
+	return response.json();
 }
 
 /**
@@ -212,11 +211,11 @@ export async function LoginGoogle(): Promise<void> {
 		try {
 			// Make sure the callback url is used
 			if (req.url.indexOf("/callback") < 0)return; 
-			console.log(req)
+			
 			// acquire the code from the querystring, and close the web server.
 			const qs = new url.URL(
 				req.url,
-				`http://localhost:${PORT}`
+				`http://127.0.0.1:${PORT}`
 			).searchParams;
 			const code = qs.get("code");
 			const received_state = qs.get("state");
@@ -250,6 +249,7 @@ export async function LoginGoogle(): Promise<void> {
 			
 		} catch (e) {
 			console.log("Auth failed")
+
 			authSession.server.close(()=>{
 				console.log("Server closed")
 			});
