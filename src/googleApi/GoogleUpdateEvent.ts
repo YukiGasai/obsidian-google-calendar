@@ -3,6 +3,9 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
 import { createNotice } from "../helper/NoticeHelper";
 import { callRequest } from "src/helper/RequestWrapper";
 import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
+import { GoogleCacheHandler } from "./GoogleCacheHandler";
+import _ from "lodash";
+
 /**
  * This function can update simple properties of an event at the api.
  * If the event is recurrent is will update all it's instanced except if updateSingle is set
@@ -45,20 +48,21 @@ export async function googleUpdateEvent(
 
     }
 
-
+    const calender = _.clone(event.parent);
 	//clean the event object to send it to the api directly
-	const calenderId = event.parent.id;
 	delete event.parent;
 
 
-	const updatedEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${event.id}`, "PUT", event)
+	const updatedEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calender.id}/events/${event.id}`, "PUT", event)
 
 	if (!updatedEvent) {
 		createNotice("Could not create Google Event");
 		return null;
 	}
-
+    updatedEvent.parent = calender;
 	createNotice("Updated Event", true);
+
+    GoogleCacheHandler.getInstance().updateEvent(updatedEvent);
 
 	return updatedEvent;
 

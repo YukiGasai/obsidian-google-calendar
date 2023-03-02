@@ -309,6 +309,7 @@ export interface ListOptions {
 	endDate?: moment.Moment;
 	exclude?: string[];
 	include?: string[];
+	calendarList?: GoogleCalendar[];
 }
 
 export interface IGoogleCalendarPluginApi {
@@ -365,4 +366,22 @@ export interface OpenPeriodicNoteOptions {
 	openToRight?: SplitDirection;
 	openInNewTab?: boolean;
 	type?: "daily" | "weekly" | "monthly" | "yearly";
+}
+
+export interface GoogleCache {
+	syncToken: string;
+	calendar: GoogleCalendar;
+	updated: moment.Moment;
+	cache: {[key: string]: GoogleEvent[]};
+}
+
+
+export interface SyncCalendar {
+	calendar: GoogleCalendar;
+	syncToken: string;
+}
+
+export interface ExportCache {
+	idMap: {[key: string]: GoogleEvent};
+	syncCalendars:{[key: string]: string};
 }

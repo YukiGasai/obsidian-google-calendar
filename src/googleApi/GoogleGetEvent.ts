@@ -3,6 +3,7 @@ import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { createNotice } from "../helper/NoticeHelper";
 import { googleListCalendars } from "./GoogleListCalendars";
+import { GoogleCacheHandler } from "./GoogleCacheHandler";
 /**
  * Function to get information of a single event by id
  * @param eventId The id of the event
@@ -19,6 +20,8 @@ export async function googleGetEvent(eventId: string, calendarId?: string): Prom
 		createNotice("Could not get Google Event");
 		return null;
 	}
+
+	GoogleCacheHandler.getInstance().createEvent(createdEvent);
 
 	return createdEvent;
 }

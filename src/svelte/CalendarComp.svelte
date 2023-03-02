@@ -4,7 +4,7 @@
     
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
-    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+    import { googleListEvents } from "../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
     import _ from "lodash"
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
@@ -14,6 +14,8 @@
 	import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "../view/DayCalendarView";
 	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../view/ScheduleCalendarView";
 	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../view/WeekCalendarView";
+	import { CacheUpdateEmitter } from "../googleApi/CacheUpdateEmitter";
+	import { GoogleCacheHandler } from "../googleApi/GoogleCacheHandler";
 
 
     export let displayedMonth = window.moment();
@@ -53,7 +55,7 @@
         let eventsByDay = _.groupBy(eventsInMonth, event =>
             window.moment(event.start.date ?? event.start.dateTime).startOf('day').format()
         );
-
+        console.log({eventsInMonth})
         events = eventsInMonth;
         const customTagsSource: ICalendarSource = {
             getWeeklyMetadata: async (week: moment.Moment): Promise<IDayMetadata> => {
@@ -118,7 +120,6 @@
     const onClickDay = (date: moment.Moment, isMenu:boolean) => {
 
         new EventListModal(getEventsOfDay(events, date),"details", date, false, () => {
-            googleClearCachedEvents();
             displayedMonth = displayedMonth
         }).open();
     }
@@ -276,21 +277,16 @@
         }
         return true;
     }
+    
+ 
 
-    $: {
-        if(interval){
-            clearInterval(interval);
-        }
-        interval = setInterval(() => getSource(displayedMonth), 1000)
+    GoogleCacheHandler.getInstance().cacheUpdateEmitter.on('cacheUpdate', () => {
+        console.log("Triggered cache update in calendar view")
+        getSource(displayedMonth);
+    });
 
-        if(newDayInterval){
-            clearInterval(newDayInterval);
-        }
-        newDayInterval = setInterval(() => today = window.moment(), 60000)
+    $: displayedMonth, getSource(displayedMonth)
 
-        getSource(displayedMonth)
-
-    }
     onDestroy(() => {
         clearInterval(interval);
         clearInterval(newDayInterval);
@@ -331,6 +327,9 @@
                 <CalendarBase
                     showWeekNums={false}
                     {onClickDay}
+                    {onClickWeek}
+                    {onContextMenuDay}
+                    {onContextMenuWeek}
                     bind:sources
                     bind:displayedMonth
                     bind:today

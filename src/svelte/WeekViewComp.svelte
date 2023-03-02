@@ -2,9 +2,7 @@
 
     import TimeLine from "./TimeLineComp.svelte";
     import {EventDetailsModal} from "../modal/EventDetailsModal"
-    import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
-    import { onMount } from "svelte";
-    
+
     export let height:number = undefined;
     export let width:number = undefined;
     export let startDate:moment.Moment = window.moment();
@@ -24,10 +22,7 @@
 
     const openNewEventDialog = (event) => {  
 
-        new EventDetailsModal({start:{}, end:{}}, () =>{
-            googleClearCachedEvents()
-            date=date;
-        }).open()
+        new EventDetailsModal({start:{}, end:{}}).open()
     }
 
     $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;

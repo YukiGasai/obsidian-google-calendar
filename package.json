@@ -43,6 +43,7 @@
 		"@types/marked": "^4.0.8",
 		"clipboardy": "^3.0.0",
 		"countries-and-timezones": "^3.3.0",
+		"event-emitter": "^0.3.5",
 		"google-auth-library": "^8.0.2",
 		"googleapis": "^100.0.0",
 		"marked": "^4.2.4",

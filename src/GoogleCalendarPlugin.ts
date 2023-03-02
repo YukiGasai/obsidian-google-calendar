@@ -6,7 +6,7 @@ import {
 } from "./view/GoogleCalendarSettingTab";
 import { googleListCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
-import { googleClearCachedEvents, googleListEvents } from "./googleApi/GoogleListEvents";
+import { googleListEvents } from "./googleApi/GoogleListEvents";
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { WeekCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEEK } from "./view/WeekCalendarView";
@@ -30,6 +30,7 @@ import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
+import { GoogleCacheHandler } from "src/googleApi/GoogleCacheHandler";
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -202,7 +203,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			(leaf: WorkspaceLeaf) => new ScheduleCalendarView(leaf)
 		);
 
-
+		GoogleCacheHandler.getInstance();
 		this.registerEvent(
 			this.app.workspace.on(
 				"editor-change",
@@ -290,9 +291,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				new EventDetailsModal({ start: {}, end: {} }, () => {
-					googleClearCachedEvents()
-				}).open()
+				new EventDetailsModal({ start: {}, end: {} }).open()
 
 			},
 		});

@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { GoogleEvent } from "../helper/types";
     
-    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+    import { googleListEvents } from "../googleApi/GoogleListEvents";
     import { getColorFromEvent } from "../googleApi/GoogleColors";
     import { EventDetailsModal } from "../modal/EventDetailsModal";
     import { EventListModal } from "../modal/EventListModal";
@@ -61,20 +61,14 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new EventDetailsModal(event, () => {
-                googleClearCachedEvents();
-                date = date
-            }).open();
+            new EventDetailsModal(event).open();
         }
     }
 
     const goToDaySelect = async (event:GoogleEvent) => {
         const clickedDate = window.moment(event.start.date || event.start.dateTime);
         const events = await googleListEvents({startDate:clickedDate});
-        new EventListModal(events,'details', clickedDate, false, () => {
-            googleClearCachedEvents();
-            date = date;
-        }).open();
+        new EventListModal(events,'details', clickedDate, false).open();
     }
 
     const checkForSameDate = (event:GoogleEvent): boolean => {

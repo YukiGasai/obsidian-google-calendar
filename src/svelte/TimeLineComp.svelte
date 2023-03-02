@@ -6,7 +6,7 @@
     import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
     import {getEventStartPosition, getEventHeight} from "../helper/Helper";
     
-    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+    import { googleListEvents } from "../googleApi/GoogleListEvents";
     import {EventDetailsModal} from '../modal/EventDetailsModal'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
     import { onDestroy } from "svelte";
@@ -124,10 +124,7 @@
         if(e.shiftKey){
             window.open(event.htmlLink);
         }else{
-            new EventDetailsModal(event, () => {
-                googleClearCachedEvents();
-                date = date
-            }).open();
+            new EventDetailsModal(event).open();
         }
     }
 

@@ -4,6 +4,8 @@ import { createNotice } from "../helper/NoticeHelper";
 import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { googleListCalendars } from "./GoogleListCalendars";
+import { GoogleCacheHandler } from "./GoogleCacheHandler";
 
 
 function dateToGoogleDate(date: string): string {
@@ -61,6 +63,11 @@ export async function googleCreateEvent(event: GoogleEvent | any): Promise<Googl
 	}
 
 	createNotice(`Google Event ${createdEvent.summary} created`, true);
+
+    const calendar = (await googleListCalendars()).find(calendar => calendar.id === calenderId)
+    createdEvent.parent = calendar;
+
+    GoogleCacheHandler.getInstance().createEvent(createdEvent);
 
 	return createdEvent;
 

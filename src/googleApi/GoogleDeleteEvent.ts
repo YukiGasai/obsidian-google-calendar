@@ -1,3 +1,4 @@
+import { GoogleCacheHandler } from "../googleApi/GoogleCacheHandler";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { createNotice } from "../helper/NoticeHelper";
 import type { GoogleEvent } from "../helper/types";
@@ -40,6 +41,10 @@ export async function googleDeleteEvent(
 
 	const response = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${id}`, 'DELETE', null);
 	if (response) {
+
+		// Remove the event from the cache
+		GoogleCacheHandler.getInstance().removeEvent(event);
+
 		return true;
 	} else {
 		return false
