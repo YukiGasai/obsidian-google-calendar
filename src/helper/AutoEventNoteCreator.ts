@@ -184,14 +184,16 @@ async function getEventNoteFilePath(plugin: GoogleCalendarPlugin, event: GoogleE
     return normalizePath(`${folderPath}/${sanitizedFileName}.md`);
 }
 
-async function checkIfFileExists(event: GoogleEvent, filePath: string): Promise<TFile> | null {
+async function checkIfFileExists(event: GoogleEvent, filePath: string, isAutoCreated: boolean): Promise<TFile> | null {
     const { vault } = app;
     const { adapter } = vault;
 
     if (await adapter.exists(filePath)) {
         let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
-        createNotice(`EventNote ${event.summary} already exists.`)
-        new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
+        if(!isAutoCreated) {
+            createNotice(`EventNote ${event.summary} already exists.`)
+            new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
+        }
         return existingFile
     }
     return;
@@ -215,11 +217,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     const filePath = await getEventNoteFilePath(plugin, event, folderName);
 
-    if (!isAutoCreated) {
-        //check if file already exists
-        const existingFile = await checkIfFileExists(event, filePath);
-        if (existingFile) return existingFile;
-    }
+    //check if file already exists
+    const existingFile = await checkIfFileExists(event, filePath, isAutoCreated);
+    if (existingFile) return existingFile;
 
     //Create file with no content
     const file = await vault.create(filePath, '');
