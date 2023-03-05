@@ -14,17 +14,18 @@ export class GoogleCacheHandler {
 
     private plugin: GoogleCalendarPlugin;
 
-    private CACHE_FILE = "googleCalendarCache.json";
+    private static CACHE_FILE = "googleCalendarCache.json";
 
     private idCache = {};
     private dateCache = {};
-    private interval: number;
+    private static interval: number;
 
     public cacheStart: moment.Moment ;
     public cacheEnd: moment.Moment;
     public cacheUpdateEmitter: CacheUpdateEmitter;
 
     private syncCalendars: {[key: string]: string} = {};
+
 
     // Singleton fun
     public static getInstance(): GoogleCacheHandler {
@@ -41,6 +42,24 @@ export class GoogleCacheHandler {
         this.init();
     }
 
+
+    // Allow to reload when settings change
+    public static reloadCache = async () => {
+        clearInterval(GoogleCacheHandler.interval);
+        GoogleCacheHandler.instance = null;
+    }
+
+    public static clearCache = async () => {
+        clearInterval(GoogleCacheHandler.interval);
+        
+        const { vault } = GoogleCalendarPlugin.getInstance().app;
+        if((await vault.adapter.exists(GoogleCacheHandler.CACHE_FILE))) {
+            await vault.adapter.remove(GoogleCacheHandler.CACHE_FILE);
+        }
+        GoogleCacheHandler.instance = null;
+    }
+
+
     private init = async () => {
         this.plugin = GoogleCalendarPlugin.getInstance();
         await this.loadCache()
@@ -50,15 +69,16 @@ export class GoogleCacheHandler {
             this.getInitialSyncTokens();
         }
 
-        this.interval = window.setInterval(async () => {
+        GoogleCacheHandler.interval = window.setInterval(async () => {
             await this.updateCache();
-        }, this.plugin.settings.refreshInterval * 1000);
+        }, 5000//  this.plugin.settings.refreshInterval * 1000
+        );
     }
 
     private loadCache = async () => {
         const { vault } = this.plugin.app;
-        let cachePath = normalizePath(this.CACHE_FILE);
-        if(!(await vault.adapter.exists(this.CACHE_FILE))) {
+        let cachePath = normalizePath(GoogleCacheHandler.CACHE_FILE);
+        if(!(await vault.adapter.exists(GoogleCacheHandler.CACHE_FILE))) {
             return;
         }
         const fileContent = await vault.adapter.read(cachePath);
@@ -87,7 +107,7 @@ export class GoogleCacheHandler {
         this.cacheUpdateEmitter.emit('cacheUpdate');
 
         const { vault } = this.plugin.app;
-        let cachePath = normalizePath(this.CACHE_FILE);
+        let cachePath = normalizePath(GoogleCacheHandler.CACHE_FILE);
 
         const exportCacheObject: ExportCache = {
             idMap: this.idCache,
@@ -102,9 +122,33 @@ export class GoogleCacheHandler {
         let cacheDidUpdate = false;
         for (let [calendarId, syncToken] of Object.entries(this.syncCalendars)) {
             
-            const result = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?syncToken=${syncToken}`, "GET", null);
-            this.syncCalendars[calendarId] = result.nextSyncToken;
-            (result.items as GoogleEvent[])?.forEach((event: GoogleEvent) => {
+            let nextPageToken = "";
+            let totalEventList : GoogleEvent[] = [];
+            let nextSyncToken = "";
+            while(true) {
+                let url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`
+                url += `?singleEvents=true`
+                url += `&syncToken=${syncToken}`
+
+                if(nextPageToken) {
+                    url += `&pageToken=${nextPageToken}`
+                }
+
+                const result = await callRequest(url, "GET", null);
+                if (result){
+                    totalEventList = [...totalEventList , ...result.items];
+                }
+
+                if(result.nextPageToken) {
+                    nextPageToken = result.nextPageToken;
+                }else{
+                    nextSyncToken = result.nextSyncToken;
+                    break;
+                }
+            }
+            console.log({totalEventList})
+            this.syncCalendars[calendarId] = nextSyncToken;
+            (totalEventList)?.forEach((event: GoogleEvent) => {
                 console.log("Updating cache for event: " + event.summary)
                 cacheDidUpdate = true;
                 const oldEvent = this.idCache[event.id] ;
@@ -216,8 +260,10 @@ export class GoogleCacheHandler {
         this.saveCache();
     }
 
-    public createEvent = (event: GoogleEvent) => {
-        this.idCache[event.id] = event;
+    public createEvent = (event: GoogleEvent, storeInFiles = true) => {
+        if(storeInFiles){
+            this.idCache[event.id] = event;
+        }
         const index = window.moment(event.start.dateTime??event.start.date).format("YYYY-MM-DD");
         this.dateCache[index] = this.dateCache[index].concat(event);
         this.saveCache();

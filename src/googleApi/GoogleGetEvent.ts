@@ -21,7 +21,7 @@ export async function googleGetEvent(eventId: string, calendarId?: string): Prom
 		return null;
 	}
 
-	GoogleCacheHandler.getInstance().createEvent(createdEvent);
+	//GoogleCacheHandler.getInstance().createEvent(createdEvent, false);
 
 	return createdEvent;
 }

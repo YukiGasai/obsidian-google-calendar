@@ -491,7 +491,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 								...calendarBlackList,
 								[id, summery],
 							];
-
+							
 							await this.plugin.saveSettings();
 						}
 						const setting = new Setting(containerEl)

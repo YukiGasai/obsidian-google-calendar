@@ -55,7 +55,7 @@
         let eventsByDay = _.groupBy(eventsInMonth, event =>
             window.moment(event.start.date ?? event.start.dateTime).startOf('day').format()
         );
-        console.log({eventsInMonth})
+
         events = eventsInMonth;
         const customTagsSource: ICalendarSource = {
             getWeeklyMetadata: async (week: moment.Moment): Promise<IDayMetadata> => {

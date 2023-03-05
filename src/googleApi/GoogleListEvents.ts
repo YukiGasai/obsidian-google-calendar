@@ -21,27 +21,25 @@ import { checkForDefaultVariable } from "../helper/CheckForDefaultVariable";
  * @param Input Object for named parameters  
  * @returns A list of GoogleCalendarEvents
  */
-export async function googleListEvents(
-	{ startDate,
-		endDate,
-		exclude: excludedCalendars,
-		include: includedCalendars,
-	}: ListOptions = {}
-): Promise<GoogleEvent[]> {
+export async function googleListEvents( listOptions: ListOptions = {} ): Promise<GoogleEvent[]> {
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 	const googleCache = GoogleCacheHandler.getInstance();
 
-	const newListOptions:ListOptions = checkForDefaultVariable({
-		startDate,
-		endDate,
-		exclude: excludedCalendars,
-		include: includedCalendars,
-	});
+	const { startDate,
+			endDate,
+			exclude: excludedCalendars,
+			include: includedCalendars,
+	}:ListOptions = checkForDefaultVariable(listOptions);
 
 	// Use the cache if the request is in the cache date range of default 4 years
-	if(newListOptions.startDate.isAfter(googleCache.cacheStart) && newListOptions.endDate.isBefore(googleCache.cacheEnd)){
-		return googleCache.getEventsForRange(newListOptions)
+	if(startDate.isAfter(googleCache.cacheStart) && endDate.isBefore(googleCache.cacheEnd)){
+		return googleCache.getEventsForRange({ 
+			startDate,
+			endDate,
+			exclude: excludedCalendars,
+			include: includedCalendars,
+		})
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,23 +60,22 @@ export async function googleListEvents(
 		);
 	}
 
-	//Get Events from calendars
-	let eventList: GoogleEvent[] = []
-	for (let i = 0; i < calendarList.length; i++) {
-		const events = await googleListEventsByCalendar(
+	const requests = [];
+	for (const calendar of calendarList) {
+		requests.push(googleListEventsByCalendar(
 			plugin,
-			calendarList[i],
+			calendar,
 			startDate,
 			endDate
-		);
-
-		eventList = [...eventList, ...events];
+		));
 	}
-
+	//Get Events from calendars
+	let allEvents = await Promise.all(requests);
+	allEvents = [].concat.apply([], allEvents)
 	//Sort because multi day requests will only sort by date
-	eventList = _.orderBy(eventList, [(event: GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], "asc")
+	allEvents = _.orderBy(allEvents, [(event: GoogleEvent) => new Date(event.start.date ?? event.start.dateTime)], "asc")
 	
-	return eventList;
+	return allEvents;
 }
 
 
@@ -101,13 +98,13 @@ export async function requestEventsFromApi(
 	startString: string,
 	endString: string
 ): Promise<[GoogleEvent[], string]> {
-
 	if (!settingsAreCompleteAndLoggedIn()) return [[], ""];
 
-	let tmpRequestResult: GoogleEventList;
+	let nextPageToken = "";
 	const resultSizes = 2500;
 	let totalEventList: GoogleEvent[] = [];
-	do {
+
+	while(true){
 		let url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
 			GoogleCalendar.id
 		)}/events?`;
@@ -119,25 +116,36 @@ export async function requestEventsFromApi(
 		url += `&timeMin=${startString}`;
 		url += `&timeMax=${endString}`;
 
-		if (tmpRequestResult && tmpRequestResult.nextPageToken) {
-			url += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
+		if (nextPageToken) {
+			url += `&pageToken=${nextPageToken}`;
 		}
-
-		tmpRequestResult = await callRequest(url, "GET", null);
+		console.log(url)
+		const tmpRequestResult = await callRequest(url, "GET", null);
 		if (!tmpRequestResult) {
 			createNotice("Could not list Google Events");
 			continue;
+		}
+		console.log(tmpRequestResult)
+		//Set next page token for next request to query the next page of events
+		if(tmpRequestResult?.nextPageToken){
+			nextPageToken = tmpRequestResult.nextPageToken;
+			console.log("SET NEW TOKEN")
+		}else {
+			nextPageToken = "";
 		}
 		const newList = tmpRequestResult.items.filter((event) => {
 			event.parent = GoogleCalendar;
 			return event.status !== "cancelled"
 		});
+
 		totalEventList = [...totalEventList, ...newList];
-	} while (tmpRequestResult.items.length == resultSizes);
 
-	console.log("000", totalEventList);
-
-	return [totalEventList, tmpRequestResult.nextSyncToken];
+		// Break out of loop if there are no more events to fetch
+		if(tmpRequestResult?.nextSyncToken || tmpRequestResult?.items?.length < resultSizes){
+			return [totalEventList, tmpRequestResult.nextSyncToken];
+		}
+	}
+	//while (tmpRequestResult.items.length == resultSizes);
 }
 
 /**
@@ -215,15 +223,13 @@ async function googleListEventsByCalendar(
 ): Promise<GoogleEvent[]> {
 	
 	//Get the events because cache was no option
-	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startDate.toISOString(), endDate.toISOString())[0];
-	console.log("AAAA", totalEventList);
+	let [totalEventList, ] = await requestEventsFromApi(GoogleCalendar, startDate.toISOString(), endDate.toISOString());
+
 	//Turn multi day events into multiple events
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate);
-	console.log("BBB", totalEventList);
 
 	//Filter out original multi day event
 	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => indexEvent.eventType !== "delete");
-	console.log("CCC", totalEventList);
 
 	return totalEventList;
 }
