@@ -235,7 +235,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
         const newFile = vault.getAbstractFileByPath(filePath) as TFile;
 
-        if (plugin.settings.autoCreateEventKeepOpen) {
+        if (plugin.settings.autoCreateEventKeepOpen || !isAutoCreated) {
             await app.workspace.getLeaf(true).openFile(newFile)
         }
 
@@ -278,7 +278,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     }
 
 
-    if (!plugin.settings.autoCreateEventKeepOpen) {
+    if (!plugin.settings.autoCreateEventKeepOpen && isAutoCreated) {
         newLeaf.detach();
     }
 
