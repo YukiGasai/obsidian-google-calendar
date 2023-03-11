@@ -43,7 +43,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {
         //regex will check for text and extract a template name if it exists
-        const match = events[i].description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
+        const match = events[i].description?.match(/:([^:]*-)?obsidian-?([^:]*)?:/) ?? [];
 
         if (match.length == 3) {
             //the trigger text was found and a new note will be created
