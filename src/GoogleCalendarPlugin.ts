@@ -301,7 +301,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//List events command
 		this.addCommand({
 			id: "list-google-events",
-			name: "List Google Events",
+			name: "List gCal Events",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -323,7 +323,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "google-calendar-trigger-auto-import",
-			name: "Google Calendar Trigger Auto Import",
+			name: "gCal Trigger Auto Import",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -385,7 +385,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "google-calendar-create-event-note-current-event",
-			name: "Create Event Note for Current Event",
+			name: "Create Event Note for Current gCal Event",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -446,7 +446,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "insert-google-event-codeblock",
-			name: "Insert Google Event CodeBlock",
+			name: "Insert gCal Event CodeBlock",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
 					"```gEvent\ndate: " + window.moment().format("YYYY-MM-DD") + "\ntype: day\n```",
@@ -457,7 +457,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "insert-google-event-template",
-			name: "Insert Google Event Template",
+			name: "Insert gCal Event Template",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
 					"{{gEvent.}}",
@@ -479,7 +479,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		*/
 		this.addCommand({
 			id: "insert-google-events",
-			name: "Insert Google events",
+			name: "Insert gCal Events",
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor
@@ -536,7 +536,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Copy Refresh token to clipboard
 		this.addCommand({
 			id: "copy-google-calendar-refresh-token",
-			name: "Copy Google Calendar Refresh Token to Clipboard",
+			name: "Copy gCal Refresh Token to Clipboard",
 
 			callback: () => {
 				const token = getRefreshToken();
