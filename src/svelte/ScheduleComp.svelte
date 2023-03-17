@@ -168,7 +168,7 @@
 		min-width: 105px;
         gap: 5px;
         flex-grow: 1;
-        background-color: rgba(128, 128, 128, 0.129);
+        /* background-color: rgba(128, 128, 128, 0.129); */
 	}
 
 	.gcal-schedule-day-circle {
