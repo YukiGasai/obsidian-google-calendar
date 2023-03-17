@@ -244,10 +244,6 @@ const getHourText = (hour:number, hourFormat:number):string => {
         width: 100%;
         border-bottom: 1px solid grey;
     }
-    .gcal-hour-line-large::after{
-        width: 80%;
-        left: 50px;
-    }
 
     .gcal-timeline, .hourText{
         overflow: hidden;
