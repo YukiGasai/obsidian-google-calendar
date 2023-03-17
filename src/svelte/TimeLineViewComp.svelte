@@ -1,8 +1,10 @@
 <script lang="ts" >
 
 import TimeLine from "./TimeLineComp.svelte";
+import TimeLineHourText from "./TimeLineHourText.svelte";
 import {EventDetailsModal} from "../modal/EventDetailsModal"
 import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
+
 
 export let height:number = undefined;
 export let width:number = undefined;
@@ -48,8 +50,10 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
             <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+</button>
         </div>
     {/if}
-    <div style="overflow: hidden">
-        <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} />
+    
+    <div class="gcal-day-container">
+        <TimeLineHourText />
+        <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} showTimeDisplay={false} />
     </div>
 </div>
 
@@ -64,6 +68,12 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
 
     .gcal-date-dayofweek, .gcal-date-main {
         margin: 0px;
+    }
+
+    .gcal-day-container {
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
     
     .gcal-new-event-button {

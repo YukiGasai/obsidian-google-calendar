@@ -177,9 +177,6 @@ const getHourText = (hour:number, hourFormat:number):string => {
     >
 
     <div class="gcal-timeline-container">
-        {#if showTimeDisplay}
-                <TimeLineHourText />
-            {/if}
         <div class="gcal-hour-line-container">
             {#each {length: 24} as _, i }
                 <div class={hourFormat == 2 ? "gcal-hour-line gcal-hour-line-large" : "gcal-hour-line"} style:height="{height/24}px" />
@@ -263,6 +260,7 @@ const getHourText = (hour:number, hourFormat:number):string => {
         flex-direction: row;
         overflow: visible;
         padding-top: 5px;
+        flex-shrink: 1000;
     }
 
 </style>
