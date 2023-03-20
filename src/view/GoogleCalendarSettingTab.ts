@@ -370,8 +370,10 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
             .addText(text => {
                 text.setValue(this.plugin.settings.eventNoteNameFormat);
                 text.onChange(async value => {
-                    this.plugin.settings.eventNoteNameFormat = value;
-                    await this.plugin.saveSettings();
+					if(value.startsWith("{{prefix}}")) {
+                    	this.plugin.settings.eventNoteNameFormat = value;
+                    	await this.plugin.saveSettings();
+					}
                 });   
             })
 

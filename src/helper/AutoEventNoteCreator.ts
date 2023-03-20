@@ -42,7 +42,6 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
 
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {
-        console.log(events[i])
         // Create a event note for all events if the trigger text is empty
         if(plugin.settings.autoCreateEventNotesMarker === "") {
             await createNoteFromEvent(events[i], plugin.settings.defaultFolder, plugin.settings.defaultTemplate, true)
@@ -52,7 +51,6 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
         
             //regex will check for text and extract a template name if it exists
             const match = events[i].description?.match(regex) ?? [];
-            console.log(match)
             if (match.length == 3) {
                 //the trigger text was found and a new note will be created
                 await createNoteFromEvent(events[i], match[1], match[2], true)
@@ -225,9 +223,8 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     if (folderName) {
         folderName = replacePathPlaceholders(plugin, event, folderName);
     }
-    console.log("folderName", folderName)
+    
     const filePath = await getEventNoteFilePath(plugin, event, folderName);
-    console.log("folderName", filePath)
     //check if file already exists
     const existingFile = await checkIfFileExists(event, filePath, isAutoCreated);
     if (existingFile) return existingFile;
