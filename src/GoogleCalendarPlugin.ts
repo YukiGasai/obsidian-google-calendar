@@ -41,6 +41,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	useNotification: false,
 	showNotice: true,
 	autoCreateEventNotes: true,
+	autoCreateEventNotesMarker: "obsidian",
 	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,
@@ -124,8 +125,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 		if (templaterPlugin && templaterPlugin._loaded) {
 			this.templaterPlugin = templaterPlugin;
 		}
-
-		checkForEventNotes(this);
 	}
 
 	async onload(): Promise<void> {
@@ -133,6 +132,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 		GoogleCalendarPlugin.instance = this;
 		this.api = new GoogleCalendarPluginApi().make();
 		await this.loadSettings();
+		await checkForEventNotes(this);
+
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 

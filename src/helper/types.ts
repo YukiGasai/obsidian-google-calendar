@@ -24,6 +24,7 @@ export interface GoogleCalendarPluginSettings {
     defaultTemplate: string;
 	defaultFolder: string;
     autoCreateEventNotes: boolean,
+		autoCreateEventNotesMarker: string,
         autoCreateEventKeepOpen: boolean,
         importStartOffset: number,
         importEndOffset: number,

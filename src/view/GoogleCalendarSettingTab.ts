@@ -296,6 +296,18 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+		.setName("Auto create Event Notes Marker")
+		.setDesc("Specify the marker that will be used to find events to create notes. Keep empty to create a note for all events.")
+		.setClass("SubSettings")
+		.addText(text => {
+			text.setValue(this.plugin.settings.autoCreateEventNotesMarker);
+			text.onChange(async value => {
+				this.plugin.settings.autoCreateEventNotesMarker = value;
+				await this.plugin.saveSettings();
+			});   
+		})
+
+		new Setting(containerEl)
 			.setName("Keep auto created Notes open")
 			.setDesc("When creating a new note should it stay open for direct editing")
 			.setClass("SubSettings")
