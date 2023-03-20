@@ -180,7 +180,9 @@ async function getEventNoteFilePath(plugin: GoogleCalendarPlugin, event: GoogleE
         folderPath = app.fileManager.getNewFileParent("").path;
     }
 
-    const sanitizedFileName = replacePathPlaceholders(plugin, event, sanitizeFileName(plugin.settings.eventNoteNameFormat))
+    const fileName = replacePathPlaceholders(plugin, event, plugin.settings.eventNoteNameFormat);
+
+    const sanitizedFileName = replacePathPlaceholders(plugin, event, sanitizeFileName(fileName))
     return normalizePath(`${folderPath}/${sanitizedFileName}.md`);
 }
 
@@ -214,9 +216,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     if (folderName) {
         folderName = replacePathPlaceholders(plugin, event, folderName);
     }
-
+    console.log("folderName", folderName)
     const filePath = await getEventNoteFilePath(plugin, event, folderName);
-
+    console.log("folderName", filePath)
     //check if file already exists
     const existingFile = await checkIfFileExists(event, filePath, isAutoCreated);
     if (existingFile) return existingFile;
