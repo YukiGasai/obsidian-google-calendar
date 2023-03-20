@@ -279,7 +279,7 @@ async function googleListEventsByCalendar(
 
 	// Group events by Day
 	const groupedEvents = _.groupBy(totalEventList, (event: GoogleEvent) => {
-		const startMoment = window.moment(event.start.dateTime);
+		const startMoment = window.moment(event.start.dateTime ?? event.start.date);
 		return startMoment.format("YYYY-MM-DD");
 	});
 
