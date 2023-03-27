@@ -213,18 +213,20 @@
 	.gcal-schedule-event-container {
 		display: flex;
 		flex-direction: column;
-		flex: 1;
 	}
-
+ 
 	.gcal-schedule-event {
 		display: flex;
 		flex: 1;
-		flex-direction: column;
+		flex-direction: row;
 		padding: 5px;
 		border-radius: 10px;
 		cursor: pointer;
         flex-wrap: wrap;
 	}
+    .gcal-schedle-event.gcal-wide-schedule {
+        flex-direction: column
+    }
 
 	.gcal-schedule-event:hover {
 		background-color: rgba(128, 128, 128, 0.129);
@@ -232,9 +234,7 @@
 
     .gcal-schedule-event-info{
         display: flex;
-		min-width: 220px;
         align-items: center;
-        flex-grow: 1;
     }
 
 	.gcal-schedule-circle-container-recurring,
@@ -274,6 +274,8 @@
 
 	.gcal-schedule-event-title-container {
 		white-space: nowrap;
+        display: flex;
+        align-items: center;
 	}
 
     .gcal-schedule-event-title {
