@@ -2,7 +2,6 @@ import type { GoogleCalendar, GoogleCalendarList } from "./../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
-import { getGoogleColors } from "./GoogleColors";
 import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 
@@ -46,8 +45,6 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 	if(lock) return [];
 	lock = true;
 
-	//Make sure the colors for calendar and events are loaded before getting the first calendar
-	await getGoogleColors();
 
 	const calendarList: GoogleCalendarList = await callRequest(`https://www.googleapis.com/calendar/v3/users/me/calendarList`, "GET", null)
 

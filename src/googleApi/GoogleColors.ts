@@ -8,38 +8,158 @@
  */
 
 import type { GoogleEvent } from "../helper/types";
-import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
-import { createNotice } from "../helper/NoticeHelper";
-import { callRequest } from "src/helper/RequestWrapper";
 
-const calendarColors = new Map<string, string>();
-const eventColors = new Map<string, string>();
-
-/**
- * Get all possible colors from the google API and store them 
- * Run once on plugin startup
- */
-export async function getGoogleColors(): Promise<void> {
-
-	if (!settingsAreCompleteAndLoggedIn()) return;
-	if (calendarColors.size) return;
-
-	const colorData = await callRequest(`https://www.googleapis.com/calendar/v3/colors`, "GET", null);
-
-	if (!colorData) {
-		createNotice("Error fetching color data from google");
-		return;
+const calendarColors = {
+   "1": {
+		"hex": "#ac725e",
+		name: "0"
+   },
+   "2": {
+		"hex": "#d06b64",
+		name: "0"
+   },
+   "3": {
+		"hex": "#f83a22",
+		name: "0"
+   },
+   "4": {
+		"hex": "#fa573c",
+		name: "0"
+   },
+   "5": {
+		"hex": "#ff7537",
+		name: "0"
+   },
+   "6": {
+		"hex": "#ffad46",
+		name: "0"
+   },
+   "7": {
+		"hex": "#42d692",
+		name: "0"
+   },
+   "8": {
+		"hex": "#16a765",
+		name: "0"
+   },
+   "9": {
+		"hex": "#7bd148",
+		name: "0"
+   },
+   "10": {
+		"hex": "#b3dc6c",
+		name: "0"
+   },
+   "11": {
+		"hex": "#fbe983",
+		name: "0"
+   },
+   "12": {
+		"hex": "#fad165",
+		name: "0"
+   },
+   "13": {
+		"hex": "#92e1c0",
+		name: "0"
+   },
+   "14": {
+		"hex": "#9fe1e7",
+		name: "0"
+   },
+   "15": {
+		"hex": "#9fc6e7",
+		name: "0"
+   },
+   "16": {
+		"hex": "#4986e7",
+		name: "0"
+   },
+   "17": {
+		"hex": "#9a9cff",
+		name: "0"
+   },
+   "18": {
+		"hex": "#b99aff",
+		name: "0"
+   },
+   "19": {
+		"hex": "#c2c2c2",
+		name: "0"
+   },
+   "20": {
+		"hex": "#cabdbf",
+		name: "0"
+   },
+   "21": {
+		"hex": "#cca6ac",
+		name: "0"
+   },
+   "22": {
+		"hex": "#f691b2",
+		name: "0"
+   },
+   "23": {
+		"hex": "#cd74e6",
+		name: "0"
+   },
+   "24": {
+		hex: "#a47ae2",
+		name: "0"
+   }
+};
+const eventColors = {
+	"1": {
+		hex: "#a4bdfc",
+		name: "Lavender"
+	},
+	"2": {
+		hex: "#7ae7bf",
+		name: "Sage"
+	},
+	"3": {
+		hex: "#dbadff",
+		name: "Grape"
+	},
+	"4": {
+		hex: "#ff887c",
+		name: "Flamingo"
+	},
+	"5": {
+		hex: "#fbd75b",
+		name: "Banana"
+	},
+	"6": {
+		hex: "#ffb878",
+		name: "Tangerine"
+	},
+	"7": {
+		hex: "#46d6db",
+		name: "Peacock"
+	},
+	"8": {
+		hex: "#e1e1e1",
+		name: "Graphite"
+	},
+	"9": {
+		hex: "#5484ed",
+		name: "Blueberry"
+	},
+	"10": {
+		hex: "#51b749",
+		name: "Basil"
+	},
+	"11": {
+		hex: "#dc2127",
+		name: "Tomato"
 	}
-
-	Object.keys(colorData.calendar).forEach(key => {
-		calendarColors.set(key, colorData.calendar[key].background);
-	});
-
-	Object.keys(colorData.event).forEach(key => {
-		eventColors.set(key, colorData.event[key].background);
-	});
-
 }
+
+export const allColorNames = [
+	...new Set([
+		...Object.values(eventColors).map(color => color.name),
+		...Object.values(calendarColors).map(color => color.name)
+	])
+];
 
 /**
  *  This function just returns the true color of an event
@@ -48,14 +168,35 @@ export async function getGoogleColors(): Promise<void> {
  */
 export function getColorFromEvent(event: GoogleEvent): string {
 
-	if (event.colorId && eventColors.has(event.colorId)) {
-		return eventColors.get(event.colorId);
+	if (event.colorId) {
+		return eventColors[event.colorId].hex;
 
-	} else if (event.parent.colorId && calendarColors.has(event.parent.colorId)) {
-		return calendarColors.get(event.parent.colorId);
+	} else if (event.parent.colorId) {
+		return calendarColors[event.parent.colorId].hex;
 
 	} else {
 		//Default color for any errors
 		return "#a4bdfc"
+	}
+}
+
+/**
+ *  This function just returns the true color of an event
+ * @param event  to get the color from
+ * @returns a hex color string 
+ */
+export function getColorNameFromEvent(event: GoogleEvent): string {
+
+	if (event.colorId) {
+		return eventColors[event.colorId].name;
+
+	} else if (event.parent.colorId) {
+		return "NOT IMPLEMENTED"
+		// Not implemented + custom colors will cause problems
+		//return calendarColors[event.parent.colorId].name;
+
+	} else {
+		//Default name for any errors
+		return "NO COLOR"
 	}
 }

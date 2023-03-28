@@ -12,6 +12,7 @@ import { googleListCalendars } from "./GoogleListCalendars";
 import { callRequest } from "src/helper/RequestWrapper";
 import _ from "lodash"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
+import { allColorNames, getColorNameFromEvent } from "../googleApi/GoogleColors";
 
 const cachedEvents = new Map<string, EventCacheValue>();
 
@@ -31,8 +32,8 @@ export function googleClearCachedEvents(): void {
 export async function googleListEvents(
 	{ startDate,
 		endDate,
-		exclude: excludedCalendars,
-		include: includedCalendars,
+		exclude,
+		include,
 	}: ListOptions = {}
 ): Promise<GoogleEvent[]> {
 
@@ -53,14 +54,27 @@ export async function googleListEvents(
 	//Get all calendars not on the black list
 	let calendarList = await googleListCalendars();
 
+
+	const [includeCalendars, includeColors] = (include ?? []).reduce(([pass, fail], elem) => {
+		  return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
+		}, [[], []]);
+	
+
+	const [excludeCalendars, excludeColors] = (exclude ?? []).reduce(([pass, fail], elem) => {
+		return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
+	  }, [[], []]);
+  	
+	console.log({excludeColors, includeColors, excludeCalendars, includeCalendars})
+
+
 	//Get the list of calendars that should be queried
-	if (includedCalendars && includedCalendars.length) {
+	if (includeCalendars.length) {
 		calendarList = calendarList.filter((calendar: GoogleCalendar) =>
-			(includedCalendars.contains(calendar.id) || includedCalendars.contains(calendar.summary))
+			(includeCalendars.contains(calendar.id) || includeCalendars.contains(calendar.summary))
 		);
-	} else if (excludedCalendars && excludedCalendars.length) {
+	} else if (excludeCalendars.length) {
 		calendarList = calendarList.filter((calendar: GoogleCalendar) =>
-			!(excludedCalendars.contains(calendar.id) || excludedCalendars.contains(calendar.summary))
+			!(excludeCalendars.contains(calendar.id) || excludeCalendars.contains(calendar.summary))
 		);
 	}
 
@@ -71,7 +85,9 @@ export async function googleListEvents(
 			plugin,
 			calendarList[i],
 			startDate,
-			endDate
+			endDate,
+			includeColors,
+			excludeColors
 		);
 
 		eventList = [...eventList, ...events];
@@ -259,13 +275,23 @@ async function googleListEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	GoogleCalendar: GoogleCalendar,
 	startDate: moment.Moment,
-	endDate: moment.Moment
+	endDate: moment.Moment,
+	includeColors: string[] = [],
+	excludeColors: string[] = []
 ): Promise<GoogleEvent[]> {
 
 	//Check if the events are already cached and return them if they are
 	const alreadyCachedEvents = checkForCachedEvents(plugin, GoogleCalendar, startDate, endDate)
 	if(alreadyCachedEvents) {
-		return alreadyCachedEvents;
+		return alreadyCachedEvents.filter((indexEvent: GoogleEvent) => {
+			if ( includeColors.length > 0) {
+				return includeColors.includes(getColorNameFromEvent(indexEvent));
+			} 
+			if ( excludeColors.length > 0) {
+				return !excludeColors.includes(getColorNameFromEvent(indexEvent));
+			}
+			return true;
+		});
 	}
 	
 	//Get the events because cache was no option
@@ -274,8 +300,19 @@ async function googleListEventsByCalendar(
 	//Turn multi day events into multiple events
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate);
 
+
+
 	//Filter out original multi day event
-	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => indexEvent.eventType !== "delete");
+	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => {
+		if ( indexEvent.eventType === "delete") return false;
+		if ( includeColors.length > 0) {
+			return includeColors.includes(getColorNameFromEvent(indexEvent));
+		} 
+		if ( excludeColors.length > 0) {
+			return !excludeColors.includes(getColorNameFromEvent(indexEvent));
+		}
+		return true;
+	});
 
 	// Group events by Day
 	const groupedEvents = _.groupBy(totalEventList, (event: GoogleEvent) => {
