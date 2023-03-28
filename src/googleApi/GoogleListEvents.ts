@@ -300,20 +300,6 @@ async function googleListEventsByCalendar(
 	//Turn multi day events into multiple events
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate);
 
-
-
-	//Filter out original multi day event
-	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => {
-		if ( indexEvent.eventType === "delete") return false;
-		if ( includeColors.length > 0) {
-			return includeColors.includes(getColorNameFromEvent(indexEvent));
-		} 
-		if ( excludeColors.length > 0) {
-			return !excludeColors.includes(getColorNameFromEvent(indexEvent));
-		}
-		return true;
-	});
-
 	// Group events by Day
 	const groupedEvents = _.groupBy(totalEventList, (event: GoogleEvent) => {
 		const startMoment = window.moment(event.start.dateTime ?? event.start.date);
@@ -330,5 +316,14 @@ async function googleListEventsByCalendar(
 		currentDate.add(1, "day");
 	}
 
-	return totalEventList;
+	return totalEventList.filter((indexEvent: GoogleEvent) => {
+		if ( indexEvent.eventType === "delete") return false;
+		if ( includeColors.length > 0) {
+			return includeColors.includes(getColorNameFromEvent(indexEvent));
+		} 
+		if ( excludeColors.length > 0) {
+			return !excludeColors.includes(getColorNameFromEvent(indexEvent));
+		}
+		return true;
+	});
 }
