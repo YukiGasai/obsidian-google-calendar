@@ -16,7 +16,7 @@ The argument of the `getEvents` function is a object now to allow named paramete
 
 when not using include, exclude the result will contain all your calendars except the black listed ones from the settings page.
 
-## Example
+## Example (templater script)
 
 ~~~markdown
 <%*
