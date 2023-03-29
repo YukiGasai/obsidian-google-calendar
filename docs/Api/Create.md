@@ -6,7 +6,7 @@ The plugin allows you to create events on you own. The function `createEvent` is
 
 The argument of the `createEvent` function is a GoogleEvent object. This object has to contain the required fields listed in the [Google Calendar API documentation](https://developers.google.com/calendar/api/v3/reference/events). To define the calendar where the event is created add a field `parent` containing a GoogleCalendar object. If no parent field is set the functions uses the default calendar.
 
-## Example
+## Example (templater script)
 
 ~~~markdown
 <%*
