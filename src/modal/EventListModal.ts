@@ -3,7 +3,7 @@ import type { GoogleEvent, ModalSelectMode } from "../helper/types";
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal, TFile } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
-import { googleListEvents } from "../googleApi/GoogleListEvents";
+import { listEvents } from "../googleApi/GoogleListEvents";
 import { CreateNotePromptModal } from './CreateNotePromptModal';
 import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 import { createDailyNote } from 'obsidian-daily-notes-interface';
@@ -72,7 +72,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 
 			if (dateUpdated) {
 				this.setPlaceholder("Loading");
-				this.eventList = await googleListEvents({ startDate: this.currentDate });
+				this.eventList = await listEvents({ startDate: this.currentDate });
 				this.inputEl.dispatchEvent(new Event('input'));
 				this.setPlaceholder(`${this.currentDate.format("MM/DD/YYYY")} Arrow left and right to switch day`);
 			}

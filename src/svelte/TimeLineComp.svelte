@@ -6,7 +6,7 @@
     import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
     import {getEventStartPosition, getEventHeight} from "../helper/Helper";
     
-    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
     import {EventDetailsModal} from '../modal/EventDetailsModal'
     import {getColorFromEvent} from '../googleApi/GoogleColors'
     import { onDestroy } from "svelte";
@@ -106,7 +106,7 @@
             return;
         }
    
-        const newEvents = await googleListEvents({
+        const newEvents = await listEvents({
             startDate:date,
             include,
             exclude
@@ -161,7 +161,7 @@
                 return hourMoment.format("hh A")
         }
     }
-    
+
     </script>
 
  

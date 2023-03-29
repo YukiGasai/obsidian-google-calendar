@@ -6,7 +6,7 @@ import { googleListCalendars } from '../googleApi/GoogleListCalendars';
 import { googleCreateEvent } from '../googleApi/GoogleCreateEvent';
 import { googleDeleteEvent } from '../googleApi/GoogleDeleteEvent';
 import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent';
-import { checkForEventNotes, createNoteFromEvent } from "../helper/AutoEventNoteCreator";
+import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 
 export class GoogleCalendarPluginApi {
 

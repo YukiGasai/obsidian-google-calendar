@@ -4,6 +4,7 @@ import { createNotice } from "../helper/NoticeHelper";
 import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { GoogleApiError } from "./GoogleApiError";
 
 
 function dateToGoogleDate(date: string): string {
@@ -33,8 +34,9 @@ export async function googleCreateEvent(event: GoogleEvent | any): Promise<Googl
         event.end.dateTime = dateTimeToGoogleDateTime(event.end.dateTime); 
     }
 
-
-	if (!settingsAreCompleteAndLoggedIn()) return null;
+	if (!settingsAreCompleteAndLoggedIn()){
+        throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
+    }
 
     let calenderId = ""
     
@@ -48,20 +50,35 @@ export async function googleCreateEvent(event: GoogleEvent | any): Promise<Googl
     }
 
     if(calenderId === ""){
-        createNotice("Could not create Google Event because no default calendar selected in Settings");
-        return null;
+        throw new GoogleApiError("Could not create Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
     }
 
+    const createdEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`, 'POST', event)
+    return createdEvent;
+}
 
-	const createdEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`, 'POST', event)
 
-	if (!createdEvent) {
-		createNotice("Could not create Google Event");
-		return null;
-	}
+export async function createEvent(event: GoogleEvent | any): Promise<GoogleEvent> {
+    try{
+        const createdEvent = await googleCreateEvent(event);
+        createNotice(`Google Event ${event.summary} created.`);
+        return createdEvent;
+    } catch (error) {
+        if(!(error instanceof GoogleApiError)){
+            return null;
+        }
 
-	createNotice(`Google Event ${createdEvent.summary} created`, true);
+        switch (error.status) {
+            case 401: break;
+            case 999: 
+                createNotice(error.message)
+                break;
+            default:
+                createNotice(`Google Event ${event.summary} could not be created.`);
+                console.error('[GoogleCalendar]', error);
+                break;
+        }
 
-	return createdEvent;
-
+        return null;
+    }
 }

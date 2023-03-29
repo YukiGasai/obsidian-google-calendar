@@ -2,9 +2,9 @@
 	import type { InsertEventsModal } from "../modal/InsertEventsModal";
 	import type { GoogleCalendar, GoogleEvent, Template } from "../helper/types";
 	import { onMount } from "svelte";
-	import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+	import { listCalendars } from "../googleApi/GoogleListCalendars";
 	import { GoogleEventSuggestionList } from "../suggest/GoogleEventSuggestionList";
-	import { googleListEvents } from "../googleApi/GoogleListEvents";
+	import { listEvents } from "../googleApi/GoogleListEvents";
 	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 	import { AskNameModal } from "../modal/AskNameModal";
 	import { createNotice } from "../helper/NoticeHelper";
@@ -22,10 +22,10 @@
     let tableOptions: string[] = [".summary", ".description"];
     
 	onMount(async () => {
-        const totalCalendarList = await googleListCalendars();
+        const totalCalendarList = await listCalendars();
         calendarList = totalCalendarList.map(calendar => {return [calendar, true]});
 
-        const totalEventList = await googleListEvents();
+        const totalEventList = await listEvents();
         eventList = totalEventList.map(event => {return [event, true]});		
 
 	});
@@ -70,10 +70,10 @@
 
     let changedDate = async (e) => {
  
-        const totalCalendarList = await googleListCalendars();
+        const totalCalendarList = await listCalendars();
         calendarList = totalCalendarList.map(calendar => {return [calendar, true]});
 
-        const totalEventList = await googleListEvents({startDate:window.moment(e.target.value).local()});
+        const totalEventList = await listEvents({startDate:window.moment(e.target.value).local()});
         eventList = totalEventList.map(event => {return [event, true]});	
         eventList = eventList;
     }

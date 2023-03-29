@@ -10,7 +10,7 @@ import {
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
 import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
-import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
 import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
@@ -463,7 +463,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setName("Default Calendar")
 				.addDropdown(async (dropdown) => {
 					dropdown.addOption("Default", "Select a calendar");
-					const calendars = await googleListCalendars();
+					const calendars = await listCalendars();
 
 					calendars.forEach((calendar) => {
 						dropdown.addOption(
@@ -486,7 +486,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setName("Add Item to BlackList")
 				.addDropdown(async (dropdown) => {
 					dropdown.addOption("Default", "Select Option to add");
-					const calendars = await googleListCalendars();
+					const calendars = await listCalendars();
 
 					calendars.forEach((calendar) => {
 						dropdown.addOption(

@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { GoogleEvent } from "../helper/types";
     
-    import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+    import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
     import { getColorFromEvent } from "../googleApi/GoogleColors";
     import { EventDetailsModal } from "../modal/EventDetailsModal";
     import { EventListModal } from "../modal/EventListModal";
@@ -24,7 +24,7 @@
 
     const getEvents = async () => {
         hourFormat = plugin.settings.timelineHourFormat;
-        const newEvents = await googleListEvents({
+        const newEvents = await listEvents({
             startDate:date,
             endDate:date.clone().add(timeSpan, "day"),
             include,
@@ -92,7 +92,7 @@
 
     const goToDaySelect = async (event:GoogleEvent) => {
         const clickedDate = window.moment(event.start.date || event.start.dateTime);
-        const events = await googleListEvents({startDate:clickedDate});
+        const events = await listEvents({startDate:clickedDate});
         new EventListModal(events,'details', clickedDate, false, () => {
             googleClearCachedEvents();
             date = date;

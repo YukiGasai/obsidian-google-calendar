@@ -1,10 +1,10 @@
 import { parseYaml } from "obsidian";
-import { googleListEvents } from "../../googleApi/GoogleListEvents";
+import { listEvents } from "../../googleApi/GoogleListEvents";
 import type { CustomTask, ListOptions } from "../types"
 
 export const getCustomTasks = async (listOptions: ListOptions = {}): Promise<CustomTask[]> => {
 
-    const events = await googleListEvents(listOptions);
+    const events = await listEvents(listOptions);
 
     const taskList:CustomTask[] = events.map(event => {
         if(!event.description?.includes("~obsidianTask~")){

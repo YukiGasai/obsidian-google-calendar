@@ -368,3 +368,9 @@ export interface OpenPeriodicNoteOptions {
 	openInNewTab?: boolean;
 	type?: "daily" | "weekly" | "monthly" | "yearly";
 }
+
+export interface ApiRequestData {
+	url: string;
+	method: string;
+	body?: any;
+}

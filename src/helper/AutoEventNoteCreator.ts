@@ -1,7 +1,7 @@
 import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-import { googleListEvents } from "../googleApi/GoogleListEvents";
+import { listEvents } from "../googleApi/GoogleListEvents";
 import { normalizePath, Pos, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
@@ -38,7 +38,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     const endDate = window.moment().local().add(endOffset, "day")
 
     //get all events in the import time range
-    const events = await googleListEvents({ startDate, endDate });
+    const events = await listEvents({ startDate, endDate });
 
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {

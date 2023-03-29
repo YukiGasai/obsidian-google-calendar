@@ -13,6 +13,7 @@ import { callRequest } from "src/helper/RequestWrapper";
 import _ from "lodash"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { allColorNames, getColorNameFromEvent } from "../googleApi/GoogleColors";
+import { GoogleApiError } from "./GoogleApiError";
 
 const cachedEvents = new Map<string, EventCacheValue>();
 
@@ -64,7 +65,6 @@ export async function googleListEvents(
 		return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
 	  }, [[], []]);
   	
-	console.log({excludeColors, includeColors, excludeCalendars, includeCalendars})
 
 
 	//Get the list of calendars that should be queried
@@ -99,6 +99,43 @@ export async function googleListEvents(
 	return eventList;
 }
 
+export async function listEvents(listOptions = {}): Promise<GoogleEvent[]> {
+	try {
+		const response = await googleListEvents(listOptions);
+		return response;
+	} catch (error) {
+        if(!(error instanceof GoogleApiError)){
+            return [];
+        }
+
+		switch (error.status) {
+            case 401: break;
+            case 999: 
+                createNotice(error.message)
+                break;
+            default:
+                createNotice(`Google Events could not be loaded.`);
+                console.error('[GoogleCalendar]', error);
+                break;
+        }
+
+		return [];
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -120,7 +157,9 @@ async function requestEventsFromApi(
 	endString: string
 ): Promise<GoogleEvent[]> {
 
-	if (!settingsAreCompleteAndLoggedIn()) return [];
+	if (!settingsAreCompleteAndLoggedIn()){
+		throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
+	};
 
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
@@ -142,12 +181,7 @@ async function requestEventsFromApi(
 		}
 
 		tmpRequestResult = await callRequest(url, "GET", null);
-
-		if (!tmpRequestResult) {
-			createNotice("Could not list Google Events");
-			continue;
-		}
-
+		
 		const newList = tmpRequestResult.items.filter((event) => {
 			event.parent = GoogleCalendar;
 			return event.status != "cancelled"
