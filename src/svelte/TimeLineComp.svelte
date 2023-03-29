@@ -137,7 +137,7 @@
 
     const switchHourDisplay = () => {
         hourFormat += 1;
-        if(hourFormat > 2){
+        if(hourFormat > 5){
             hourFormat = 0;
         }
         plugin.settings.timelineHourFormat = hourFormat;
@@ -146,15 +146,18 @@
 
     const getHourText = (hour:number, hourFormat:number):string => {
         const hourMoment = window.moment(`${hour}:00:00`, "H:mm:ss");
-
         switch (hourFormat) {
             case 0:
-                return hourMoment.format("HH"); 
-                
+                return hourMoment.format("H"); 
             case 1:
-                return hourMoment.format("hh");
-            
+                return hourMoment.format("HH"); 
             case 2:
+                return hourMoment.format("h");
+            case 3:
+                return hourMoment.format("hh");   
+            case 4:
+                return hourMoment.format("h A")
+            case 5:
                 return hourMoment.format("hh A")
         }
     }
@@ -176,7 +179,7 @@
 
         <div class="hourLineContainer">
         {#each {length: 24} as _, i }
-            <div class={hourFormat == 2 ? "hourLine hourLineLarge" : "hourLine"} style:height="{height/24}px" />
+            <div class={hourFormat > 3 ? "hourLine hourLineLarge" : "hourLine"} style:height="{height/24}px" />
         {/each}
         </div>  
     

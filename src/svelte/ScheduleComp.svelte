@@ -6,6 +6,7 @@
     import { EventDetailsModal } from "../modal/EventDetailsModal";
     import { EventListModal } from "../modal/EventListModal";
     import { onDestroy } from "svelte";
+	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     
     
     export let timeSpan = 6;
@@ -17,8 +18,12 @@
     let days: Map<string, GoogleEvent[]> = new Map();
     let loading = false;
     let events = [];
+    let plugin = GoogleCalendarPlugin.getInstance();
+    let hourFormat = plugin.settings.timelineHourFormat;
+
 
     const getEvents = async () => {
+        hourFormat = plugin.settings.timelineHourFormat;
         const newEvents = await googleListEvents({
             startDate:date,
             endDate:date.clone().add(timeSpan, "day"),
@@ -47,12 +52,29 @@
         loading = false;
     }
 
-    const getDateString = (event: GoogleEvent):string => {
+    const getDateText = ( date:moment.Moment, hourFormat: number):string => {
+        switch (hourFormat) {
+            case 0:
+                return date.format("H:mm"); 
+            case 1:
+                return date.format("HH:mm"); 
+            case 2:
+                return date.format("h:mm");
+            case 3:
+                return date.format("hh:mm");   
+            case 4:
+                return date.format("h:mm A")
+            case 5:
+                return date.format("hh:mm A")
+        }
+    }
+
+    const getDateString = (event: GoogleEvent, hourFormat: number):string => {
         if(event.start.date){
             return "All day";
         }else{
-            const start = window.moment(event.start.dateTime).format("hh:mma"); 
-            const end = window.moment(event.end.dateTime).format("hh:mma"); 
+            const start = getDateText(window.moment(event.start.dateTime), hourFormat)
+            const end = getDateText(window.moment(event.end.dateTime), hourFormat)
             return `${start}-${end}`
         }
     }
@@ -97,6 +119,15 @@
         clearInterval(interval);
     })
     
+    const switchHourDisplay = () => {
+        hourFormat += 1;
+        if(hourFormat > 5){
+            hourFormat = 0;
+        }
+        plugin.settings.timelineHourFormat = hourFormat;
+        plugin.saveSettings();
+    }
+
     
     </script>
     <div class ="scheduleContainer">
@@ -113,7 +144,7 @@
                         >
                             <span>{key.slice(0,2)}</span>
                         </div>
-                        <span class="dayText">{key.slice(2)}</span>
+                        <span class="dayText" on:click={switchHourDisplay}>{key.slice(2)}</span>
                     </div>
                  
 
@@ -125,7 +156,7 @@
                                         <div  class="circle" style:background="{getColorFromEvent(event)}"></div>
                                     </div>
                                     <div class="timeContainer">
-                                        <span>{getDateString(event)}</span>
+                                        <span>{getDateString(event,hourFormat)}</span>
                                     </div>
                             </div>
                             <div class="eventTitleContainer">
