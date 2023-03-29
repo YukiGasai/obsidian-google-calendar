@@ -6,7 +6,7 @@ The plugin allows you to delete events on you own. The function `deleteEvent` is
 
 The first argument of the `deleteEvent` function is a GoogleEvent object. To define the calendar where the event is created add a field `parent` containing a GoogleCalendar object. If no parent field is set the functions uses the default calendar. The second argument `deleteAllOccurrences` is a boolean that defaults to false. If it is true and the event is reoccurring, it will delete all occurrences of the event.
 
-## Example
+## Example (templater script)
 
 ~~~markdown
 <%*
