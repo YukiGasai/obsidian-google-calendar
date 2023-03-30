@@ -147,28 +147,25 @@
 		display: flex;
 		flex-direction: column;
         align-items: flex-start;
-		white-space: nowrap;
+		max-width: 100%
 	}
 
 	.gcal-schedule-day-container {
 		display: flex;
-		flex-direction: row;
 		align-items: flex-start;
-        justify-content: flex-start;
 		border-bottom: 1px solid gray;
 		margin: 2px 0px;
 		padding: 2px 0px;
-        flex-wrap: wrap;
+        max-width: 100%
 	}
 
 	.gcal-schedule-date-display {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		min-width: 105px;
         gap: 5px;
-        flex-grow: 1;
-        /* background-color: rgba(128, 128, 128, 0.129); */
+        flex: 0 0 100px;
+        padding: 0px;
 	}
 
 	.gcal-schedule-day-circle {
@@ -176,9 +173,6 @@
 		-moz-border-radius: 50%;
 		-webkit-border-radius: 50%;
 		display: inline-block;
-		/* font-weight: bold;
-		line-height: 40px;
-		text-align: center; */
         border: solid 1px gray;
         min-height: 40px;
 		min-width: 40px;
@@ -213,20 +207,15 @@
 	.gcal-schedule-event-container {
 		display: flex;
 		flex-direction: column;
+        overflow: hidden;
 	}
  
 	.gcal-schedule-event {
 		display: flex;
-		flex: 1;
-		flex-direction: row;
 		padding: 5px;
 		border-radius: 10px;
 		cursor: pointer;
-        flex-wrap: wrap;
 	}
-    .gcal-schedle-event.gcal-wide-schedule {
-        flex-direction: column
-    }
 
 	.gcal-schedule-event:hover {
 		background-color: rgba(128, 128, 128, 0.129);
@@ -268,19 +257,24 @@
 	}
 
 	.gcal-schedule-time-container {
-		width: 150px;
-		min-width: 150px;
+        min-width: 150px;
+        padding-right: 1em;
 	}
 
 	.gcal-schedule-event-title-container {
-		white-space: nowrap;
         display: flex;
         align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
 	}
 
     .gcal-schedule-event-title {
         font-size: medium;
         font-weight: 400;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     </style>
