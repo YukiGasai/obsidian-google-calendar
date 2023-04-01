@@ -216,7 +216,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open Timeline view
 		this.addCommand({
 			id: "open-google-calendar-timline-view",
-			name: "Open Google Calendar timeline view",
+			name: "Open gCal Timeline View",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_DAY)
 		});
@@ -224,7 +224,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open Week view
 		this.addCommand({
 			id: "open-google-calendar-week-view",
-			name: "Open Google Calendar week view",
+			name: "Open gCal week view",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEEK)
 		});
@@ -232,7 +232,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open Month view
 		this.addCommand({
 			id: "open-google-calendar-month-view",
-			name: "Open Google Calendar month view",
+			name: "Open gCal month view",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_MONTH)
 		});
@@ -240,7 +240,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open web view
 		this.addCommand({
 			id: "open-google-calendar-web-view",
-			name: "Open Google Calendar web view",
+			name: "Open gCal Web View",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_WEB)
 		});
@@ -248,37 +248,15 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Open schedule view
 		this.addCommand({
 			id: "open-google-calendar-schedule-view",
-			name: "Open Google Calendar schedule view",
+			name: "Open gCal Schedule View",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE)
-		});
-
-		//List events command
-		this.addCommand({
-			id: "list-google-calendars",
-			name: "List Google Calendars",
-
-			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn();
-
-				if (checking) {
-					return canRun;
-				}
-
-				if (!canRun) {
-					return;
-				}
-
-				listCalendars().then((calendars) => {
-					new CalendarsListModal(calendars).open();
-				});
-			},
 		});
 
 		//Create event command
 		this.addCommand({
 			id: "create-google-calendar-event",
-			name: "Create Google Calendar Event",
+			name: "Create gCal Event",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -324,7 +302,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//List events command
 		this.addCommand({
 			id: "list-google-events",
-			name: "List Google Events",
+			name: "List gCal Events",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -346,7 +324,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "google-calendar-trigger-auto-import",
-			name: "Google Calendar Trigger Auto Import",
+			name: "gCal Trigger Auto Import",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -387,7 +365,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
         this.addCommand({
 			id: "google-calendar-get-todays-tasks",
-			name: "Get todays google calendar tasks",
+			name: "Get Today's gCal Tasks",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -408,7 +386,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "google-calendar-create-event-note-current-event",
-			name: "Create Event Note for current event",
+			name: "Create Event Note for Current gCal Event",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -469,7 +447,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "insert-google-event-codeblock",
-			name: "Insert Google Event CodeBlock",
+			name: "Insert gCal Event CodeBlock",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
 					"```gEvent\ndate: " + window.moment().format("YYYY-MM-DD") + "\ntype: day\n```",
@@ -480,7 +458,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addCommand({
 			id: "insert-google-event-template",
-			name: "Insert Google Event Template",
+			name: "Insert gCal Event Template",
 			editorCallback: (editor: Editor) => {
 				editor.replaceRange(
 					"{{gEvent.}}",
@@ -502,7 +480,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		*/
 		this.addCommand({
 			id: "insert-google-events",
-			name: "Insert Google events",
+			name: "Insert gCal Events",
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor
@@ -529,7 +507,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		*/
 		this.addCommand({
 			id: "create-google-calendar-event-from-frontmatter ",
-			name: "Create Google Calendar Event from frontmatter",
+			name: "Create gCal Event From Frontmatter",
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor,
@@ -559,7 +537,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Copy Refresh token to clipboard
 		this.addCommand({
 			id: "copy-google-calendar-refresh-token",
-			name: "Copy Google Calendar Refresh Token to Clipboard",
+			name: "Copy gCal Refresh Token to Clipboard",
 
 			callback: () => {
 				const token = getRefreshToken();

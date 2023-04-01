@@ -130,37 +130,38 @@
 
     
     </script>
-    <div class ="scheduleContainer">
+    <div class ="gcal-schedule-container">
         {#if loading}
             <span>LOADING</span>
         {:else}
-            <div class="scheduleContent">
             {#each [...days] as [key, events]}
-                <div class="dayContainer">
-                    <div class="dateDisplay">
+                <div class="gcal-schedule-day-container">
+                    <div class="gcal-schedule-date-display">
                         <div 
                         on:click="{()=>goToDaySelect(events[0])}"
-                        class="{checkForSameDate(events[0]) ? "dayNumber today" : "dayNumber"}"
+                        class="{checkForSameDate(events[0]) ? "gcal-schedule-day-circle today" : "gcal-schedule-day-circle"}"
+                        style="display: flex; flex-direction: column;"
                         >
-                            <span>{key.slice(0,2)}</span>
+                            <span class="gcal-schedule-month-text">{key.slice(3,6)}</span>
+                            <span class="gcal-schedule-day-number">{key.slice(0,2)}</span>
                         </div>
-                        <span class="dayText" on:click={switchHourDisplay}>{key.slice(2)}</span>
+                        <span class="gcal-schedule-day-text" on:click={switchHourDisplay}>{key.slice(7)}</span>
                     </div>
                  
 
-                    <div class="dayEvents">
+                    <div class="gcal-schedule-event-container">
                         {#each events as event}
-                        <div class="dayEvent" on:click="{(e) => goToEvent(event,e)}">
-                            <div class="circleTime">
-                                    <div class="{event.recurringEventId ? "recurringCircleContainer" : "circleContainer"}">
-                                        <div  class="circle" style:background="{getColorFromEvent(event)}"></div>
+                        <div class="gcal-schedule-event" on:click="{(e) => goToEvent(event,e)}">
+                            <div class="gcal-schedule-event-info">
+                                    <div class="{event.recurringEventId ? "gcal-schedule-circle-container-recurring" : "gcal-schedule-circle-container"}">
+                                        <div class="gcal-schedule-event-circle" style:background="{getColorFromEvent(event)}"></div>
                                     </div>
-                                    <div class="timeContainer">
+                                    <div class="gcal-schedule-time-container">
                                         <span>{getDateString(event,hourFormat)}</span>
                                     </div>
                             </div>
-                            <div class="eventTitleContainer">
-                                <span>{event.summary}</span>
+                            <div class="gcal-schedule-event-title-container">
+                                <span class="gcal-schedule-event-title">{event.summary}</span>
                             </div>
                              
                         </div>
@@ -168,51 +169,50 @@
                     </div>
                 </div>
             {/each}
-            </div>
         {/if}
     </div>
     
     <style>
-    .scheduleContainer {
-		padding: 10px;
-	}
-
-	.scheduleContent {
+    .gcal-schedule-container {
 		display: flex;
 		flex-direction: column;
         align-items: flex-start;
-		white-space: nowrap;
+		max-width: 100%
 	}
 
-	.dayContainer {
+	.gcal-schedule-day-container {
 		display: flex;
-		flex-direction: row;
 		align-items: flex-start;
-        justify-content: flex-start;
-		border-bottom: 1px solid white;
+		border-bottom: 1px solid gray;
 		margin: 2px 0px;
 		padding: 2px 0px;
-        flex-wrap: wrap;
+        max-width: 100%
 	}
 
-	.dateDisplay {
+	.gcal-schedule-date-display {
 		display: flex;
 		flex-direction: row;
-		align-items: flex-end;
-		width: 105px;
-		min-width: 105px;
+		align-items: center;
+        gap: 5px;
+        flex: 0 0 100px;
+        padding: 0px;
 	}
-	.dayNumber {
+
+	.gcal-schedule-day-circle {
 		border-radius: 50%;
 		-moz-border-radius: 50%;
 		-webkit-border-radius: 50%;
 		display: inline-block;
-		font-weight: bold;
-		line-height: 40px;
-		text-align: center;
-		width: 40px;
+        border: solid 1px gray;
+        min-height: 40px;
 		min-width: 40px;
+        width: 50px;
+        height: 50px;
 		cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
 	}
 
 	.today {
@@ -221,50 +221,52 @@
 		text-decoration: none;
 	}
 
-	.dayText {
-		font-size: 15px;
+    .gcal-schedule-month-text {
+        font-size: small;
+    }
+
+    .gcal-schedule-day-number {
+        font-size: large;
+        font-weight: 700;
+    }
+
+	.gcal-schedule-day-text {
+		font-size: medium;
 	}
 
-	.dayEvents {
+	.gcal-schedule-event-container {
 		display: flex;
 		flex-direction: column;
-		flex: 1;
+        overflow: hidden;
 	}
-
-	.dayEvent {
+ 
+	.gcal-schedule-event {
 		display: flex;
-		flex: 1;
-		flex-direction: row;
-		align-items: center;
 		padding: 5px;
 		border-radius: 10px;
 		cursor: pointer;
-        flex-wrap: wrap;
 	}
 
-	.dayEvent:hover {
+	.gcal-schedule-event:hover {
 		background-color: rgba(128, 128, 128, 0.129);
 	}
 
-    .circleTime{
+    .gcal-schedule-event-info{
         display: flex;
-        flex-direction: row;
-        width: 220px;
-		min-width: 220px;
+        align-items: center;
     }
 
-	.recurringCircleContainer,
-	.circleContainer {
+	.gcal-schedule-circle-container-recurring,
+	.gcal-schedule-circle-container {
 		position: relative;
 		display: flex;
-		width: 30px;
 		min-width: 30px;
 		height: 30px;
 		align-items: center;
 		justify-content: center;
 	}
 
-	.recurringCircleContainer::after {
+	.gcal-schedule-circle-container-recurring::after {
 		content: "↺";
 		position: absolute;
 		width: 30px;
@@ -273,23 +275,36 @@
 		line-height: 30px;
 		font-size: 30px;
 		color: rgb(164, 164, 164);
+        top: 1.5px;
 		white-space: nowrap;
 	}
 
-	.circle {
+	.gcal-schedule-event-circle {
 		width: 10px;
 		min-width: 10px;
 		height: 10px;
 		border-radius: 50%;
 	}
 
-	.timeContainer {
-		width: 150px;
-		min-width: 150px;
+	.gcal-schedule-time-container {
+        min-width: 150px;
+        padding-right: 1em;
 	}
 
-	.eventTitleContainer {
-		white-space: nowrap;
+	.gcal-schedule-event-title-container {
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
 	}
+
+    .gcal-schedule-event-title {
+        font-size: medium;
+        font-weight: 400;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     
     </style>

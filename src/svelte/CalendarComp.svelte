@@ -15,7 +15,6 @@
 	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../view/ScheduleCalendarView";
 	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../view/WeekCalendarView";
 
-
     export let displayedMonth = window.moment();
     export let width:number = 0;
     export let height:number = 0;
@@ -153,25 +152,26 @@
 
     const onContextMenu = (date: moment.Moment, type: 'daily' | 'weekly'): Menu => {
         const note = type === "daily" ? getSingleDailyNote(date) : getSingleWeeklyNote(date);
+        const typeText = type.charAt(0).toUpperCase() + type.slice(1)
         const menu = new Menu();
 
         if(!note){
             menu.addItem((item) => {
-                item.setTitle(`Create ${type} Note`)
+                item.setTitle(`Create ${typeText} Note`)
                 item.setIcon("create-new")
                 item.onClick(() => {
                     openPeriodicNote({date, openInNewTab: false, type});
                 })
             })
             menu.addItem((item) => {
-                item.setTitle(`Create ${type} Note Split Right`)
+                item.setTitle(`Create ${typeText} Note Split Right`)
                 item.setIcon("vertical-split")
                 item.onClick(() => {
                     openPeriodicNote({date, openInNewTab: true, openToRight: "horizontal", type});
                 })
             })
             menu.addItem((item) => {
-                item.setTitle(`Create ${type} Note Split Down`)
+                item.setTitle(`Create ${typeText} Note Split Down`)
                 item.setIcon("horizontal-split")
                 item.onClick(() => {
                     openPeriodicNote({date, openInNewTab: true, openToRight: "vertical", type});
@@ -179,21 +179,21 @@
             })
         }else{
             menu.addItem((item) => {
-                item.setTitle(`Open ${type} Note`)
+                item.setTitle(`Open ${typeText} Note`)
                 item.setIcon("file")
                 item.onClick(() => {
                     openPeriodicNote({date, openInNewTab: false, type});
                 })
             })
             menu.addItem((item) => {
-                item.setTitle(`Open ${type} Note Split Right`)
+                item.setTitle(`Open ${typeText} Note Split Right`)
                 item.setIcon("vertical-split")
                 item.onClick(() => {
                     openPeriodicNote({date, openInNewTab: true, openToRight: "horizontal", type});
                 })
             })
             menu.addItem((item) => {
-                item.setTitle(`Open ${type} Note Split Down`)
+                item.setTitle(`Open ${typeText} Note Split Down`)
                 item.setIcon("horizontal-split")
                 item.onClick(() => {
                     openPeriodicNote({date, openInNewTab: true, openToRight: "vertical", type});
@@ -202,7 +202,7 @@
             //Make sure plugin wont crash on mobile
             if(Platform.isDesktop) {
                 menu.addItem((item) => {
-                    item.setTitle(`Open ${type} Note in new Window`)
+                    item.setTitle(`Open ${typeText} Note in new Window`)
                     item.setIcon("fullscreen")
                     item.onClick(() => {
                         openPeriodicNoteInNewWindow({date, type});
@@ -299,7 +299,7 @@
 </script>
 
 {#if width==0 || height == 0}
-    <div class="calendarContainer">
+    <div class="gcal-calendar-container">
         {#if loading}
             <p>Loading...</p>
         {:else} 
@@ -319,14 +319,13 @@
     </div>
 {:else}
     <div 
-        class="calendarContainer" 
+        class="gcal-calendar-container" 
         style:width="{width}px" 
         style:height="{height}px"
         >
         {#if loading}
             <p>Loading...</p>
         {:else} 
-    
             <div style="--theme-color: {plugin.settings.dailyNoteDotColor}">
                 <CalendarBase
                     showWeekNums={false}
