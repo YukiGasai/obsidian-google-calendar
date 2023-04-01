@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
     const plugin = GoogleCalendarPlugin.getInstance();
     let hourFormat = plugin.settings.timelineHourFormat;
 
     export let height = 700;
+    export let hourRange = [0, 24];
 
     const switchHourDisplay = () => {
         hourFormat += 1;
@@ -34,7 +36,10 @@
     }
 </script>
 
-<div class="gcal-hour-text-container" style:margin-top="-{height/87}px">
+<div 
+    class="gcal-hour-text-container"
+    style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
+>
     {#each {length: 24} as _, i }
         <span class=gcal-hour-text
         on:click={switchHourDisplay}

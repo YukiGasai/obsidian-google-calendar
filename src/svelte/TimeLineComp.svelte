@@ -11,7 +11,6 @@ import {EventDetailsModal} from '../modal/EventDetailsModal'
 import {getColorFromEvent} from '../googleApi/GoogleColors'
 import { onDestroy } from "svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-import TimeLineHourText from "./TimeLineHourText.svelte";
 
 interface Location {
     event:GoogleEvent;
@@ -28,7 +27,6 @@ export let date = window.moment();
 export let include;
 export let exclude;
 export let hourRange = [0, 24];
-export let showTimeDisplay = true;
 
 let loading = true;
 let timeDisplayPosition = 0;

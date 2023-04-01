@@ -52,7 +52,7 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
     {/if}
     
     <div class="gcal-day-container">
-        <TimeLineHourText />
+        <TimeLineHourText {hourRange}/>
         <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} showTimeDisplay={false} />
     </div>
 </div>

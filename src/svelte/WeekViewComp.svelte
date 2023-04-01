@@ -4,7 +4,6 @@
     import TimeLineHourText from "./TimeLineHourText.svelte";
     import {EventDetailsModal} from "../modal/EventDetailsModal"
     import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
-    import { onMount } from "svelte";
     
     export let height:number = undefined;
     export let width:number = undefined;
@@ -67,13 +66,13 @@
             <div>
                 <span class="invisible">Test</span>
             </div>
-            <TimeLineHourText />
+            <TimeLineHourText {hourRange} />
             {#each getDatesToDisplay(date) as day, i}
                 <div class="gcal-day-container">
                     <span class="gcal-dayofweek">{day.format('ddd')}</span>
                     <span class="gcal-day">{day.format('D')}</span>
                 </div>
-                <TimeLine date={day} {height} {width} {include} {exclude} {hourRange} showTimeDisplay={false}/> 
+                <TimeLine date={day} {height} {width} {include} {exclude} {hourRange} /> 
             {/each}
         </div>
     </div>
