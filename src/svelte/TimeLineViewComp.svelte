@@ -74,6 +74,7 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
         display: flex;
         align-items: center;
         gap: 5px;
+        overflow: hidden;
     }
     
     .gcal-new-event-button {
