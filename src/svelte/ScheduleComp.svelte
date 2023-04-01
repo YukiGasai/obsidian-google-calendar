@@ -20,7 +20,7 @@
     let events = [];
     let plugin = GoogleCalendarPlugin.getInstance();
     let hourFormat = plugin.settings.timelineHourFormat;
-
+    let containerWidth;
 
     const getEvents = async () => {
         hourFormat = plugin.settings.timelineHourFormat;
@@ -130,12 +130,12 @@
 
     
     </script>
-    <div class ="gcal-schedule-container">
+    <div class ="gcal-schedule-container" bind:clientWidth={containerWidth}>
         {#if loading}
             <span>LOADING</span>
         {:else}
             {#each [...days] as [key, events]}
-                <div class="gcal-schedule-day-container">
+                <div class={containerWidth < 550 ? "gcal-schedule-day-container breakLine" : "gcal-schedule-day-container"}>
                     <div class="gcal-schedule-date-display">
                         <div 
                         on:click="{()=>goToDaySelect(events[0])}"
@@ -151,7 +151,7 @@
 
                     <div class="gcal-schedule-event-container">
                         {#each events as event}
-                        <div class="gcal-schedule-event" on:click="{(e) => goToEvent(event,e)}">
+                        <div class={containerWidth < 200 ? "gcal-schedule-event breakLine" : "gcal-schedule-event"} on:click="{(e) => goToEvent(event,e)}">
                             <div class="gcal-schedule-event-info">
                                     <div class="{event.recurringEventId ? "gcal-schedule-circle-container-recurring" : "gcal-schedule-circle-container"}">
                                         <div class="gcal-schedule-event-circle" style:background="{getColorFromEvent(event)}"></div>
@@ -173,20 +173,15 @@
     </div>
     
     <style>
-    .gcal-schedule-container {
-		display: flex;
-		flex-direction: column;
-        align-items: flex-start;
-		max-width: 100%
-	}
 
 	.gcal-schedule-day-container {
 		display: flex;
+        flex-direction: row;
 		align-items: flex-start;
 		border-bottom: 1px solid gray;
 		margin: 2px 0px;
 		padding: 2px 0px;
-        max-width: 100%
+        width: 100%
 	}
 
 	.gcal-schedule-date-display {
@@ -238,6 +233,7 @@
 		display: flex;
 		flex-direction: column;
         overflow: hidden;
+        width: 100%;
 	}
  
 	.gcal-schedule-event {
@@ -305,6 +301,11 @@
         font-weight: 400;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .breakLine {
+        flex-direction: column;
+        margin-bottom:10px;
     }
     
     </style>
