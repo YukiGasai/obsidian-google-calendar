@@ -62,15 +62,26 @@
         </div>
         
         {/if}
-        <div class="gcal-week-container">
+        <div class="gcal-week-numbers">
+            {#each getDatesToDisplay(date) as day, i}
+            <div class="gcal-day-container">
+                <span class="gcal-dayofweek">{day.format('ddd')}</span>
+                <span class="gcal-day">{day.format('D')}</span>
+            </div>
+            {/each}
+        </div>
+
+        <div 
+            class="gcal-week-container"
+            style:grid-template-columns="auto repeat({timespan}, minmax(0,1fr))"
+        >
             <div>
                 <span class="invisible">Test</span>
             </div>
             <TimeLineHourText {hourRange} />
             {#each getDatesToDisplay(date) as day, i}
-                <div class="gcal-day-container">
-                    <span class="gcal-dayofweek">{day.format('ddd')}</span>
-                    <span class="gcal-day">{day.format('D')}</span>
+                <div>
+                    <span class="invisible">Test</span>
                 </div>
                 <TimeLine date={day} {height} {width} {include} {exclude} {hourRange} /> 
             {/each}
@@ -78,6 +89,12 @@
     </div>
     
 <style>
+
+    .gcal-week-numbers {
+        display: flex;
+        justify-content: space-around;
+        padding-left: 20px;
+    }
 
     .gcal-title-container {
         display: grid;
@@ -111,13 +128,14 @@
     .gcal-week-container{
         position: relative;
         display: grid;
-        grid-template-columns: auto repeat(7, minmax(0,1fr));
         grid-template-rows: auto 1fr;
         column-gap: 1em;
         grid-auto-flow: column;
+        overflow: hidden;
     }
 
     .gcal-day-container {
+        width: 25px;
         display: grid;
         justify-content: center;
     }
