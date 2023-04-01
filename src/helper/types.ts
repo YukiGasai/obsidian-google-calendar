@@ -24,6 +24,7 @@ export interface GoogleCalendarPluginSettings {
     defaultTemplate: string;
 	defaultFolder: string;
     autoCreateEventNotes: boolean,
+		autoCreateEventNotesMarker: string,
         autoCreateEventKeepOpen: boolean,
         importStartOffset: number,
         importEndOffset: number,
@@ -318,6 +319,7 @@ export interface IGoogleCalendarPluginApi {
     createEvent: (input:GoogleEvent) => Promise<GoogleEvent>,
     deleteEvent: (event:GoogleEvent, deleteAll:boolean) => Promise<boolean>,
     updateEvent: (event:GoogleEvent, updateSingle: boolean) => Promise<GoogleEvent>,
+	createEventNote: (event:GoogleEvent, eventDirectory: string, templatePath: string) => Promise<TFile>,
 }
 
 export enum CodeBlockTypes {
@@ -365,4 +367,10 @@ export interface OpenPeriodicNoteOptions {
 	openToRight?: SplitDirection;
 	openInNewTab?: boolean;
 	type?: "daily" | "weekly" | "monthly" | "yearly";
+}
+
+export interface ApiRequestData {
+	url: string;
+	method: string;
+	body?: any;
 }

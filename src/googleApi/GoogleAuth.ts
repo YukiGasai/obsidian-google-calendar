@@ -18,76 +18,118 @@ import {
 	getAccessToken,
 	getExpirationTime,
 	getRefreshToken,
-	getUserId,
 	setAccessToken,
 	setExpirationTime,
 	setRefreshToken,
 } from "../helper/LocalStorage";
-import { Notice, Platform } from "obsidian";
-import { callRequest } from "src/helper/RequestWrapper";
+import { Notice, Platform, requestUrl } from "obsidian";
 import { createNotice } from 'src/helper/NoticeHelper';
+import * as crypto from "crypto";
 
 
-const PORT = 42813
 
+const PORT = 42813;
+const REDIRECT_URL = `http://127.0.0.1:${PORT}/callback`;
+const PUBLIC_CLIENT_ID = `783376961232-v90b17gr1mj1s2mnmdauvkp77u6htpke.apps.googleusercontent.com`
 
-function checkAccessTokenValid(): boolean {
+let lastRefreshTryMoment = window.moment().subtract(100, "seconds");
+let authSession = {server: null, verifier: null, challenge: null, state:null};
+
+// Creates a code verifier for the OAuth flow
+function base64URLEncode(str) {
+	return str.toString('base64')
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_')
+		.replace(/=/g, '');
+}
+
+// Creates a code challenge for the OAuth flow
+function sha256(buffer) {
+	return crypto.createHash('sha256').update(buffer).digest();
+}
+
+export function getAccessIfValid(): string {
 	//Check if the token exists
-	if (!getAccessToken() || getAccessToken() == "") return false;
+	if (!getAccessToken() || getAccessToken() == "") return;
 
 	//Check if Expiration time is not set or default 0
-	if (!getExpirationTime()) return false;
+	if (!getExpirationTime()) return;
 
 	//Check if Expiration time is set to text
-	if (isNaN(getExpirationTime())) return false
+	if (isNaN(getExpirationTime())) return
 
 	//Check if Expiration time is in the past so the token is expired
-	if (getExpirationTime() < +new Date()) return false;
+	if (getExpirationTime() < +new Date()) return;
 
-	return true;
+	return getAccessToken();
 }
 
 
-const refreshWithCustomClient = async (plugin: GoogleCalendarPlugin): Promise<boolean> => {
+const refreshAccessToken = async (plugin: GoogleCalendarPlugin): Promise<string> => {
+	const useCustomClient = plugin.settings.useCustomClient;
 
-	const refreshBody = {
-		client_id: plugin.settings.googleClientId,
-		client_secret: plugin.settings.googleClientSecret.trim(),
+	// if(lastRefreshTryMoment.diff(window.moment(), "seconds") < 60){
+	// 	return;
+	// }
+
+	let refreshBody = {
 		grant_type: "refresh_token",
+		client_id: useCustomClient ? plugin.settings.googleClientId?.trim() : PUBLIC_CLIENT_ID,
+		client_secret: useCustomClient ? plugin.settings.googleClientSecret?.trim() : null,
 		refresh_token: getRefreshToken(),
 	};
 
-	const tokenData = await callRequest('https://oauth2.googleapis.com/token', "POST", refreshBody, true)
+	const {json: tokenData} = await requestUrl({
+		method: 'POST',
+		url: useCustomClient ? `https://oauth2.googleapis.com/token` : `${plugin.settings.googleOAuthServer}/api/google/refresh`,
+		headers: {'content-type': 'application/json'},
+		body: JSON.stringify(refreshBody)
+	})
 
 	if (!tokenData) {
 		createNotice("Error while refreshing authentication");
-		return false;
+		return;
 	}
-
+	
 	//Save new Access token and Expiration Time
 	setAccessToken(tokenData.access_token);
 	setExpirationTime(+new Date() + tokenData.expires_in * 1000);
-	return true;
+	return tokenData.access_token;
 }
 
+const exchangeCodeForTokenDefault = async (plugin: GoogleCalendarPlugin, state:string, verifier:string, code: string): Promise<boolean> => {
 
-const refreshWithDefaultClient = async (plugin: GoogleCalendarPlugin): Promise<boolean> => {
+	const request = await requestUrl({
+		method: 'POST',
+		url: `${plugin.settings.googleOAuthServer}/api/google/token`,
+		headers: {'content-type': 'application/json'},
+		body: JSON.stringify({
+			"client_id": PUBLIC_CLIENT_ID,
+			"code_verifier": verifier,
+			"code": code,
+			"state": state,
+		})
+	})
 
-	const refreshBody = {
-		uid: getUserId(),
-	};
+	return request.json;
+}
 
-	const tokenData = await callRequest(`${plugin.settings.googleOAuthServer}/api/google/refresh`, "POST", refreshBody, true)
+const exchangeCodeForTokenCustom = async (plugin: GoogleCalendarPlugin, state: string, verifier:string, code: string): Promise<boolean> => {
+	const url = `https://oauth2.googleapis.com/token`
+	+ `?grant_type=authorization_code`
+	+ `&client_id=${plugin.settings.googleClientId?.trim()}`
+	+ `&client_secret=${plugin.settings.googleClientSecret?.trim()}`
+	+ `&code_verifier=${verifier}`
+	+ `&code=${code}`
+	+ `&state=${state}`
+	+ `&redirect_uri=${REDIRECT_URL}`
 
-	if (!tokenData) {
-		createNotice("Error while refreshing authentication");
-		return false;
-	}
+	const response = await fetch(url,{
+		method: 'POST',
+		headers: {'content-type': 'application/x-www-form-urlencoded'},
+	});
 
-	//Save new Access token and Expiration Time
-	setAccessToken(tokenData.access_token);
-	setExpirationTime(+new Date() + tokenData.expires_in * 1000);
-	return true;
+	return response.json();
 }
 
 /**
@@ -99,28 +141,20 @@ const refreshWithDefaultClient = async (plugin: GoogleCalendarPlugin): Promise<b
  * @returns A valid access Token
  */
 export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<string> {
-	if (!settingsAreCompleteAndLoggedIn()) return "";
-	let gotRefreshToken = false;
-	//Check if the Access token is still valid
-	if (
-		checkAccessTokenValid() == false
-	) {
-		//Access token is no longer valid have to create a new one
-		if (getRefreshToken() != "" || getUserId() != "") {
+	// Check if refresh token is set
+	if (!settingsAreCompleteAndLoggedIn()) return;
 
-			if (plugin.settings.useCustomClient) {
+	let accessToken = getAccessIfValid();
 
-				gotRefreshToken = await refreshWithCustomClient(plugin);
-
-				if (gotRefreshToken == false) {
-					gotRefreshToken = await refreshWithDefaultClient(plugin)
-				}
-			} else {
-				gotRefreshToken = await refreshWithDefaultClient(plugin)
-			}
-		}
+	//Check if the Access token is still valid or if it needs to be refreshed
+	if (!accessToken) {
+		accessToken = await refreshAccessToken(plugin);		
 	}
-	return getAccessToken();
+
+	// Check if refresh of access token did non work
+	if(!accessToken)return
+
+	return accessToken;
 }
 
 /**
@@ -134,63 +168,96 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
  * 
  */
 export async function LoginGoogle(): Promise<void> {
-
 	const plugin = GoogleCalendarPlugin.getInstance();
-	if (Platform.isDesktop) {
-		if (!settingsAreComplete()) return;
-		const { OAuth2Client } = require("google-auth-library");
-		const http = require("http");
-		const url = require("url");
-		const destroyer = require("server-destroy");
-		const oAuth2Client = new OAuth2Client(
-			plugin.settings.googleClientId,
-			plugin.settings.googleClientSecret.trim(),
-			`http://127.0.0.1:${PORT}/callback`
-		);
-		const authorizeUrl = oAuth2Client.generateAuthUrl({
-			scope: [
-				"https://www.googleapis.com/auth/calendar",
-			],
-			access_type: "offline",
-			prompt: "consent"
-		});
+	const useCustomClient = plugin.settings.useCustomClient;
 
-		const server = http
-			.createServer(async (req: IncomingMessage, res: ServerResponse) => {
-				try {
-					if (req.url.indexOf("/callback") > -1) {
-						// acquire the code from the querystring, and close the web server.
-						const qs = new url.URL(
-							req.url,
-							`http://localhost:${PORT}`
-						).searchParams;
-						const code = qs.get("code");
-						res.end(
-							"Authentication successful! Please return to obsidian."
-						);
-						server.destroy();
+	const CLIENT_ID = useCustomClient ? plugin.settings.googleClientId : PUBLIC_CLIENT_ID;
 
-						// Now that we have the code, use that to acquire tokens.
-						const r = await oAuth2Client.getToken(code);
+	if (!Platform.isDesktop) {
+		new Notice("Can't use this OAuth method on this device");
+		return;
+	}
 
-						setRefreshToken(r.tokens.refresh_token);
-						setAccessToken(r.tokens.access_token);
-						setExpirationTime(r.tokens.expiry_date);
+	if (!settingsAreComplete()) return;
 
-						console.info("Tokens acquired.");
-						plugin.settingsTab.display();
-					}
-				} catch (e) {
-					console.log("Auth failed")
-				}
-			})
-			.listen(PORT, async () => {
-				// open the browser to the authorize url to start the workflow
-				window.open(authorizeUrl);
+	if(!authSession.state){
+		authSession.state = base64URLEncode(crypto.randomBytes(32));
+		authSession.verifier = base64URLEncode(crypto.randomBytes(32));
+		authSession.challenge = base64URLEncode(sha256(authSession.verifier));
+	}
+
+	const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+	+ `?client_id=${CLIENT_ID}`
+	+ `&response_type=code`
+	+ `&redirect_uri=${REDIRECT_URL}`
+	+ `&prompt=consent`
+	+ `&access_type=offline`
+	+ `&state=${authSession.state}`
+	+ `&code_challenge=${authSession.challenge}`
+	+ `&code_challenge_method=S256`
+	+ `&scope=email%20profile%20https://www.googleapis.com/auth/calendar`;
+	
+	// Make sure no server is running before starting a new one
+	if(authSession.server) {
+		window.open(authUrl);
+		return
+	}
+
+	const http = require("http");
+	const url = require("url");
+
+	authSession.server = http
+		.createServer(async (req: IncomingMessage, res: ServerResponse) => {
+		try {
+			// Make sure the callback url is used
+			if (req.url.indexOf("/callback") < 0)return; 
+			
+			// acquire the code from the querystring, and close the web server.
+			const qs = new url.URL(
+				req.url,
+				`http://127.0.0.1:${PORT}`
+			).searchParams;
+			const code = qs.get("code");
+			const received_state = qs.get("state");
+
+			if (received_state !== authSession.state) {
+				return;
+			}
+			let token;
+			if(useCustomClient){
+				token = await exchangeCodeForTokenCustom(plugin, authSession.state, authSession.verifier, code);
+			}else{
+				token = await exchangeCodeForTokenDefault(plugin, authSession.state, authSession.verifier, code);
+			}
+
+			if(token?.refresh_token) {
+				setRefreshToken(token.refresh_token);
+				setAccessToken(token.access_token);
+				setExpirationTime(+new Date() + token.expires_in * 1000);
+			}
+			console.info("Tokens acquired.");
+
+			res.end(
+				"Authentication successful! Please return to obsidian."
+			);
+
+			authSession.server.close(()=>{
+				console.log("Server closed")
 			});
 
-		destroyer(server);
-	} else {
-		new Notice("Can't use OAuth on this device");
-	}
+			plugin.settingsTab.display();
+			
+		} catch (e) {
+			console.log("Auth failed")
+
+			authSession.server.close(()=>{
+				console.log("Server closed")
+			});
+		}
+		authSession = {server: null, verifier: null, challenge: null, state:null};
+	})
+	.listen(PORT, async () => {
+		// open the browser to the authorize url to start the workflow
+		window.open(authUrl);
+	});
 }

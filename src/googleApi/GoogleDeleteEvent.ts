@@ -1,3 +1,4 @@
+import { GoogleApiError } from "./GoogleApiError";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { createNotice } from "../helper/NoticeHelper";
 import type { GoogleEvent } from "../helper/types";
@@ -18,7 +19,9 @@ export async function googleDeleteEvent(
 
     const plugin = GoogleCalendarPlugin.getInstance();
 
-	if (!settingsAreCompleteAndLoggedIn()) return false;
+	if (!settingsAreCompleteAndLoggedIn()) {
+        throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
+	}
 
     let calendarId = event.parent?.id;
 
@@ -26,9 +29,8 @@ export async function googleDeleteEvent(
         calendarId = plugin.settings.defaultCalendar ?? "";
     }
 
-    if(calendarId === "") {
-        createNotice("Calendar id missing");
-        return false;
+    if(calendarId === ""){
+		throw new GoogleApiError("Could not create Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
     }
 
 	// Use the recurrence id to delete all events from a recurring task
@@ -39,9 +41,34 @@ export async function googleDeleteEvent(
 	}
 
 	const response = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${id}`, 'DELETE', null);
-	if (response) {
-		return true;
-	} else {
-		return false
+	return response;
+}
+
+
+export async function deleteEvent(
+	event: GoogleEvent,
+	deleteAllOccurrences = false
+): Promise<boolean> {
+	try {
+		const response = await googleDeleteEvent(event, deleteAllOccurrences);
+		createNotice(`Google Event ${event.summary} deleted.`);
+		return response;
+	} catch (error) {
+        if(!(error instanceof GoogleApiError)){
+            return false;
+        }
+
+		switch (error.status) {
+            case 401: break;
+            case 999: 
+                createNotice(error.message)
+                break;
+            default:
+                createNotice(`Google Event ${event.summary} could not be deleted.`);
+                console.error('[GoogleCalendar]', error);
+                break;
+        }
+
+		return false;
 	}
 }

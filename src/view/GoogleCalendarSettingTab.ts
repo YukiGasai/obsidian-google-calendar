@@ -9,8 +9,8 @@ import {
 	Platform,
 } from "obsidian";
 import { LoginGoogle } from "../googleApi/GoogleAuth";
-import { getRefreshToken, getUserId, setAccessToken, setExpirationTime, setRefreshToken, setUserId } from "../helper/LocalStorage";
-import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
+import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
 import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
@@ -26,7 +26,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 
-		const isLoggedIn = (getRefreshToken() || getUserId());
+		const isLoggedIn = getRefreshToken();
 
 		containerEl.empty();
 
@@ -40,6 +40,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				toggle
 					.setValue(this.plugin.settings.useCustomClient)
 					.onChange(async (value) => {
+						setRefreshToken("");
+						setAccessToken("");
+						setExpirationTime(0);
 						this.plugin.settings.useCustomClient = value;
 						await this.plugin.saveSettings();
 						this.display();
@@ -116,16 +119,19 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					.onClick(() => {
 						if (isLoggedIn) {
 							setRefreshToken("");
-							setUserId("");
 							setAccessToken("");
 							setExpirationTime(0);
 							this.hide();
 							this.display();
 						} else {
-							if (this.plugin.settings.useCustomClient) {
-								LoginGoogle()
+							if (Platform.isMobileApp) {
+								if(this.plugin.settings.useCustomClient){
+									setRefreshToken(this.plugin.settings.googleRefreshToken);
+								}else{
+									window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+								}
 							} else {
-								window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
+								LoginGoogle()
 							}
 						}
 					})
@@ -136,9 +142,10 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			.setDesc("Time in seconds between refresh request from google server")
 			.addSlider(cb => {
 				cb.setValue(this.plugin.settings.refreshInterval)
-				cb.setLimits(10, 360, 1);
+				cb.setLimits(this.plugin.settings.useCustomClient ? 10 : 60, 360, 1);
 				cb.setDynamicTooltip();
 				cb.onChange(async value => {
+					if(value < 60 && !this.plugin.settings.useCustomClient)return;
 					this.plugin.settings.refreshInterval = value;
 					await this.plugin.saveSettings();
 				})
@@ -289,6 +296,18 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+		.setName("Auto create Event Notes Marker")
+		.setDesc("Specify the marker that will be used to find events to create notes. Keep empty to create a note for all events.")
+		.setClass("SubSettings")
+		.addText(text => {
+			text.setValue(this.plugin.settings.autoCreateEventNotesMarker);
+			text.onChange(async value => {
+				this.plugin.settings.autoCreateEventNotesMarker = value;
+				await this.plugin.saveSettings();
+			});   
+		})
+
+		new Setting(containerEl)
 			.setName("Keep auto created Notes open")
 			.setDesc("When creating a new note should it stay open for direct editing")
 			.setClass("SubSettings")
@@ -351,8 +370,8 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
             .addText(text => {
                 text.setValue(this.plugin.settings.eventNoteNameFormat);
                 text.onChange(async value => {
-                    this.plugin.settings.eventNoteNameFormat = value;
-                    await this.plugin.saveSettings();
+                    	this.plugin.settings.eventNoteNameFormat = value;
+                    	await this.plugin.saveSettings();
                 });   
             })
 
@@ -444,7 +463,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setName("Default Calendar")
 				.addDropdown(async (dropdown) => {
 					dropdown.addOption("Default", "Select a calendar");
-					const calendars = await googleListCalendars();
+					const calendars = await listCalendars();
 
 					calendars.forEach((calendar) => {
 						dropdown.addOption(
@@ -467,7 +486,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setName("Add Item to BlackList")
 				.addDropdown(async (dropdown) => {
 					dropdown.addOption("Default", "Select Option to add");
-					const calendars = await googleListCalendars();
+					const calendars = await listCalendars();
 
 					calendars.forEach((calendar) => {
 						dropdown.addOption(
@@ -524,8 +543,10 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 export function settingsAreComplete(): boolean {
 	const plugin = GoogleCalendarPlugin.getInstance();
 	if (
-		plugin.settings.googleClientId == "" ||
-		plugin.settings.googleClientSecret == ""
+		plugin.settings.useCustomClient && (
+			plugin.settings.googleClientId == "" ||
+			plugin.settings.googleClientSecret == ""
+		)
 	) {
 		createNotice("Google Calendar missing settings");
 		return false;
@@ -552,7 +573,7 @@ export function settingsAreCorret(): boolean {
 
 export function settingsAreCompleteAndLoggedIn(): boolean {
 
-	if ((!getRefreshToken() || getRefreshToken() == "") && (!getUserId() || getUserId() == "")) {
+	if (!getRefreshToken() || getRefreshToken() == "") {
 		createNotice(
 			"Google Calendar missing settings or not logged in"
 		);

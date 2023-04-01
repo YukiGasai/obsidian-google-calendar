@@ -4,9 +4,9 @@ import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
 } from "./view/GoogleCalendarSettingTab";
-import { googleListCalendars } from "./googleApi/GoogleListCalendars";
+import { listCalendars } from "./googleApi/GoogleListCalendars";
 import { CalendarsListModal } from "./modal/CalendarsListModal";
-import { googleClearCachedEvents, googleListEvents } from "./googleApi/GoogleListEvents";
+import { googleClearCachedEvents, listEvents } from "./googleApi/GoogleListEvents";
 import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { WeekCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEEK } from "./view/WeekCalendarView";
@@ -14,7 +14,7 @@ import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/Month
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { getRefreshToken, setAccessToken, setExpirationTime, setUserId } from "./helper/LocalStorage";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -25,9 +25,9 @@ import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
 import { findEventNote, getCurrentTheme } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 import { checkForNewDailyNotes, checkForNewWeeklyNotes } from "./helper/DailyNoteHelper";
-import { googleCreateEvent } from "../src/googleApi/GoogleCreateEvent";
+import { createEvent } from "../src/googleApi/GoogleCreateEvent";
 import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
-import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
+import { getEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
 
@@ -41,6 +41,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	useNotification: false,
 	showNotice: true,
 	autoCreateEventNotes: true,
+	autoCreateEventNotesMarker: "obsidian",
 	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,
@@ -124,8 +125,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 		if (templaterPlugin && templaterPlugin._loaded) {
 			this.templaterPlugin = templaterPlugin;
 		}
-
-		checkForEventNotes(this);
 	}
 
 	async onload(): Promise<void> {
@@ -133,6 +132,8 @@ export default class GoogleCalendarPlugin extends Plugin {
 		GoogleCalendarPlugin.instance = this;
 		this.api = new GoogleCalendarPluginApi().make();
 		await this.loadSettings();
+		await checkForEventNotes(this);
+
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
@@ -157,7 +158,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		if (this.settings.useNotification) {
 			const notificationInterval = window.setInterval(async () => {
 
-				const events = await googleListEvents();
+				const events = await listEvents();
 
 				const currentMoment = window.moment()
 
@@ -292,7 +293,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListCalendars().then((calendars) => {
+				listCalendars().then((calendars) => {
 					new CalendarsListModal(calendars).open();
 				});
 			},
@@ -314,7 +315,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListEvents().then((events) => {
+				listEvents().then((events) => {
 					new EventListModal(events, "details").open()
 				});
 			},
@@ -355,7 +356,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListEvents().then((events) => {
+				listEvents().then((events) => {
 					new EventListModal(events, "createNote").open()
 				});
 			},
@@ -398,7 +399,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				googleListEvents().then((events) => {
+				listEvents().then((events) => {
 					let currentEvents = events.filter(event => {
 						if (event.start.date) return false;
 						const startMoment = window.moment(event.start.dateTime);
@@ -528,7 +529,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 				getEventFromFrontMatter(view).then((newEvent) => {
 					if (!newEvent) return;
-					googleCreateEvent(newEvent)
+					createEvent(newEvent)
 				})
 			},
 		});
@@ -555,9 +556,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.addSettingTab(this.settingsTab);
 
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
-			if (this.settings.useCustomClient) return;
-			setUserId(req['uid'])
+			//Only allow login on mobile
+			if(Platform.isDesktop)return;
 			setAccessToken(req['at']);
+			setRefreshToken(req['rt']);
 			setExpirationTime(+new Date() + 3600000);
 			new Notice("Login successful!");
 
@@ -569,7 +571,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 			const [event_id, calendar_id] = req['event'].split("::");
 
-			const event = await googleGetEvent(event_id, calendar_id);
+			const event = await getEvent(event_id, calendar_id);
 			let { file: eventNote } = findEventNote(event, this);
 			if (eventNote) {
 				app.workspace.getLeaf(true).openFile(eventNote);

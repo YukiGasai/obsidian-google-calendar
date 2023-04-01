@@ -3,17 +3,17 @@
     
     import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
-    import { googleListCalendars } from "../googleApi/GoogleListCalendars";
-    import { googleDeleteEvent } from "../googleApi/GoogleDeleteEvent";
+    import { listCalendars } from "../googleApi/GoogleListCalendars";
+    import { deleteEvent } from "../googleApi/GoogleDeleteEvent";
     import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
-    import { googleCreateEvent } from "../googleApi/GoogleCreateEvent";
+    import { createEvent } from "../googleApi/GoogleCreateEvent";
     import { RRule, RRuleSet, rrulestr } from "rrule";
     import _ from "lodash";
 	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
     import type { TFile } from "obsidian";
     import { createNotice } from "../helper/NoticeHelper";
     import { findEventNote } from "../helper/Helper";
-    import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
+    import { getEvent } from "src/googleApi/GoogleGetEvent";
     import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
 
     export let event: GoogleEvent;
@@ -65,7 +65,7 @@
 
         fullDay = event?.start?.dateTime == undefined && event?.start?.date !== undefined;
 
-        calendars = await googleListCalendars();
+        calendars = await listCalendars();
         loading = false;
 
         //New event all blank
@@ -98,7 +98,7 @@
 
         }else {
 
-            const parentEvent = await googleGetEvent(event.recurringEventId ?? event.id, event.parent.id);
+            const parentEvent = await getEvent(event.recurringEventId ?? event.id, event.parent.id);
    
             if(parentEvent?.recurrence){
                 const rule = rrulestr(parentEvent.recurrence[0]);
@@ -149,7 +149,7 @@
         }
     }
 
-    const createEvent = async () => {
+    const handleCreateEvent = async () => {
 
         if(recurringText && recurringText != ""){
             try {
@@ -169,19 +169,19 @@
                 return;
             }
         }
-        const newEvent = await googleCreateEvent(addEventDate(event))
+        const newEvent = await createEvent(addEventDate(event))
    
         if(newEvent?.id){
             closeFunction();
         }
     }
 
-    const deleteEvent = async(e) => {
+    const deleteSingleEvent = async(e) => {
         let wasSuccessful = false;
         if(event.recurringEventId){
-            wasSuccessful = await googleDeleteEvent(event)
+            wasSuccessful = await deleteEvent(event)
         }else{
-            wasSuccessful = await googleDeleteEvent(event)
+            wasSuccessful = await deleteEvent(event)
         }
         if(wasSuccessful){
             closeFunction();
@@ -190,7 +190,7 @@
 
     const deleteAllEvents = async() => {
         
-        const wasSuccessful = await googleDeleteEvent(addEventDate(event), true)
+        const wasSuccessful = await deleteEvent(addEventDate(event), true)
         if(wasSuccessful){
             closeFunction();
         }
@@ -315,7 +315,7 @@ $: {
             <div class="buttonRow">
                 <button on:click="{updateEvent}">Update</button>
     
-                <button on:click="{deleteEvent}">Delete</button>
+                <button on:click="{deleteSingleEvent}">Delete</button>
             </div>
             {#if recurringText != "" }
                 <div class="buttonRow">
@@ -327,7 +327,7 @@ $: {
 
         {:else}
             <div class="buttonRow">
-                <button on:click="{createEvent}">Create</button>
+                <button on:click="{handleCreateEvent}">Create</button>
             </div>
         {/if}
     </div>

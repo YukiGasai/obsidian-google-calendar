@@ -2,7 +2,10 @@ import type { GoogleEvent } from "../helper/types";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { createNotice } from "../helper/NoticeHelper";
 import { callRequest } from "src/helper/RequestWrapper";
-import { googleGetEvent } from "src/googleApi/GoogleGetEvent";
+import { getEvent } from "src/googleApi/GoogleGetEvent";
+import { GoogleApiError } from "./GoogleApiError";
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+
 /**
  * This function can update simple properties of an event at the api.
  * If the event is recurrent is will update all it's instanced except if updateSingle is set
@@ -15,11 +18,15 @@ export async function googleUpdateEvent(
 	event: GoogleEvent,
 	updateAllOccurrences = false
 ): Promise<GoogleEvent> {
-	if (!settingsAreCompleteAndLoggedIn()) return null;
+    const plugin = GoogleCalendarPlugin.getInstance();
+
+	if (!settingsAreCompleteAndLoggedIn()){
+        throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
+    }
 
 	//Check if the user wants to update all events from a recurring task
 	if (updateAllOccurrences && event.recurringEventId) {
-        const recurringEvent = await googleGetEvent(event.recurringEventId, event.parent.id);
+        const recurringEvent = await getEvent(event.recurringEventId, event.parent.id);
    
         event = {
 
@@ -35,8 +42,6 @@ export async function googleUpdateEvent(
             event.end.date = window.moment(recurringEvent.end.date).format("YYYY-MM-DD")
         }
 
-        
-
         event.id = recurringEvent.id;
         event.recurrence = recurringEvent.recurrence;
         event.id = recurringEvent.id;
@@ -45,21 +50,51 @@ export async function googleUpdateEvent(
 
     }
 
+    let calenderId = ""
+    
+    if(event?.parent?.id){
+        calenderId = event.parent.id;
+        event.start.timeZone = event.parent.timeZone;
+        event.end.timeZone = event.parent.timeZone;
+        delete event.parent;
+    }else{
+        calenderId = plugin.settings.defaultCalendar;
+    }
 
-	//clean the event object to send it to the api directly
-	const calenderId = event.parent.id;
-	delete event.parent;
-
+    if(calenderId === ""){
+        throw new GoogleApiError("Could not create Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
+    }
 
 	const updatedEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${event.id}`, "PUT", event)
 
-	if (!updatedEvent) {
-		createNotice("Could not create Google Event");
-		return null;
-	}
-
-	createNotice("Updated Event", true);
-
 	return updatedEvent;
-
 }
+
+
+export async function updateEvent(
+	event: GoogleEvent,
+	updateAllOccurrences = false
+): Promise<GoogleEvent> {
+    try{
+        const updatedEvent = await googleUpdateEvent(
+            event,
+            updateAllOccurrences
+        );
+        createNotice(`Google Event ${updatedEvent.summary} updated.`);
+	    return updatedEvent;
+    }catch(error){
+        switch (error.status) {
+            case 401: break;
+            case 999: 
+                createNotice(error.message)
+                break;
+            default:
+                createNotice(`Google Event ${event.summary} could not be updated.`);
+                console.error('[GoogleCalendar]', error);
+                break;
+        }
+		return null; 
+    }
+}
+
+

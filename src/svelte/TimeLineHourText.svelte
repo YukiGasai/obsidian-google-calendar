@@ -8,20 +8,28 @@
 
     const switchHourDisplay = () => {
         hourFormat += 1;
-        if(hourFormat > 2){
+        if(hourFormat > 5){
             hourFormat = 0;
         }
         plugin.settings.timelineHourFormat = hourFormat;
         plugin.saveSettings();
     }
-
+    
     const getHourText = (hour:number, hourFormat:number):string => {
         const hourMoment = window.moment(`${hour}:00:00`, "H:mm:ss");
-
         switch (hourFormat) {
-            case 0: return hourMoment.format("HH"); 
-            case 1: return hourMoment.format("hh");
-            case 2: return hourMoment.format("hh A")
+            case 0:
+                return hourMoment.format("H"); 
+            case 1:
+                return hourMoment.format("HH"); 
+            case 2:
+                return hourMoment.format("h");
+            case 3:
+                return hourMoment.format("hh");   
+            case 4:
+                return hourMoment.format("h A")
+            case 5:
+                return hourMoment.format("hh A")
         }
     }
 </script>

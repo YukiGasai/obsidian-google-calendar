@@ -1,7 +1,7 @@
 import type { GoogleEvent } from "../helper/types";
 
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-import { googleListEvents } from "../googleApi/GoogleListEvents";
+import { listEvents } from "../googleApi/GoogleListEvents";
 import { normalizePath, Pos, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
@@ -38,16 +38,23 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     const endDate = window.moment().local().add(endOffset, "day")
 
     //get all events in the import time range
-    const events = await googleListEvents({ startDate, endDate });
+    const events = await listEvents({ startDate, endDate });
 
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {
-        //regex will check for text and extract a template name if it exists
-        const match = events[i].description?.match(/:(.*-)?obsidian-?(.*)?:/) ?? [];
-
-        if (match.length == 3) {
-            //the trigger text was found and a new note will be created
-            await createNoteFromEvent(events[i], match[1], match[2], true)
+        // Create a event note for all events if the trigger text is empty
+        if(plugin.settings.autoCreateEventNotesMarker === "") {
+            await createNoteFromEvent(events[i], plugin.settings.defaultFolder, plugin.settings.defaultTemplate, true)
+        }else{
+            
+            const regex = new RegExp(`:([^:]*-)?${plugin.settings.autoCreateEventNotesMarker}-?([^:]*)?:`)
+        
+            //regex will check for text and extract a template name if it exists
+            const match = events[i].description?.match(regex) ?? [];
+            if (match.length == 3) {
+                //the trigger text was found and a new note will be created
+                await createNoteFromEvent(events[i], match[1], match[2], true)
+            }
         }
     }
 }
@@ -180,18 +187,22 @@ async function getEventNoteFilePath(plugin: GoogleCalendarPlugin, event: GoogleE
         folderPath = app.fileManager.getNewFileParent("").path;
     }
 
-    const sanitizedFileName = replacePathPlaceholders(plugin, event, sanitizeFileName(plugin.settings.eventNoteNameFormat))
+    const fileName = replacePathPlaceholders(plugin, event, plugin.settings.eventNoteNameFormat);
+
+    const sanitizedFileName = replacePathPlaceholders(plugin, event, sanitizeFileName(fileName))
     return normalizePath(`${folderPath}/${sanitizedFileName}.md`);
 }
 
-async function checkIfFileExists(event: GoogleEvent, filePath: string): Promise<TFile> | null {
+async function checkIfFileExists(event: GoogleEvent, filePath: string, isAutoCreated: boolean): Promise<TFile> | null {
     const { vault } = app;
     const { adapter } = vault;
 
     if (await adapter.exists(filePath)) {
         let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
-        createNotice(`EventNote ${event.summary} already exists.`)
-        new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
+        if(!isAutoCreated) {
+            createNotice(`EventNote ${event.summary} already exists.`)
+            new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
+        }
         return existingFile
     }
     return;
@@ -212,19 +223,20 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     if (folderName) {
         folderName = replacePathPlaceholders(plugin, event, folderName);
     }
-
+    
     const filePath = await getEventNoteFilePath(plugin, event, folderName);
-
-    if (!isAutoCreated) {
-        //check if file already exists
-        const existingFile = await checkIfFileExists(event, filePath);
-        if (existingFile) return existingFile;
-    }
+    //check if file already exists
+    const existingFile = await checkIfFileExists(event, filePath, isAutoCreated);
+    if (existingFile) return existingFile;
 
     //Create file with no content
-    const file = await vault.create(filePath, '');
-    createNotice(`EventNote ${event.summary} created.`)
-
+    let file;
+    try{
+        file = await vault.create(filePath, '');
+        createNotice(`EventNote ${event.summary} created.`)
+    }catch(err) {
+        return null
+    }
 
     //check if the template plugin is active and a template name is given
     if ((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName) {
@@ -235,7 +247,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
         const newFile = vault.getAbstractFileByPath(filePath) as TFile;
 
-        if (plugin.settings.autoCreateEventKeepOpen) {
+        if (plugin.settings.autoCreateEventKeepOpen || !isAutoCreated) {
             await app.workspace.getLeaf(true).openFile(newFile)
         }
 
@@ -278,7 +290,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     }
 
 
-    if (!plugin.settings.autoCreateEventKeepOpen) {
+    if (!plugin.settings.autoCreateEventKeepOpen && isAutoCreated) {
         newLeaf.detach();
     }
 

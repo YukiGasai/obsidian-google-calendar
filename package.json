@@ -1,11 +1,12 @@
 {
 	"name": "google-calendar",
-	"version": "1.8.11",
+	"version": "1.9.1",
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "node esbuild.config.mjs production"
+		"build": "node esbuild.config.mjs production",
+		"docs": "npx docsify-cli serve docs"
 	},
 	"keywords": [],
 	"author": "YukiGasai",
@@ -50,6 +51,7 @@
 		"open": "^8.4.0",
 		"rrule": "^2.7.0",
 		"server-destroy": "^1.0.1",
+		"socket.io-client": "^4.6.1",
 		"ts-treemap": "^1.1.0"
 	}
 }

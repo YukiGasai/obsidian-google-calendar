@@ -1,5 +1,5 @@
 import { FrontMatterCache, MarkdownView, normalizePath, TFile } from "obsidian";
-import { googleListCalendars } from "src/googleApi/GoogleListCalendars";
+import { listCalendars } from "src/googleApi/GoogleListCalendars";
 import GoogleCalendarPlugin from 'src/GoogleCalendarPlugin';
 import _ from "lodash";
 import { createNotice } from "src/helper/NoticeHelper";
@@ -62,7 +62,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
             _.set(frontmatter, value, eventValue);
         }
     }
-    const calendars = await googleListCalendars();
+    const calendars = await listCalendars();
     const frontmatterPosition = frontmatter.position;
     delete frontmatter.position;
     const calendar = calendars.find(calendar => calendar.id == (frontmatter.calendar ?? plugin.settings.defaultCalendar) || calendar.summary == (frontmatter.calendar ?? plugin.settings.defaultCalendar));

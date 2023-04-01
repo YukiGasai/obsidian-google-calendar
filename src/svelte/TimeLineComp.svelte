@@ -6,7 +6,7 @@ import TreeMap from 'ts-treemap'
 import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
 import {getEventStartPosition, getEventHeight} from "../helper/Helper";
 
-import { googleClearCachedEvents, googleListEvents } from "../googleApi/GoogleListEvents";
+import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
 import {EventDetailsModal} from '../modal/EventDetailsModal'
 import {getColorFromEvent} from '../googleApi/GoogleColors'
 import { onDestroy } from "svelte";
@@ -101,17 +101,17 @@ const getLocationArray = () => {
     }
 }
 
-const getEvents = async() => {
-    
-    if(!date.isValid()){
-        return;
-    }
-
-    const newEvents = await googleListEvents({
-        startDate:date,
-        include,
-        exclude
-    }); 
+    const getEvents = async() => {
+        
+        if(!date.isValid()){
+            return;
+        }
+   
+        const newEvents = await listEvents({
+            startDate:date,
+            include,
+            exclude
+        }); 
 
     if(JSON.stringify(newEvents) != JSON.stringify(events)){
         events = newEvents;
@@ -136,30 +136,6 @@ onDestroy(() => {
     clearInterval(interval);
 })
 
-const switchHourDisplay = () => {
-    hourFormat += 1;
-    if(hourFormat > 2){
-        hourFormat = 0;
-    }
-    plugin.settings.timelineHourFormat = hourFormat;
-    plugin.saveSettings();
-}
-
-const getHourText = (hour:number, hourFormat:number):string => {
-    const hourMoment = window.moment(`${hour}:00:00`, "H:mm:ss");
-
-    switch (hourFormat) {
-        case 0:
-            return hourMoment.format("HH"); 
-            
-        case 1:
-            return hourMoment.format("hh");
-        
-        case 2:
-            return hourMoment.format("hh A")
-    }
-}
-
 </script>
 
 
@@ -179,7 +155,7 @@ const getHourText = (hour:number, hourFormat:number):string => {
     <div class="gcal-timeline-container">
         <div class="gcal-hour-line-container">
             {#each {length: 24} as _, i }
-                <div class={hourFormat == 2 ? "gcal-hour-line gcal-hour-line-large" : "gcal-hour-line"} style:height="{height/24}px" />
+                <div class={hourFormat > 3 ? "gcal-hour-line gcal-hour-line-large" : "gcal-hour-line"} style:height="{height/24}px" />
             {/each}
         </div>  
     </div>

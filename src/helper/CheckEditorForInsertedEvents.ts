@@ -1,6 +1,6 @@
 import type { Editor, EditorPosition } from "obsidian";
 import type { GoogleEvent } from "./types";
-import { googleGetEvent } from "../googleApi/GoogleGetEvent";
+import { getEvent } from "../googleApi/GoogleGetEvent";
 import _ from "lodash";
 
 async function getEventsInFile(fileContent: string): Promise<GoogleEvent[]> {
@@ -21,7 +21,7 @@ async function getEventsInFile(fileContent: string): Promise<GoogleEvent[]> {
     const events = await Promise.all(outputForLink.map(async (match) => {
         if (match) {
             const eventId = atob(match[1]).split(" ")[0];
-            const event = await googleGetEvent(eventId, match[2]);
+            const event = await getEvent(eventId, match[2]);
             return event;
         }
     }));

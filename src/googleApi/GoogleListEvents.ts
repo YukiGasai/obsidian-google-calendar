@@ -12,6 +12,8 @@ import { googleListCalendars } from "./GoogleListCalendars";
 import { callRequest } from "src/helper/RequestWrapper";
 import _ from "lodash"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
+import { allColorNames, getColorNameFromEvent } from "../googleApi/GoogleColors";
+import { GoogleApiError } from "./GoogleApiError";
 
 const cachedEvents = new Map<string, EventCacheValue>();
 
@@ -31,8 +33,8 @@ export function googleClearCachedEvents(): void {
 export async function googleListEvents(
 	{ startDate,
 		endDate,
-		exclude: excludedCalendars,
-		include: includedCalendars,
+		exclude,
+		include,
 	}: ListOptions = {}
 ): Promise<GoogleEvent[]> {
 
@@ -53,14 +55,26 @@ export async function googleListEvents(
 	//Get all calendars not on the black list
 	let calendarList = await googleListCalendars();
 
+
+	const [includeCalendars, includeColors] = (include ?? []).reduce(([pass, fail], elem) => {
+		  return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
+		}, [[], []]);
+	
+
+	const [excludeCalendars, excludeColors] = (exclude ?? []).reduce(([pass, fail], elem) => {
+		return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
+	  }, [[], []]);
+  	
+
+
 	//Get the list of calendars that should be queried
-	if (includedCalendars && includedCalendars.length) {
+	if (includeCalendars.length) {
 		calendarList = calendarList.filter((calendar: GoogleCalendar) =>
-			(includedCalendars.contains(calendar.id) || includedCalendars.contains(calendar.summary))
+			(includeCalendars.contains(calendar.id) || includeCalendars.contains(calendar.summary))
 		);
-	} else if (excludedCalendars && excludedCalendars.length) {
+	} else if (excludeCalendars.length) {
 		calendarList = calendarList.filter((calendar: GoogleCalendar) =>
-			!(excludedCalendars.contains(calendar.id) || excludedCalendars.contains(calendar.summary))
+			!(excludeCalendars.contains(calendar.id) || excludeCalendars.contains(calendar.summary))
 		);
 	}
 
@@ -71,7 +85,9 @@ export async function googleListEvents(
 			plugin,
 			calendarList[i],
 			startDate,
-			endDate
+			endDate,
+			includeColors,
+			excludeColors
 		);
 
 		eventList = [...eventList, ...events];
@@ -82,6 +98,43 @@ export async function googleListEvents(
 
 	return eventList;
 }
+
+export async function listEvents(listOptions = {}): Promise<GoogleEvent[]> {
+	try {
+		const response = await googleListEvents(listOptions);
+		return response;
+	} catch (error) {
+        if(!(error instanceof GoogleApiError)){
+            return [];
+        }
+
+		switch (error.status) {
+            case 401: break;
+            case 999: 
+                createNotice(error.message)
+                break;
+            default:
+                createNotice(`Google Events could not be loaded.`);
+                console.error('[GoogleCalendar]', error);
+                break;
+        }
+
+		return [];
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -104,7 +157,9 @@ async function requestEventsFromApi(
 	endString: string
 ): Promise<GoogleEvent[]> {
 
-	if (!settingsAreCompleteAndLoggedIn()) return [];
+	if (!settingsAreCompleteAndLoggedIn()){
+		throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
+	};
 
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
@@ -126,12 +181,7 @@ async function requestEventsFromApi(
 		}
 
 		tmpRequestResult = await callRequest(url, "GET", null);
-
-		if (!tmpRequestResult) {
-			createNotice("Could not list Google Events");
-			continue;
-		}
-
+		
 		const newList = tmpRequestResult.items.filter((event) => {
 			event.parent = GoogleCalendar;
 			return event.status != "cancelled"
@@ -201,6 +251,52 @@ function resolveMultiDayEventsHelper(
 	return totalEventList;
 }
 
+// Check if the range if events is already cached
+function checkForCachedEvents (
+	plugin: GoogleCalendarPlugin,
+	GoogleCalendar: GoogleCalendar,
+	startDate: moment.Moment,
+	endDate: moment.Moment
+) : GoogleEvent[] | null {
+	
+	let currentDate = startDate.clone();
+	let cachedEventList: GoogleEvent[] = [];
+
+	// Loop through all days and check if there is a cached result
+	while (currentDate <= endDate) {
+		
+		const cacheKey: string = JSON.stringify({
+			day: currentDate.format("YYYY-MM-DD"),
+			calendar: GoogleCalendar.id
+		});
+		
+		// Check if there is a day missing in the cache
+		if(!cachedEvents.has(cacheKey)) {
+			return null;
+		}
+		
+		if(!plugin.settings.useCustomClient && plugin.settings.refreshInterval < 60){
+			plugin.settings.refreshInterval = 60;
+		}
+		
+		// Get the cached events and check if they are still valid
+		const { events, updated } = cachedEvents.get(cacheKey);	
+		if (updated.clone().add(plugin.settings.refreshInterval, "second").isBefore(window.moment())) {
+			return null
+		}
+		
+		// Add the events to the list
+		cachedEventList = [...cachedEventList, ...events];
+		
+		// Check the next day
+		currentDate.add(1, "day");
+		
+	}
+	
+	return cachedEventList;
+}
+
+
 /**
  * This function will return a list of event in a timespan from a specific calendar
  * The function will check for an equal function call in the cache if there is a stored result that is not to old it will return without api request
@@ -213,35 +309,55 @@ async function googleListEventsByCalendar(
 	plugin: GoogleCalendarPlugin,
 	GoogleCalendar: GoogleCalendar,
 	startDate: moment.Moment,
-	endDate: moment.Moment
+	endDate: moment.Moment,
+	includeColors: string[] = [],
+	excludeColors: string[] = []
 ): Promise<GoogleEvent[]> {
 
-	//Turn dates into strings for request and caching
-	const startString = startDate.toISOString();
-	const endString = endDate.toISOString();
-
-	//get the hashmap key from start end and calendar
-	const cacheKey: string = JSON.stringify({ start: startString, end: endString, calendar: GoogleCalendar.id });
-
-	//Check if cache has request saved
-	if (cachedEvents.has(cacheKey)) {
-		const { events, updated } = cachedEvents.get(cacheKey);
-		if (updated.clone().add(plugin.settings.refreshInterval, "second").isAfter(window.moment())) {
-			return events;
-		}
+	//Check if the events are already cached and return them if they are
+	const alreadyCachedEvents = checkForCachedEvents(plugin, GoogleCalendar, startDate, endDate)
+	if(alreadyCachedEvents) {
+		return alreadyCachedEvents.filter((indexEvent: GoogleEvent) => {
+			if ( includeColors.length > 0) {
+				return includeColors.includes(getColorNameFromEvent(indexEvent));
+			} 
+			if ( excludeColors.length > 0) {
+				return !excludeColors.includes(getColorNameFromEvent(indexEvent));
+			}
+			return true;
+		});
 	}
-
+	
 	//Get the events because cache was no option
-	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startString, endString);
+	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startDate.toISOString(), endDate.toISOString());
 
 	//Turn multi day events into multiple events
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate);
 
-	//Filter out original multi day event
-	totalEventList = totalEventList.filter((indexEvent: GoogleEvent) => indexEvent.eventType !== "delete");
+	// Group events by Day
+	const groupedEvents = _.groupBy(totalEventList, (event: GoogleEvent) => {
+		const startMoment = window.moment(event.start.dateTime ?? event.start.date);
+		return startMoment.format("YYYY-MM-DD");
+	});
 
-	//Cache result
-	cachedEvents.set(cacheKey, { events: totalEventList, updated: window.moment() })
+	const currentDate = startDate.clone();
+	while (currentDate <= endDate) {
+		const formattedDate = currentDate.format("YYYY-MM-DD");
 
-	return totalEventList;
+		const cacheKey: string = JSON.stringify({ day: formattedDate, calendar: GoogleCalendar.id });
+		cachedEvents.set(cacheKey, { events: groupedEvents[formattedDate] || [], updated: window.moment() })
+		
+		currentDate.add(1, "day");
+	}
+
+	return totalEventList.filter((indexEvent: GoogleEvent) => {
+		if ( indexEvent.eventType === "delete") return false;
+		if ( includeColors.length > 0) {
+			return includeColors.includes(getColorNameFromEvent(indexEvent));
+		} 
+		if ( excludeColors.length > 0) {
+			return !excludeColors.includes(getColorNameFromEvent(indexEvent));
+		}
+		return true;
+	});
 }

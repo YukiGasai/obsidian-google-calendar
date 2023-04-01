@@ -2,11 +2,12 @@ import type { GoogleCalendar, GoogleCalendarList } from "./../helper/types";
 
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
-import { getGoogleColors } from "./GoogleColors";
 import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
+import { GoogleApiError } from "./GoogleApiError";
 
 let cachedCalendars: GoogleCalendar[] = []
+let lock = false;
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
@@ -32,7 +33,9 @@ function filterCalendarsByBlackList(plugin: GoogleCalendarPlugin, calendars: Goo
  */
 export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
-	if (!settingsAreCompleteAndLoggedIn()) return [];
+	if (!settingsAreCompleteAndLoggedIn()) {
+		throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
+	}
 
 	const plugin = GoogleCalendarPlugin.getInstance();
 
@@ -41,19 +44,39 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 		return filterCalendarsByBlackList(plugin, cachedCalendars);
 	}
 
-	//Make sure the colors for calendar and events are loaded before getting the first calendar
-	await getGoogleColors();
+	// Added a lock to prevent multiple requests at the same time
+	if(lock) return [];
+	lock = true;
 
 	const calendarList: GoogleCalendarList = await callRequest(`https://www.googleapis.com/calendar/v3/users/me/calendarList`, "GET", null)
-
-	if (!calendarList) {
-		createNotice("Could not list Google Calendars");
-		return [];
-	}
 
 	cachedCalendars = calendarList.items;
 
 	const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
 
+	lock = false;
 	return calendars;
+}
+
+
+export async function listCalendars(): Promise<GoogleCalendar[]> {
+
+	try {
+		const calendars = await googleListCalendars();
+		return calendars;
+	} catch(error) {
+		switch (error.status) {
+			case 401: break;
+			case 999: 
+				createNotice(error.message)
+				break;
+			default:
+				createNotice("Could not list Google Calendars.");
+				console.error('[GoogleCalendar]', error);
+				break;
+		}
+		lock = false;
+
+		return [];
+	}
 }
