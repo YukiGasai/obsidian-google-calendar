@@ -12,10 +12,8 @@
 	"author": "YukiGasai",
 	"license": "MIT",
 	"devDependencies": {
-		"@rollup/plugin-commonjs": "^18.0.0",
-		"@rollup/plugin-node-resolve": "^11.2.1",
-		"@rollup/plugin-typescript": "^8.2.1",
 		"@tsconfig/svelte": "^1.0.13",
+		"@types/marked": "^4.0.8",
 		"@types/node": "^14.14.37",
 		"@typescript-eslint/eslint-plugin": "^4.25.0",
 		"@typescript-eslint/parser": "^4.25.0",
@@ -24,8 +22,6 @@
 		"esbuild-svelte": "^0.5.4",
 		"eslint": "^7.27.0",
 		"obsidian": "latest",
-		"sass": "^1.39.0",
-		"scss": "^0.2.4",
 		"svelte": "^3.49.0",
 		"svelte-check": "^1.4.0",
 		"svelte-preprocess": "^4.7.0",
@@ -38,20 +34,13 @@
 		"svelte"
 	],
 	"dependencies": {
-		"@googleapis/calendar": "^1.0.2",
 		"@popperjs/core": "^2.11.6",
-		"@types/marked": "^4.0.8",
 		"clipboardy": "^3.0.0",
-		"countries-and-timezones": "^3.3.0",
-		"google-auth-library": "^8.0.2",
-		"googleapis": "^100.0.0",
 		"marked": "^4.2.4",
 		"obsidian-calendar-ui": "^0.3.12",
 		"obsidian-daily-notes-interface": "^0.9.4",
-		"open": "^8.4.0",
 		"rrule": "^2.7.0",
 		"server-destroy": "^1.0.1",
-		"socket.io-client": "^4.6.1",
 		"ts-treemap": "^1.1.0"
 	}
 }
