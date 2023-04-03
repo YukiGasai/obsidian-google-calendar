@@ -45,8 +45,6 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 	}
 
 	// Added a lock to prevent multiple requests at the same time
-	if(lock) return [];
-	lock = true;
 
 	const calendarList: GoogleCalendarList = await callRequest(`https://www.googleapis.com/calendar/v3/users/me/calendarList`, "GET", null)
 
@@ -54,7 +52,6 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
 	const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
 
-	lock = false;
 	return calendars;
 }
 
@@ -75,8 +72,6 @@ export async function listCalendars(): Promise<GoogleCalendar[]> {
 				console.error('[GoogleCalendar]', error);
 				break;
 		}
-		lock = false;
-
 		return [];
 	}
 }
