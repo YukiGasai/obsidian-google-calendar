@@ -38,12 +38,19 @@ export const callRequest = async (url: string, method: string, body: any, noAuth
                 headers: requestHeaders
             })
         }catch (error) {
-            console.log(response)
-            throw new GoogleApiError("Error Google API request", 
-                { method, url, body, },
-                response.status,
-                (await response.json()),
-            );
+            if(response) {
+                throw new GoogleApiError("Error Google API request", 
+                    { method, url, body, },
+                    response.status,
+                    (await response.json()),
+                );
+            } else {
+                throw new GoogleApiError("Error Google API request", 
+                    { method, url, body, },
+                    500,
+                    {error: "Unknown Error"},
+                );
+            }
         }
 
         if (response.status >= 300) {
@@ -74,12 +81,19 @@ export const callRequest = async (url: string, method: string, body: any, noAuth
                 throw: false,
             });
         }catch (error) {
-            console.log(response)
+            if(response) {
             throw new GoogleApiError("Error Google API request", 
                 { method, url, body, },
                 response.status,
                 (await response.json()),
             );
+            } else {
+                throw new GoogleApiError("Error Google API request", 
+                { method, url, body, },
+                500,
+                {error: "Unknown Error"},
+            );
+            }
         }
 
         if (response.status >= 300) {
