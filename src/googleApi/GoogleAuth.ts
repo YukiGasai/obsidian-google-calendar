@@ -188,11 +188,11 @@ export async function StartLoginGoogleMobile(): Promise<void> {
 	+ `&code_challenge_method=S256`
 	+ `&scope=email%20profile%20https://www.googleapis.com/auth/calendar`;
 
-	console.log({authUrl})
 	window.open(authUrl);
 }
 
 export async function FinishLoginGoogleMobile(code:string, state:string): Promise<void> {
+	const plugin = GoogleCalendarPlugin.getInstance();
 
 	if (state !== authSession.state) {
 		return;
@@ -204,6 +204,9 @@ export async function FinishLoginGoogleMobile(code:string, state:string): Promis
 		setRefreshToken(token.refresh_token);
 		setAccessToken(token.access_token);
 		setExpirationTime(+new Date() + token.expires_in * 1000);
+
+		new Notice("Login successful!");
+		plugin.settingsTab.display();
 	}
 	authSession = {server: null, verifier: null, challenge: null, state:null};
 }
@@ -237,7 +240,6 @@ export async function LoginGoogle(): Promise<void> {
 		authSession.challenge = await generateChallenge(authSession.verifier);
 	}
 
-	console.log(authSession);
 
 	const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
 	+ `?client_id=${CLIENT_ID}`
@@ -250,7 +252,6 @@ export async function LoginGoogle(): Promise<void> {
 	+ `&code_challenge_method=S256`
 	+ `&scope=email%20profile%20https://www.googleapis.com/auth/calendar`;
 	
-	console.log({authUrl});
 
 	// Make sure no server is running before starting a new one
 	if(authSession.server) {
@@ -276,7 +277,6 @@ export async function LoginGoogle(): Promise<void> {
 			const received_state = qs.get("state");
 
 			if (received_state !== authSession.state) {
-				console.log("fuck");
 				return;
 			}
 			let token;

@@ -545,6 +545,15 @@ export default class GoogleCalendarPlugin extends Plugin {
 				FinishLoginGoogleMobile(req.code, req.state)
 				return
 			}
+
+			// Login for Mobile client with public client
+			if(Platform.isMobile && req.at){
+				setAccessToken(req['at']);
+				setRefreshToken(req['rt']);
+				setExpirationTime(+new Date() + 3600000);
+				new Notice("Login successful!");
+				this.settingsTab.display();
+			}
 		});
 
 		this.registerObsidianProtocolHandler("googleOpenNote", async (req) => {
