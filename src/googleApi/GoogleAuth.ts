@@ -24,29 +24,36 @@ import {
 } from "../helper/LocalStorage";
 import { Notice, Platform, requestUrl } from "obsidian";
 import { createNotice } from 'src/helper/NoticeHelper';
-import * as crypto from "crypto";
-
 
 
 const PORT = 42813;
 const REDIRECT_URL = `http://127.0.0.1:${PORT}/callback`;
+const REDIRECT_URL_MOBILE = `https://google-auth-obsidian-redirect.vercel.app/callback`;
 const PUBLIC_CLIENT_ID = `783376961232-v90b17gr1mj1s2mnmdauvkp77u6htpke.apps.googleusercontent.com`
 
 let lastRefreshTryMoment = window.moment().subtract(100, "seconds");
 let authSession = {server: null, verifier: null, challenge: null, state:null};
 
-// Creates a code verifier for the OAuth flow
-function base64URLEncode(str) {
-	return str.toString('base64')
+
+function generateState(): string {
+	return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+  
+async function generateVerifier(): Promise<string> {
+	const array = new Uint32Array(56);
+	await window.crypto.getRandomValues(array);
+	return Array.from(array, dec => ('0' + dec.toString(16)).substr(-2)).join('');
+}
+  
+async function generateChallenge(verifier: string): Promise<string> {
+	const data = new TextEncoder().encode(verifier);
+	const hash = await window.crypto.subtle.digest('SHA-256', data);
+	return btoa(String.fromCharCode(...new Uint8Array(hash)))
+		.replace(/=/g, '')
 		.replace(/\+/g, '-')
-		.replace(/\//g, '_')
-		.replace(/=/g, '');
+		.replace(/\//g, '_');
 }
 
-// Creates a code challenge for the OAuth flow
-function sha256(buffer) {
-	return crypto.createHash('sha256').update(buffer).digest();
-}
 
 export function getAccessIfValid(): string {
 	//Check if the token exists
@@ -114,7 +121,7 @@ const exchangeCodeForTokenDefault = async (plugin: GoogleCalendarPlugin, state:s
 	return request.json;
 }
 
-const exchangeCodeForTokenCustom = async (plugin: GoogleCalendarPlugin, state: string, verifier:string, code: string): Promise<boolean> => {
+const exchangeCodeForTokenCustom = async (plugin: GoogleCalendarPlugin, state: string, verifier:string, code: string, isMobile: boolean): Promise<any> => {
 	const url = `https://oauth2.googleapis.com/token`
 	+ `?grant_type=authorization_code`
 	+ `&client_id=${plugin.settings.googleClientId?.trim()}`
@@ -122,7 +129,7 @@ const exchangeCodeForTokenCustom = async (plugin: GoogleCalendarPlugin, state: s
 	+ `&code_verifier=${verifier}`
 	+ `&code=${code}`
 	+ `&state=${state}`
-	+ `&redirect_uri=${REDIRECT_URL}`
+	+ `&redirect_uri=${isMobile ? REDIRECT_URL_MOBILE :REDIRECT_URL}`
 
 	const response = await fetch(url,{
 		method: 'POST',
@@ -157,6 +164,50 @@ export async function getGoogleAuthToken(plugin: GoogleCalendarPlugin): Promise<
 	return accessToken;
 }
 
+
+export async function StartLoginGoogleMobile(): Promise<void> {
+	const plugin = GoogleCalendarPlugin.getInstance();
+	const useCustomClient = plugin.settings.useCustomClient;
+
+	const CLIENT_ID = useCustomClient ? plugin.settings.googleClientId : PUBLIC_CLIENT_ID;
+	
+	if(!authSession.state){
+		authSession.state = generateState();
+		authSession.verifier = await generateVerifier();
+		authSession.challenge = await generateChallenge(authSession.verifier);
+	}
+
+	const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+	+ `?client_id=${CLIENT_ID}`
+	+ `&response_type=code`
+	+ `&redirect_uri=${REDIRECT_URL_MOBILE}`
+	+ `&prompt=consent`
+	+ `&access_type=offline`
+	+ `&state=${authSession.state}`
+	+ `&code_challenge=${authSession.challenge}`
+	+ `&code_challenge_method=S256`
+	+ `&scope=email%20profile%20https://www.googleapis.com/auth/calendar`;
+
+	console.log({authUrl})
+	window.open(authUrl);
+}
+
+export async function FinishLoginGoogleMobile(code:string, state:string): Promise<void> {
+
+	if (state !== authSession.state) {
+		return;
+	}
+
+	const token = await exchangeCodeForTokenCustom(GoogleCalendarPlugin.getInstance(), state, authSession.verifier, code, true);
+
+	if(token?.refresh_token) {
+		setRefreshToken(token.refresh_token);
+		setAccessToken(token.access_token);
+		setExpirationTime(+new Date() + token.expires_in * 1000);
+	}
+	authSession = {server: null, verifier: null, challenge: null, state:null};
+}
+
 /**
  * Function to allow the user to grant the APplication access to his google calendar by OAUTH authentication
  * 
@@ -181,10 +232,12 @@ export async function LoginGoogle(): Promise<void> {
 	if (!settingsAreComplete()) return;
 
 	if(!authSession.state){
-		authSession.state = base64URLEncode(crypto.randomBytes(32));
-		authSession.verifier = base64URLEncode(crypto.randomBytes(32));
-		authSession.challenge = base64URLEncode(sha256(authSession.verifier));
+		authSession.state = generateState();
+		authSession.verifier = await generateVerifier();
+		authSession.challenge = await generateChallenge(authSession.verifier);
 	}
+
+	console.log(authSession);
 
 	const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
 	+ `?client_id=${CLIENT_ID}`
@@ -197,6 +250,8 @@ export async function LoginGoogle(): Promise<void> {
 	+ `&code_challenge_method=S256`
 	+ `&scope=email%20profile%20https://www.googleapis.com/auth/calendar`;
 	
+	console.log({authUrl});
+
 	// Make sure no server is running before starting a new one
 	if(authSession.server) {
 		window.open(authUrl);
@@ -221,11 +276,12 @@ export async function LoginGoogle(): Promise<void> {
 			const received_state = qs.get("state");
 
 			if (received_state !== authSession.state) {
+				console.log("fuck");
 				return;
 			}
 			let token;
 			if(useCustomClient){
-				token = await exchangeCodeForTokenCustom(plugin, authSession.state, authSession.verifier, code);
+				token = await exchangeCodeForTokenCustom(plugin, authSession.state, authSession.verifier, code, false);
 			}else{
 				token = await exchangeCodeForTokenDefault(plugin, authSession.state, authSession.verifier, code);
 			}

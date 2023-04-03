@@ -36,17 +36,12 @@ The function to use a public OAuth client is in beta and could be removed at any
 - [Add OAUTH client](https://console.cloud.google.com/apis/credentials/oauthclient)
   - select Webclient
   - add `http://127.0.0.1:42813` as Javascript origin
+  - add `https://google-auth-obsidian-redirect.vercel.app` as Javascript origin (only required if you want to use the plugin on mobile)
   - add `http://127.0.0.1:42813/callback` as redirect URI
+  - add `https://google-auth-obsidian-redirect.vercel.app/callback` as redirect URI (only required if you want to use the plugin on mobile)
 - Switch on `Use own authentication client` in the settings tab
 - add the keys into the fields under the plugin settings
 - Press Login
-
-### Using the plugin on Mobile with own client (work around)
-
-- Login on a desktop device
-- Use the `Copy Google Refresh Token to Clipboard` command on that device
-- Install the plugin on the phone
-- Instead of `Login` paste the token from the desktop device into the Refresh token field on the phone
 
 ## Usage
 
@@ -94,7 +89,6 @@ A schedule view to see all your event in a order
 | Google Calendar Trigger Auto Import             | Runs the Auto create Notes function again                                  |
 | Create Event Note                               | Creates an event note for a selected event                                 |
 | Create Event Note for current event             | Creates an event note for a currently running selected event               |
-| Copy Google Calendar Refresh Token to Clipboard | Copies the refresh token (PC only)                                         |
 
 ### @Annotation
 

@@ -8,7 +8,7 @@ import {
 	Notice,
 	Platform,
 } from "obsidian";
-import { LoginGoogle } from "../googleApi/GoogleAuth";
+import { LoginGoogle, StartLoginGoogleMobile } from "../googleApi/GoogleAuth";
 import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
 import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
@@ -78,22 +78,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							await this.plugin.saveSettings();
 						})
 				);
-
-			if (Platform.isMobileApp) {
-				new Setting(containerEl)
-					.setName("Refresh Token")
-					.setDesc("Google Refresh Token from OAuth")
-					.setClass("SubSettings")
-					.addText((text) =>
-						text
-							.setPlaceholder("Enter refresh token")
-							.setValue(this.plugin.settings.googleRefreshToken)
-							.onChange(async (value) => {
-								this.plugin.settings.googleRefreshToken = value.trim();
-								setRefreshToken(value);
-							})
-					);
-			}
 		} else {
 
 			new Setting(containerEl)
@@ -126,7 +110,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						} else {
 							if (Platform.isMobileApp) {
 								if(this.plugin.settings.useCustomClient){
-									setRefreshToken(this.plugin.settings.googleRefreshToken);
+									StartLoginGoogleMobile();
 								}else{
 									window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
 								}
