@@ -149,40 +149,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				});
 			});
 
-
-
-		new Setting(containerEl)
-			.setName("Default webview theme")
-			.addDropdown(async (dropdown) => {
-				dropdown.addOption("auto", "Auto");
-				dropdown.addOption("dark", "Dark");
-				dropdown.addOption("light", "Light");
-				dropdown.setValue(this.plugin.settings.webViewDefaultColorMode);
-				dropdown.onChange(async (state) => {
-					this.plugin.settings.webViewDefaultColorMode = state;
-					await this.plugin.saveSettings();
-					this.hide();
-					this.display();
-				})
-			});
-
-		
-		new Setting(containerEl)
-			.setName("Default webview view mode")
-			.addDropdown(async (dropdown) => {
-				dropdown.addOption("day", "Day");
-				dropdown.addOption("week", "Week");
-				dropdown.addOption("month", "Month");
-				dropdown.addOption("agenda", "Agenda");
-				dropdown.setValue(this.plugin.settings.webViewDefaultView);
-				dropdown.onChange(async (state:any) => {
-					this.plugin.settings.webViewDefaultView = state;
-					await this.plugin.saveSettings();
-					this.hide();
-					this.display();
-				})
-			});
-
 		new Setting(containerEl)
 			.setName("Show daily notes")
 			.setDesc("Will display daily notes and allow to open and create daily notes")

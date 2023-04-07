@@ -71,8 +71,6 @@ function updateCssAndJs(theme) {
 
 $: updateCssAndJs(codeBlockOptions.theme);
 
-$: console.log(container?.parentElement?.parentElement?.getAttribute("show-settings"))
-
 </script>
 
 <div class="box" bind:this={container}>

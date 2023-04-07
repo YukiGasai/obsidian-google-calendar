@@ -40,3 +40,7 @@ input[type='datetime-local'] {
 .block-language-gEvent {
 	padding: 0px;
 }
+
+.setting .multiselect .options  {
+	background-color: #262626 !important;
+}

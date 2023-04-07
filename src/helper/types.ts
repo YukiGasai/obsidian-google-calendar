@@ -46,12 +46,10 @@ export interface GoogleCalendarPluginSettings {
 
     // General settings
     refreshInterval: number;
-    webViewDefaultColorMode: string;
-	webViewDefaultView: "week" | "day" | "month" | "agenda" | "year";
     atAnnotationEnabled: boolean;
     debugMode: boolean;
 
-	viewSettings: { [type in CodeBlockTypes]: CodeBlockOptions };
+	viewSettings: { [type in string]: CodeBlockOptions };
     }
 
 export interface Template {
@@ -323,17 +321,8 @@ export interface IGoogleCalendarPluginApi {
     updateEvent: (event:GoogleEvent, updateSingle: boolean) => Promise<GoogleEvent>,
 	createEventNote: (event:GoogleEvent, eventDirectory: string, templatePath: string) => Promise<TFile>,
 }
-
-export enum CodeBlockTypes {
-	web = "web",
-	month = "month",
-	day = "day",
-	schedule = "schedule",
-	week = "week",
-}
-
 export interface CodeBlockOptions {
-	type?: CodeBlockTypes;
+	type?: "web" | "month" | "day" | "schedule" | "week";
 	date?: string;
 	moment?: moment.Moment;
 	width?: number;

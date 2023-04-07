@@ -1,5 +1,4 @@
 import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
-import { CodeBlockTypes } from "./helper/types";
 import { Editor, EventRef, MarkdownView, Notice, Platform, Plugin, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
@@ -52,8 +51,6 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	defaultCalendar: "",
 	calendarBlackList: [],
 	insertTemplates: [],
-	webViewDefaultColorMode: getCurrentTheme(),
-	webViewDefaultView: "day",
 	useDefaultTemplate: false,
 	defaultTemplate: "",
 	defaultFolder: (app.vault as any).config.newFileFolderPath,
@@ -66,14 +63,14 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	usDateFormat: true,
 	viewSettings: {
 		day: {
-			type: CodeBlockTypes.day,
+			type: "day",
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
 			navigation: true,
 		},
 		week: {
-			type: CodeBlockTypes.week,
+			type: "week",
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
@@ -82,18 +79,18 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			timespan: 7,
 		},
 		month: {
-			type: CodeBlockTypes.month,
+			type: "month",
 			exclude: [],
 			include: [],
 		},
 		schedule: {
-			type: CodeBlockTypes.schedule,
+			type: "schedule",
 			exclude: [],
 			include: [],
 			timespan: 7,
 		},
 		web: {
-			type: CodeBlockTypes.web,
+			type: "web",
 			theme: "auto",
 			view: "day",			
 		}

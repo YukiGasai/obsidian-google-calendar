@@ -3,7 +3,9 @@
     import type { CodeBlockOptions } from "../helper/types";
 	import { googleListCalendars } from '../googleApi/GoogleListCalendars';
 	import { onMount } from 'svelte';
+    import { slide } from 'svelte/transition';
 	import GoogleCalendarPlugin from '../GoogleCalendarPlugin';
+	import { stringifyYaml } from 'obsidian';
 
     export let codeBlockOptions: CodeBlockOptions;
     export let showSettings = false;
@@ -33,16 +35,30 @@
         codeBlockOptions.theme = theme;
         
         plugin.settings.viewSettings[codeBlockOptions.type] = {
+            ...plugin.settings.viewSettings[codeBlockOptions.type],
             hourRange, navigation, timespan, include, exclude, view, theme
         };
         plugin.saveSettings();
     }
     
+    const copyCodeblock = () => {
+        const yaml = stringifyYaml(plugin.settings.viewSettings[codeBlockOptions.type]);
+        const codeBlock = `\`\`\`gEvent\n${yaml}\n\`\`\``;
+        navigator.clipboard.writeText(codeBlock)
+    }
 
 </script>
 <div class={showSettings ? "settingsContainerOpen" : ""}>
-    <div class="settingsWrapper">
+    
     {#if showSettings}
+    <div class="settingsWrapper" transition:slide|local>
+
+            <label for="hourRange">Copy to Codeblock</label>
+            <div class="setting">
+                <button class="copyButton" on:click={copyCodeblock}>&#128203;</button>
+            </div>
+
+
         {#if hourRange !== undefined}
                 <label for="hourRange">Hour Range</label>
                 <div class="setting">
@@ -80,21 +96,24 @@
         {/if}
 
         {#if view !== undefined}
+            <label for="navigation">Default view</label>
             <select name="view" bind:value={view}>
                 <option value="day">Day</option>
                 <option value="week">Week</option>
                 <option value="month">Month</option>
-                <option value="agenda">Schedule</option>
+                <option value="agenda">Agenda</option>
             </select>
-
+        {/if}
+        {#if theme !== undefined}
+            <label for="navigation">Color theme</label>
             <select name="theme" bind:value={theme}>
                 <option value="auto">Auto</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
             </select>
         {/if}
-    {/if}
     </div>
+    {/if}
 </div>
 <style>
     .settingsContainerOpen{
@@ -133,6 +152,10 @@
 
     .setting input[type="number"] {
         width: 50px;
+    }
+
+    .copyButton{
+        filter: saturate(0)
     }
 
 </style>

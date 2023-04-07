@@ -4,7 +4,7 @@
  * from svelte components
  */
 
-import { CodeBlockOptions, CodeBlockTypes } from "../helper/types";
+import { CodeBlockOptions } from "../helper/types";
 import { MarkdownPostProcessorContext, parseYaml, Platform } from "obsidian";
 import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import WebFrameComp from "../svelte/WebFrameComp.svelte";
@@ -16,14 +16,7 @@ import { SvelteBuilder } from "../svelte/SvelteBuilder";
 
 /**
  * This function converts the codeblock into a svelte widget
- * There are multiple settings a user can set:
- * 
- * 	necessary:
- * 		   type: {day, month, web} selects which widget is displayed
- * 	 optional:
- * 		  date : The day that the widget should display / start at
- * 		  width: The width of the widget
- * 		  height The height of the widget
+ * There are multiple settings a user can set
  *  
  * @param text the text of the codeblock
  * @param el the container element for the codeblock widget
@@ -33,12 +26,14 @@ export async function checkEditorForCodeBlocks(
 	el: HTMLElement,
 	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
-	const parsedYaml = parseYaml(text);
+	const parsedYaml = parseYaml(text) ?? {}
+
 	const codeBlockOptions:CodeBlockOptions = parsedYaml
+
 
 	// Id no type is set, default to day view
 	if (!codeBlockOptions.type) {
-		codeBlockOptions.type = CodeBlockTypes.day;
+		codeBlockOptions.type = "day";
 	}
 
 	if(!codeBlockOptions.exclude) {
@@ -101,7 +96,7 @@ export async function checkEditorForCodeBlocks(
 
 		el.style.padding = "10px"
 
-		if (codeBlockOptions.type == CodeBlockTypes.web) {
+		if (codeBlockOptions.type == "web") {
 			if (Platform.isDesktopApp) {
 				ctx.addChild(
 					new SvelteBuilder(WebFrameComp, el, {
@@ -109,14 +104,14 @@ export async function checkEditorForCodeBlocks(
 					})
 				);
 			}
-		} else if (codeBlockOptions.type == CodeBlockTypes.day) {
+		} else if (codeBlockOptions.type == "day") {
 			ctx.addChild(
 				new SvelteBuilder(TimeLineViewComp, el, {
 					codeBlockOptions: codeBlockOptions,
 				})
 			);
 
-		} else if (codeBlockOptions.type == CodeBlockTypes.month) {
+		} else if (codeBlockOptions.type == "month") {
 
 			ctx.addChild(
 				new SvelteBuilder(CalendarComp, el, {
@@ -124,13 +119,13 @@ export async function checkEditorForCodeBlocks(
 				})
 			);
 
-		} else if (codeBlockOptions.type == CodeBlockTypes.schedule) {
+		} else if (codeBlockOptions.type == "schedule") {
 			ctx.addChild(
 				new SvelteBuilder(ScheduleComp, el, {
 					codeBlockOptions: codeBlockOptions,
 				})
 			);
-		} else if (codeBlockOptions.type == CodeBlockTypes.week) {
+		} else if (codeBlockOptions.type == "week") {
 			ctx.addChild(
 				new SvelteBuilder(WeekViewComp, el, {
 					codeBlockOptions: codeBlockOptions,
