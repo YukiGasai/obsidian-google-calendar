@@ -4,16 +4,19 @@ import TimeLine from "./TimeLineComp.svelte";
 import TimeLineHourText from "./TimeLineHourText.svelte";
 import {EventDetailsModal} from "../modal/EventDetailsModal"
 import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
+import type { CodeBlockOptions } from "../helper/types";
+import ViewSettings from "./ViewSettings.svelte";
 
 
-export let height:number = undefined;
-export let width:number = undefined;
-export let startDate:moment.Moment = window.moment();
-export let navigation:boolean = false;
-export let include;
-export let exclude;
-export let hourRange: number[] = undefined; 
+export let codeBlockOptions: CodeBlockOptions;
+export let isObsidianView = false;
+export let showSettings = false;
 
+if(!codeBlockOptions.width) codeBlockOptions.width = 300;
+if(!codeBlockOptions.height) codeBlockOptions.height = 700;
+
+
+let startDate:moment.Moment = codeBlockOptions.date ? window.moment(codeBlockOptions.date ) : window.moment();
 let dateOffset = 0;
 const minusOneWeek = () => dateOffset-= 7;
 const minusOneDay  = () => dateOffset-= 1;
@@ -30,11 +33,14 @@ const openNewEventDialog = (event) => {
     }).open()
 }
 
-$: date = navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
+$: date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
 
 </script>
 <div style="padding-left: 10px; position: relative;">
-    {#if navigation && date}
+    {#if isObsidianView}
+        <ViewSettings bind:codeBlockOptions bind:showSettings/>
+    {/if}
+    {#if codeBlockOptions.navigation && date}
         <div class="gcal-title-container">
             <div class="gcal-date-container">
                 <h3 class="gcal-date-dayofweek">{date.format("dddd")}</h3>
@@ -45,15 +51,22 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
                     <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>Today</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
+                    <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+</button>
                 </div>
             </div>    
-            <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+</button>
         </div>
     {/if}
     
     <div class="gcal-day-container">
-        <TimeLineHourText {hourRange}/>
-        <TimeLine bind:date height={height} width={width} include={include} exclude={exclude} hourRange={hourRange} showTimeDisplay={false} />
+        <TimeLineHourText hourRange={codeBlockOptions.hourRange}/>
+        <TimeLine 
+            bind:date 
+            height={codeBlockOptions.height} 
+            width={codeBlockOptions.width} 
+            include={codeBlockOptions.include} 
+            exclude={codeBlockOptions.exclude} 
+            hourRange={codeBlockOptions.hourRange} 
+        />
     </div>
 </div>
 
@@ -78,14 +91,11 @@ $: date = navigation ? startDate.clone().local().add(dateOffset, "days") : start
     }
     
     .gcal-new-event-button {
-        position: absolute;
-        top: 0;
-        right: 0;
+        margin-left: 30px;
     }
 
     .gcal-nav-container {
         display: flex;
-        justify-content: center;
         margin-bottom: 1em;
     }
 </style>

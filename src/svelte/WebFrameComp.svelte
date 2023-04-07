@@ -1,69 +1,105 @@
 <script lang="ts">
-	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-	import { onMount } from "svelte";
-	import { getCurrentTheme } from "../helper/Helper";
+import ViewSettings from "./ViewSettings.svelte";
+import { getCurrentTheme } from "../helper/Helper";
+import type { CodeBlockOptions } from "../helper/types";
 
-const plugin = GoogleCalendarPlugin.getInstance();
+export let codeBlockOptions: CodeBlockOptions;
+export let isObsidianView = false;
+export let showSettings = false;
+let container;
+let date = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
+if(!codeBlockOptions.height) codeBlockOptions.height = 500;
 
-export let date   = window.moment();
-export let view   = plugin.settings.webViewDefaultView;
-export let width  = 0;
-export let height = 500;
-export let theme  = plugin.settings.webViewDefaultColorMode;
 let frame;
-let webUrl:string = ""
 
-//If date is not valid default to toady
-if(!date.isValid()){
-    webUrl = `https://calendar.google.com/calendar/u/0/r/${view}/`
+const getWebUrl = (view) => {
+    if(!date.isValid()) {
+        return `https://calendar.google.com/calendar/u/0/r/${view}/`
+    }
 
-}else{
     const dateString = date.format("yyyy/M/D");
-    webUrl = `https://calendar.google.com/calendar/u/0/r/${view}/${dateString}`;
+    return`https://calendar.google.com/calendar/u/0/r/${view}/${dateString}`;
 }
 
-onMount(() => {
-    if(theme == "auto") {
-        theme =  getCurrentTheme();
-    }
+function updateCssAndJs(theme) {
+    if(frame) {
+        if(theme == "dark" || (theme == "auto" && getCurrentTheme() == "dark")){
 
-    if(theme == "dark"){
-        frame.addEventListener("dom-ready", (e) => {
-            frame.executeJavaScript(`
-                const menu = document.querySelectorAll('[aria-label][aria-expanded]')[0]
-                if(menu.getAttribute("aria-expanded") == "true"){
-                    menu.click();
-                }
-            `)
-            frame.insertCSS(`html { filter: hue-rotate(180deg)invert(100)contrast(93%) !important; }`);
-        });
+            try{
+                frame.removeEventListener("dom-ready", (e) => {
+                    frame.executeJavaScript(`
+                        const menu = document.querySelectorAll('[aria-label][aria-expanded]')[0]
+                        if(menu.getAttribute("aria-expanded") == "true"){
+                            menu.click();
+                        }
+                    `)
+                    frame.insertCSS(`html { filter: hue-rotate(180deg)invert(100)contrast(93%) !important; }`);
+                });
+            }catch(e){}
+            try{
+                frame.removeEventListener("dom-ready", (e) => {
+                    frame.executeJavaScript(`
+                        const menu = document.querySelectorAll('[aria-label][aria-expanded]')[0]
+                        if(menu.getAttribute("aria-expanded") == "true"){
+                            menu.click();
+                        }
+                    `)
+                });
+            }catch(e){}
+
+            frame.addEventListener("dom-ready", (e) => {
+                frame.executeJavaScript(`
+                    const menu = document.querySelectorAll('[aria-label][aria-expanded]')[0]
+                    if(menu.getAttribute("aria-expanded") == "true"){
+                        menu.click();
+                    }
+                `)
+                frame.insertCSS(`html { filter: hue-rotate(180deg)invert(100)contrast(93%) !important; }`);
+            });
+        }else{
+            frame.addEventListener("dom-ready", (e) => {
+                frame.executeJavaScript(`
+                    const menu = document.querySelectorAll('[aria-label][aria-expanded]')[0]
+                    if(menu.getAttribute("aria-expanded") == "true"){
+                        menu.click();
+                    }
+                `)
+            });
+        }
     }
-})
+}
+
+$: updateCssAndJs(codeBlockOptions.theme);
+
+$: console.log(container?.parentElement?.parentElement?.getAttribute("show-settings"))
 
 </script>
 
-<div class="box">
+<div class="box" bind:this={container}>
+    {#if isObsidianView}
+        <ViewSettings bind:codeBlockOptions bind:showSettings/>
+    {/if}
     <div class="content">
-    {#if width == -1}
+    {#if codeBlockOptions.width == -1}
     <webview 
-        src={webUrl}
+        src={getWebUrl(codeBlockOptions.view)}
         allowpopups
         class="fullSize"
         bind:this={frame}
     />
-    {:else if width == 0}
+    {:else if !codeBlockOptions.width}
     <webview 
-        src={webUrl}
+        src={getWebUrl(codeBlockOptions.view)}
         allowpopups
-        style:height="{height}px"
+        style:height="{codeBlockOptions.height}px"
         bind:this={frame}
     />
     {:else}
     <webview 
-        src={webUrl}
+        src={getWebUrl(codeBlockOptions.view)}
         allowpopups
-        style:width="{width}px"
-        style:height="{height}px"
+        style:width="{codeBlockOptions.width}px"
+        style:height="{codeBlockOptions.height}px"
         bind:this={frame}
     />
     {/if}

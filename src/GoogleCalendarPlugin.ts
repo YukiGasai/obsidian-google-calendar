@@ -1,4 +1,5 @@
 import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
+import { CodeBlockTypes } from "./helper/types";
 import { Editor, EventRef, MarkdownView, Notice, Platform, Plugin, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
@@ -63,6 +64,40 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	timelineHourFormat: 0,
 	atAnnotationEnabled: true,
 	usDateFormat: true,
+	viewSettings: {
+		day: {
+			type: CodeBlockTypes.day,
+			exclude: [],
+			include: [],
+			hourRange: [0, 24],
+			navigation: true,
+		},
+		week: {
+			type: CodeBlockTypes.week,
+			exclude: [],
+			include: [],
+			hourRange: [0, 24],
+			navigation: true,
+			dayOffset: 0,
+			timespan: 7,
+		},
+		month: {
+			type: CodeBlockTypes.month,
+			exclude: [],
+			include: [],
+		},
+		schedule: {
+			type: CodeBlockTypes.schedule,
+			exclude: [],
+			include: [],
+			timespan: 7,
+		},
+		web: {
+			type: CodeBlockTypes.web,
+			theme: "auto",
+			view: "day",			
+		}
+	}
 };
 
 export default class GoogleCalendarPlugin extends Plugin {

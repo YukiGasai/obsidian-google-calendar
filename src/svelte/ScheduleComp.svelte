@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { GoogleEvent } from "../helper/types";
+    import type { CodeBlockOptions, GoogleEvent } from "../helper/types";
     
     import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
     import { getColorFromEvent } from "../googleApi/GoogleColors";
@@ -7,12 +7,14 @@
     import { EventListModal } from "../modal/EventListModal";
     import { onDestroy } from "svelte";
 	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+	import ViewSettings from "./ViewSettings.svelte";
     
-    
-    export let timeSpan = 6;
-    export let date = window.moment();
-    export let include;
-    export let exclude;
+
+    export let codeBlockOptions: CodeBlockOptions;
+    export let isObsidianView = false;
+    export let showSettings = false;
+
+    let date = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
     
     let interval;
     let days: Map<string, GoogleEvent[]> = new Map();
@@ -26,13 +28,14 @@
         hourFormat = plugin.settings.timelineHourFormat;
         const newEvents = await listEvents({
             startDate:date,
-            endDate:date.clone().add(timeSpan, "day"),
-            include,
-            exclude
+            endDate:date.clone().add(codeBlockOptions.timespan - 1, "day"),
+            include: codeBlockOptions.include,
+            exclude: codeBlockOptions.exclude
         });
 
         //only reload if events change
         if(JSON.stringify(newEvents) == JSON.stringify(events)){
+            loading = false;
             return;
         }
         days.clear();
@@ -106,6 +109,7 @@
 
     $: {
         //needed to update if the prop date changes i dont know why
+        codeBlockOptions = codeBlockOptions
         date = date;
         if(interval){
             clearInterval(interval);
@@ -130,6 +134,9 @@
 
     
     </script>
+    {#if isObsidianView}
+        <ViewSettings bind:codeBlockOptions bind:showSettings/>
+    {/if}
     <div class ="gcal-schedule-container" bind:clientWidth={containerWidth}>
         {#if loading}
             <span>LOADING</span>

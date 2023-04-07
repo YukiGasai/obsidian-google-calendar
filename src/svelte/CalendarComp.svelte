@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { ICalendarSource, IDayMetadata, IDot} from "obsidian-calendar-ui"
-    import type { GoogleEvent } from '../helper/types';
+    import type { CodeBlockOptions, GoogleEvent } from '../helper/types';
     
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
     import { EventListModal } from "../modal/EventListModal";
@@ -14,12 +14,13 @@
 	import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "../view/DayCalendarView";
 	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../view/ScheduleCalendarView";
 	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../view/WeekCalendarView";
+	import ViewSettings from "./ViewSettings.svelte";
 
-    export let displayedMonth = window.moment();
-    export let width:number = 0;
-    export let height:number = 0;
-    export let include;
-    export let exclude;
+    export let codeBlockOptions: CodeBlockOptions;
+    export let isObsidianView = false;
+    export let showSettings = false;
+
+    let displayedMonth = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
 
     let dailyNoteList = getDailyNotes();
     let interval;
@@ -39,8 +40,8 @@
         const eventsInMonth = await listEvents({
             startDate:prevMonthDate,
             endDate:nextMonthDate,
-            include,
-            exclude
+            include: codeBlockOptions.include,
+            exclude: codeBlockOptions.exclude,
         });    
 
         //Don't do anything when events are the same
@@ -297,8 +298,10 @@
     })
 
 </script>
-
-{#if width==0 || height == 0}
+{#if isObsidianView}
+    <ViewSettings bind:codeBlockOptions bind:showSettings/>
+{/if}
+{#if !codeBlockOptions.width || !codeBlockOptions.height}
     <div class="gcal-calendar-container">
         {#if loading}
             <p>Loading...</p>
@@ -320,8 +323,8 @@
 {:else}
     <div 
         class="gcal-calendar-container" 
-        style:width="{width}px" 
-        style:height="{height}px"
+        style:width="{codeBlockOptions.width}px" 
+        style:height="{codeBlockOptions.height}px"
         >
         {#if loading}
             <p>Loading...</p>
