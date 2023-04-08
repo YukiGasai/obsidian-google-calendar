@@ -1,5 +1,6 @@
 <script lang="ts">
-    import MultiSelect from 'svelte-multiselect'
+    import MultiSelect from 'svelte-multiselect';
+    import Switch from "./Switch.svelte";
     import RangeSlider from 'svelte-range-slider-pips/src';
     import type { CodeBlockOptions } from "../helper/types";
 	import { googleListCalendars } from '../googleApi/GoogleListCalendars';
@@ -20,26 +21,27 @@
 
     let hourRange = codeBlockOptions.hourRange;
     let navigation = codeBlockOptions.navigation;
-    let timespan = [codeBlockOptions.timespan];
+    let timespan = codeBlockOptions.timespan;
     let include = codeBlockOptions.include;
     let exclude = codeBlockOptions.exclude;
     let view = codeBlockOptions.view;
     let theme = codeBlockOptions.theme;
     let dayOffset = codeBlockOptions.dayOffset;
-
+    let showAllDay = codeBlockOptions.showAllDay;
     $: {
         codeBlockOptions.hourRange = hourRange;
         codeBlockOptions.navigation = navigation;
-        codeBlockOptions.timespan = timespan[0];
+        codeBlockOptions.timespan = timespan;
         codeBlockOptions.include = include;
         codeBlockOptions.exclude = exclude;
         codeBlockOptions.view = view;
         codeBlockOptions.theme = theme;
         codeBlockOptions.dayOffset = dayOffset
+        codeBlockOptions.showAllDay = showAllDay;
         
         plugin.settings.viewSettings[codeBlockOptions.type] = {
             ...plugin.settings.viewSettings[codeBlockOptions.type],
-            hourRange, navigation, timespan: timespan[0], include, exclude, view, theme, dayOffset
+            hourRange, navigation, timespan, include, exclude, view, theme, dayOffset, showAllDay
         };
         plugin.saveSettings();
     }
@@ -66,28 +68,35 @@
             <button on:click={closeSettings}>x</button>
         </div>
 
-        {#if navigation !== undefined}
+        {#if ['day', 'week'].includes(codeBlockOptions.type)}
                 <label for="navigation">Navigation</label>
                 <div class="setting">
-                    <input type="checkbox" name="navigation" bind:checked={navigation}>
+                    <Switch bind:checked={navigation} />
                 </div>
         {/if}
 
-        {#if hourRange !== undefined}
+        {#if ['day', 'week'].includes(codeBlockOptions.type)}
+            <label for="navigation">Show All Day</label>
+            <div class="setting">
+                <Switch bind:checked={showAllDay} />
+            </div>
+        {/if}
+
+        {#if ['day', 'week'].includes(codeBlockOptions.type)}
                 <label for="hourRange">Hour Range</label>
                 <div class="setting rangeSettings">
                     <RangeSlider pipstep={4} range bind:values={hourRange} min={0} max={24} step={1} all='label' pips float/>
                 </div>
         {/if}
 
-        {#if timespan !== undefined}
+        {#if ['week', 'schedule'].includes(codeBlockOptions.type)}
                 <label for="navigation">Timespan</label>
                 <div class="setting rangeSettings">
                     <RangeSlider pipstep={5} bind:values={timespan} min={0} max={15} step={1} all='label' pips float/>
                 </div>
         {/if}
 
-        {#if dayOffset !== undefined}
+        {#if ['day', 'week', 'schedule'].includes(codeBlockOptions.type)}
             <label for="navigation">DayOffset</label>
             <div class="setting rangeSettings">
                 <RangeSlider pipstep={5} bind:values={dayOffset} min={-15} max={15} step={1} all='label' pips float/>
@@ -108,7 +117,7 @@
                 </div>
         {/if}
 
-        {#if view !== undefined}
+        {#if ['web'].includes(codeBlockOptions.type)}
             <label for="navigation">Default view</label>
             <select name="view" bind:value={view}>
                 <option value="day">Day</option>
@@ -117,7 +126,7 @@
                 <option value="agenda">Agenda</option>
             </select>
         {/if}
-        {#if theme !== undefined}
+        {#if ['web'].includes(codeBlockOptions.type)}
             <label for="navigation">Color theme</label>
             <select name="theme" bind:value={theme}>
                 <option value="auto">Auto</option>

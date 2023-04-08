@@ -25,8 +25,8 @@ export let date;
 export let hourRange;
 export let goToEvent;
 
-const getRedTimeLinePosition = () => {
-    const dayPercentage = dateToPercent($currentTime);
+const getRedTimeLinePosition = (time) => {
+    const dayPercentage = dateToPercent(time);
     return Math.floor(height * dayPercentage);
 }
 
@@ -116,7 +116,7 @@ const [send, receive] = crossfade({
     </div>
 
 {#if window.moment().isSame(date, 'day')}
-    <div class="gcal-time-display" style:top="{getRedTimeLinePosition()}px"/>
+    <div class="gcal-time-display" style:top="{getRedTimeLinePosition($currentTime)}px"/>
 {/if}
 
     {#each getLocationArray(events) as location, i (i)}
