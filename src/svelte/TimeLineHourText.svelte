@@ -53,6 +53,8 @@
     .gcal-hour-text-container {
         display: flex;
         flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
     }
 
     .gcal-hour-text {

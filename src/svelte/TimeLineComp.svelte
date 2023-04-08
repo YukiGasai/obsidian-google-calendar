@@ -1,16 +1,12 @@
 <script lang="ts" >
-
+import timerStore from './extra/timerStore'
 import type { GoogleEvent } from "../helper/types";
 import { quintOut } from 'svelte/easing';
 import { crossfade } from 'svelte/transition';
 import TreeMap from 'ts-treemap'
 import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
 import {getEventStartPosition, getEventHeight} from "../helper/Helper";
-
-import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
-import {EventDetailsModal} from '../modal/EventDetailsModal'
 import {getColorFromEvent} from '../googleApi/GoogleColors'
-import { onDestroy } from "svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 interface Location {
@@ -24,39 +20,22 @@ interface Location {
 
 export let height = 700;
 export let width = 300;
-export let date = window.moment();
-export let include;
-export let exclude;
-export let hourRange = [0, 24];
+export let events: GoogleEvent[];
+export let date;
+export let hourRange;
+export let goToEvent;
 
-let loading = false;
-let timeDisplayPosition = 0;
-let events:GoogleEvent[] = [];
-let eventLocations:Location[] = [];
-let interval;
-const plugin = GoogleCalendarPlugin.getInstance();
-let hourFormat = plugin.settings.timelineHourFormat;
-
-
-const refreshData = async (date:moment.Moment) => {
-    if(loading) return;
-    loading = true;
-    hourFormat = plugin.settings.timelineHourFormat;
-    await getEvents(date)
-    const dayPercentage = dateToPercent(new Date());
-    timeDisplayPosition = Math.floor(height * dayPercentage);
-    loading = false;
-} 
-
-$: {
-    //needed to update if the prop date changes i don't know why
-    if(interval) clearInterval(interval);
-    
-    interval = setInterval(()=>refreshData(date), 5000);
-    refreshData(date);
+const getRedTimeLinePosition = () => {
+    const dayPercentage = dateToPercent($currentTime);
+    return Math.floor(height * dayPercentage);
 }
 
-const getLocationArray = () => {
+const plugin = GoogleCalendarPlugin.getInstance();
+let hourFormat = plugin.settings.timelineHourFormat;
+const currentTime = timerStore();
+
+const getLocationArray = (events) => {
+    let eventLocations:Location[] = [];
     const startMap = new TreeMap<string, GoogleEvent[]>();
     events.forEach((event) => {
         const start = event.start.date || event.start.dateTime;
@@ -98,62 +77,27 @@ const getLocationArray = () => {
             }]     
         })
     }
+    return eventLocations;
 }
 
-    const getEvents = async(date:moment.Moment) => {
-        
-        if(!date?.isValid()){
-            loading = false;
-            return;
-        }
-   
-        const newEvents = await listEvents({
-            startDate:date,
-            include,
-            exclude
-        }); 
+const [send, receive] = crossfade({
+    duration: d => Math.sqrt(d * 200),
 
-    if(JSON.stringify(newEvents) != JSON.stringify(events)){
-        events = newEvents;
-        eventLocations = [];
-        getLocationArray()
+    fallback(node, params) {
+        const style = getComputedStyle(node);
+        const transform = style.transform === 'none' ? '' : style.transform;
+
+        return {
+            duration: 600,
+            easing: quintOut,
+            css: t => `
+                transform: ${transform} scale(${t});
+                opacity: ${t}
+            `
+        };
     }
-}
+});
 
-const goToEvent = (event:GoogleEvent, e:any) => {
-    if(e.shiftKey){
-        window.open(event.htmlLink);
-    }else{
-        new EventDetailsModal(event, () => {
-            googleClearCachedEvents();
-            refreshData(date);
-        }).open();
-    }
-}
-
-onDestroy(() => {
-    clearInterval(interval);
-})
-
-
-
-	const [send, receive] = crossfade({
-		duration: d => Math.sqrt(d * 200),
-
-		fallback(node, params) {
-			const style = getComputedStyle(node);
-			const transform = style.transform === 'none' ? '' : style.transform;
-
-			return {
-				duration: 600,
-				easing: quintOut,
-				css: t => `
-					transform: ${transform} scale(${t});
-					opacity: ${t}
-				`
-			};
-		}
-	});
 </script>
 
 <div 
@@ -163,7 +107,6 @@ onDestroy(() => {
     style:margin=" -{getStartHeightOfHour(height, hourRange[0])}px 0px -{getEndHeightOfHour(height, hourRange[1])}px 0px"
     class="gcal-timeline"
     >
-
     <div class="gcal-timeline-container">
         <div class="gcal-hour-line-container">
             {#each {length: 24} as _, i }
@@ -173,10 +116,10 @@ onDestroy(() => {
     </div>
 
 {#if window.moment().isSame(date, 'day')}
-    <div class="gcal-time-display" style:top="{timeDisplayPosition}px"/>
+    <div class="gcal-time-display" style:top="{getRedTimeLinePosition()}px"/>
 {/if}
 
-    {#each eventLocations as location, i (i)}
+    {#each getLocationArray(events) as location, i (i)}
         <div 
             in:receive="{{key: i}}"
             out:send="{{key: i}}"
@@ -247,9 +190,10 @@ onDestroy(() => {
         position:relative;
         display: flex;
         flex-direction: row;
-        overflow: visible;
         padding-top: 5px;
         flex-shrink: 1000;
+        min-height: 0;
+        overflow: hidden; 
     }
 
 </style>

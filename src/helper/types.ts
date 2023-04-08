@@ -333,6 +333,7 @@ export interface CodeBlockOptions {
 	view?: "day" | "week" | "month" | "agenda";
 	theme?: string;
 	hourRange?: number[];
+	showAllDay?: boolean;
 	dayOffset?: number;
 }
 

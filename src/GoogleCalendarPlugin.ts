@@ -69,6 +69,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			hourRange: [0, 24],
 			dayOffset: 0,
 			navigation: true,
+			showAllDay: true,
 		},
 		week: {
 			type: "week",
@@ -78,6 +79,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			navigation: true,
 			dayOffset: 0,
 			timespan: 7,
+			showAllDay: true,
 		},
 		month: {
 			type: "month",

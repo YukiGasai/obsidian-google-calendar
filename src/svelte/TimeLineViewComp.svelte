@@ -2,10 +2,13 @@
 
 import TimeLine from "./TimeLineComp.svelte";
 import TimeLineHourText from "./TimeLineHourText.svelte";
-import {EventDetailsModal} from "../modal/EventDetailsModal"
-import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
-import type { CodeBlockOptions } from "../helper/types";
+import type { CodeBlockOptions, GoogleEvent } from "../helper/types";
 import ViewSettings from "./ViewSettings.svelte";
+import DayNavigation from "./DayNavigation.svelte";
+import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
+import AllDayContainer from "./AllDayContainer.svelte";
+import { onDestroy } from "svelte";
+import { EventDetailsModal } from "../modal/EventDetailsModal";
 
 
 export let codeBlockOptions: CodeBlockOptions;
@@ -15,22 +18,47 @@ export let showSettings = false;
 if(!codeBlockOptions.width) codeBlockOptions.width = 300;
 if(!codeBlockOptions.height) codeBlockOptions.height = 700;
 
-
 let startDate: moment.Moment;
-let dateOffset = 0
-const minusOneWeek = () => dateOffset-= 7;
-const minusOneDay  = () => dateOffset-= 1;
-const backToday    = () => dateOffset = 0;
-const plusOneWeek  = () => dateOffset+= 7;
-const plusOneDay   = () => dateOffset+= 1;
+let dateOffset = 0;
 let date;
+let loading = false;
+let events:GoogleEvent[] = [];
+let interval;
 
-const openNewEventDialog = (event) => {  
+const getEvents = async(date:moment.Moment) => {
+        
+    if(!date?.isValid()){
+        loading = false;
+        return;
+    }
 
-    new EventDetailsModal({start:{}, end:{}}, () =>{
-        googleClearCachedEvents()
-        date=date;
-    }).open()
+    const newEvents = await listEvents({
+        startDate:date,
+        include: codeBlockOptions.include,
+        exclude: codeBlockOptions.exclude
+    }); 
+
+    if(JSON.stringify(newEvents) != JSON.stringify(events)){
+        events = newEvents;
+    }
+}
+
+const refreshData = async (date:moment.Moment) => {
+    if(loading) return;
+    loading = true;
+    await getEvents(date)
+    loading = false;
+} 
+
+const goToEvent = (event:GoogleEvent, e:any) => {
+    if(e.shiftKey){
+        window.open(event.htmlLink);
+    }else{
+        new EventDetailsModal(event, () => {
+            googleClearCachedEvents();
+                refreshData(date);
+        }).open();
+    }
 }
 
 $: {
@@ -38,69 +66,74 @@ $: {
         ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
         : window.moment().add(codeBlockOptions.dayOffset, "days");
     date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
+
+    if(interval) clearInterval(interval);
+    interval = setInterval(() =>refreshData(date), 5000);
+    refreshData(date);
+
 }
 
+onDestroy(() => {
+    clearInterval(interval);
+})
+
 </script>
-<div style="padding-left: 10px; position: relative;">
+<div class="gcal-timline">
     {#if isObsidianView}
         <ViewSettings bind:codeBlockOptions bind:showSettings/>
     {/if}
     {#if codeBlockOptions.navigation && date}
-        <div class="gcal-title-container">
-            <div class="gcal-date-container">
-                <h3 class="gcal-date-dayofweek">{date.format("dddd")}</h3>
-                <h1 class="gcal-date-main">{date.format("MMMM DD, YYYY")}</h1>
-                <div class="gcal-nav-container">
-                    <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
-                    <button class="gcal-nav-button" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
-                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>{window.moment().isSame(startDate, "day") ? "Today" : "Start"}</button>
-                    <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
-                    <button class="gcal-nav-button" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
-                    <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+</button>
-                </div>
-            </div>    
-        </div>
+        <DayNavigation bind:dateOffset bind:date bind:startDate/>
     {/if}
-    
+
     <div class="gcal-day-container">
-        <TimeLineHourText hourRange={codeBlockOptions.hourRange}/>
-        <TimeLine 
-            bind:date 
-            height={codeBlockOptions.height} 
-            width={codeBlockOptions.width} 
-            include={codeBlockOptions.include} 
-            exclude={codeBlockOptions.exclude} 
-            hourRange={codeBlockOptions.hourRange} 
-        />
+        {#if codeBlockOptions.showAllDay}
+            <div class="gcal-stop-overflow" />
+            <div class="gcal-day-container">
+                <AllDayContainer 
+                    {goToEvent}
+                    events={events.filter(e => e.start.date)}
+                    width={codeBlockOptions.width}
+                />
+            </div>
+        {/if}
+        <div class="gcal-stop-overflow">
+            <TimeLineHourText hourRange={codeBlockOptions.hourRange}/>
+        </div>
+        <div class="gcal-stop-overflow">
+            <TimeLine 
+                events={events.filter(e => e.start.dateTime)}
+                bind:date 
+                height={codeBlockOptions.height} 
+                width={codeBlockOptions.width} 
+                hourRange={codeBlockOptions.hourRange} 
+                {goToEvent}
+            />
+        </div>
     </div>
 </div>
 
 <style>
 
-    .gcal-title-container {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-column-gap: 1em;
-        margin-bottom: 1em;
-    }
-
-    .gcal-date-dayofweek, .gcal-date-main {
-        margin: 0px;
-    }
-
-    .gcal-day-container {
-        display: flex;
-        align-items: center;
-        gap: 5px;
+    .gcal-stop-overflow {
         overflow: hidden;
-    }
-    
-    .gcal-new-event-button {
-        margin-left: 30px;
+        min-width: 0;
+        min-height: 0;
     }
 
-    .gcal-nav-container {
+    .gcal-timline{
         display: flex;
-        margin-bottom: 1em;
+        flex-direction: column;
+        gap: 10px;
+        padding-left: 10px;
+        position: relative;
+    }
+    .gcal-day-container {
+        position: relative;
+        display: grid;
+        gap: 1em;
+        grid-auto-flow: row;
+        overflow: hidden;
+        grid-template-columns: auto 1fr;
     }
 </style>
