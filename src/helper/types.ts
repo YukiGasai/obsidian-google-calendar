@@ -324,7 +324,6 @@ export interface IGoogleCalendarPluginApi {
 export interface CodeBlockOptions {
 	type?: "web" | "month" | "day" | "schedule" | "week";
 	date?: string;
-	moment?: moment.Moment;
 	width?: number;
 	height?: number;
 	navigation?: boolean;

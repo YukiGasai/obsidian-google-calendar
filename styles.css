@@ -44,3 +44,7 @@ input[type='datetime-local'] {
 .setting .multiselect .options  {
 	background-color: #262626 !important;
 }
+
+.rangeSettings .rangeSlider {
+	width: 300px;
+}

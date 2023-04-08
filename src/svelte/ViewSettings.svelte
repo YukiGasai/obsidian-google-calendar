@@ -1,9 +1,9 @@
 <script lang="ts">
     import MultiSelect from 'svelte-multiselect'
+    import RangeSlider from 'svelte-range-slider-pips/src';
     import type { CodeBlockOptions } from "../helper/types";
 	import { googleListCalendars } from '../googleApi/GoogleListCalendars';
 	import { onMount } from 'svelte';
-    import { slide } from 'svelte/transition';
 	import GoogleCalendarPlugin from '../GoogleCalendarPlugin';
 	import { stringifyYaml } from 'obsidian';
 	import { allEventColorsNames } from '../googleApi/GoogleColors';
@@ -20,24 +20,26 @@
 
     let hourRange = codeBlockOptions.hourRange;
     let navigation = codeBlockOptions.navigation;
-    let timespan = codeBlockOptions.timespan;
+    let timespan = [codeBlockOptions.timespan];
     let include = codeBlockOptions.include;
     let exclude = codeBlockOptions.exclude;
     let view = codeBlockOptions.view;
     let theme = codeBlockOptions.theme;
+    let dayOffset = codeBlockOptions.dayOffset;
 
     $: {
         codeBlockOptions.hourRange = hourRange;
         codeBlockOptions.navigation = navigation;
-        codeBlockOptions.timespan = timespan;
+        codeBlockOptions.timespan = timespan[0];
         codeBlockOptions.include = include;
         codeBlockOptions.exclude = exclude;
         codeBlockOptions.view = view;
         codeBlockOptions.theme = theme;
+        codeBlockOptions.dayOffset = dayOffset
         
         plugin.settings.viewSettings[codeBlockOptions.type] = {
             ...plugin.settings.viewSettings[codeBlockOptions.type],
-            hourRange, navigation, timespan, include, exclude, view, theme
+            hourRange, navigation, timespan: timespan[0], include, exclude, view, theme, dayOffset
         };
         plugin.saveSettings();
     }
@@ -47,26 +49,22 @@
         const codeBlock = `\`\`\`gEvent\n${yaml}\n\`\`\``;
         navigator.clipboard.writeText(codeBlock)
     }
+    const closeSettings = () => {
+        showSettings = false;
+    }
+
 
 </script>
 <div class={showSettings ? "settingsContainerOpen" : ""}>
     
     {#if showSettings}
-    <div class="settingsWrapper" transition:slide|local>
-
-            <label for="hourRange">Copy to Codeblock</label>
-            <div class="setting">
-                <button class="copyButton" on:click={copyCodeblock}>&#128203;</button>
-            </div>
-
-
-        {#if hourRange !== undefined}
-                <label for="hourRange">Hour Range</label>
-                <div class="setting">
-                    <input type="number" name="hourRangeMin" min=0 max={hourRange[0]}  bind:value={hourRange[0]}>
-                    <input type="number" name="hourRangeMax" min={hourRange[0]} max=24 bind:value={hourRange[1]}>
-                </div>
-        {/if}
+    <div class="settingsWrapper">
+        
+        <label for="hourRange">Copy to Codeblock</label>
+        <div class="setting">
+            <button class="copyButton" on:click={copyCodeblock}>&#128203;</button>
+            <button on:click={closeSettings}>x</button>
+        </div>
 
         {#if navigation !== undefined}
                 <label for="navigation">Navigation</label>
@@ -75,21 +73,35 @@
                 </div>
         {/if}
 
-        {#if timespan !== undefined}
-                <label for="navigation">Timespan</label>
-                <div class="setting">
-                    <input type="number" name="timespan" bind:value={timespan} min=1>
+        {#if hourRange !== undefined}
+                <label for="hourRange">Hour Range</label>
+                <div class="setting rangeSettings">
+                    <RangeSlider pipstep={4} range bind:values={hourRange} min={0} max={24} step={1} all='label' pips float/>
                 </div>
         {/if}
 
-        {#if include !== undefined && calendars.length > 0}
+        {#if timespan !== undefined}
+                <label for="navigation">Timespan</label>
+                <div class="setting rangeSettings">
+                    <RangeSlider pipstep={5} bind:values={timespan} min={0} max={15} step={1} all='label' pips float/>
+                </div>
+        {/if}
+
+        {#if dayOffset !== undefined}
+            <label for="navigation">DayOffset</label>
+            <div class="setting rangeSettings">
+                <RangeSlider pipstep={5} bind:values={dayOffset} min={-15} max={15} step={1} all='label' pips float/>
+            </div>
+        {/if}
+
+        {#if include !== undefined && ( exclude?.length === 0  || include?.length > 0) }
                 <label for="navigation">Include</label>
                 <div class="setting">
                     <MultiSelect bind:selected={include} options={[...calendars, ...allEventColorsNames]} />
                 </div>
         {/if}
 
-        {#if exclude !== undefined && calendars.length > 0}
+        {#if exclude !== undefined && (include?.length === 0 || exclude?.length > 0)}
                 <label for="navigation">Exclude</label>
                 <div class="setting">
                     <MultiSelect bind:selected={exclude} options={[...calendars, ...allEventColorsNames]} />
@@ -143,20 +155,21 @@
         min-width: 80px;
     }
 
+    .rangeSettings {
+        width: 300px;
+    }
+
     .setting {
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: space-between;
         gap: 5px;
-    }
-
-    .setting input[type="number"] {
-        width: 50px;
     }
 
     .copyButton{
         filter: saturate(0)
     }
+
 
 </style>

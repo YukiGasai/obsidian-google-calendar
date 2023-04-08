@@ -14,8 +14,7 @@
     export let isObsidianView = false;
     export let showSettings = false;
 
-    let date = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
-    
+    let date;
     let interval;
     let days: Map<string, GoogleEvent[]> = new Map();
     let loading = false;
@@ -24,7 +23,7 @@
     let hourFormat = plugin.settings.timelineHourFormat;
     let containerWidth;
 
-    const getEvents = async () => {
+    const getEvents = async (date) => {
         hourFormat = plugin.settings.timelineHourFormat;
         const newEvents = await listEvents({
             startDate:date,
@@ -35,7 +34,6 @@
 
         //only reload if events change
         if(JSON.stringify(newEvents) == JSON.stringify(events)){
-            loading = false;
             return;
         }
         days.clear();
@@ -51,8 +49,7 @@
                 days.set(key, [event]);
             }
         })
-
-        loading = false;
+        days = days;
     }
 
     const getDateText = ( date:moment.Moment, hourFormat: number):string => {
@@ -88,7 +85,7 @@
         }else{
             new EventDetailsModal(event, () => {
                 googleClearCachedEvents();
-                date = date
+                getEvents(date);
             }).open();
         }
     }
@@ -98,7 +95,7 @@
         const events = await listEvents({startDate:clickedDate});
         new EventListModal(events,'details', clickedDate, false, () => {
             googleClearCachedEvents();
-            date = date;
+            getEvents(date);
         }).open();
     }
 
@@ -108,15 +105,14 @@
     }
 
     $: {
-        //needed to update if the prop date changes i dont know why
-        codeBlockOptions = codeBlockOptions
-        date = date;
+        date = codeBlockOptions.date 
+            ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
+            : window.moment().add(codeBlockOptions.dayOffset, "days");
         if(interval){
-            clearInterval(interval);
+        clearInterval(interval);
         }
-        loading = true;
-        interval = setInterval(getEvents, 5000);
-        getEvents();
+        interval = setInterval(() => getEvents(date), 5000);
+        getEvents(date);
     }
 
     onDestroy(() => {
@@ -138,45 +134,41 @@
         <ViewSettings bind:codeBlockOptions bind:showSettings/>
     {/if}
     <div class ="gcal-schedule-container" bind:clientWidth={containerWidth}>
-        {#if loading}
-            <span>LOADING</span>
-        {:else}
-            {#each [...days] as [key, events]}
-                <div class={containerWidth < 550 ? "gcal-schedule-day-container breakLine" : "gcal-schedule-day-container"}>
-                    <div class="gcal-schedule-date-display">
-                        <div 
-                        on:click="{()=>goToDaySelect(events[0])}"
-                        class="{checkForSameDate(events[0]) ? "gcal-schedule-day-circle today" : "gcal-schedule-day-circle"}"
-                        style="display: flex; flex-direction: column;"
-                        >
-                            <span class="gcal-schedule-month-text">{key.slice(3,6)}</span>
-                            <span class="gcal-schedule-day-number">{key.slice(0,2)}</span>
-                        </div>
-                        <span class="gcal-schedule-day-text" on:click={switchHourDisplay}>{key.slice(7)}</span>
+        {#each [...days] as [key, events]}
+            <div class={containerWidth < 550 ? "gcal-schedule-day-container breakLine" : "gcal-schedule-day-container"}>
+                <div class="gcal-schedule-date-display">
+                    <div 
+                    on:click="{()=>goToDaySelect(events[0])}"
+                    class="{checkForSameDate(events[0]) ? "gcal-schedule-day-circle today" : "gcal-schedule-day-circle"}"
+                    style="display: flex; flex-direction: column;"
+                    >
+                        <span class="gcal-schedule-month-text">{key.slice(3,6)}</span>
+                        <span class="gcal-schedule-day-number">{key.slice(0,2)}</span>
                     </div>
-                 
-
-                    <div class="gcal-schedule-event-container">
-                        {#each events as event}
-                        <div class={containerWidth < 200 ? "gcal-schedule-event breakLine" : "gcal-schedule-event"} on:click="{(e) => goToEvent(event,e)}">
-                            <div class="gcal-schedule-event-info">
-                                    <div class="{event.recurringEventId ? "gcal-schedule-circle-container-recurring" : "gcal-schedule-circle-container"}">
-                                        <div class="gcal-schedule-event-circle" style:background="{getColorFromEvent(event)}"></div>
-                                    </div>
-                                    <div class="gcal-schedule-time-container">
-                                        <span>{getDateString(event,hourFormat)}</span>
-                                    </div>
-                            </div>
-                            <div class="gcal-schedule-event-title-container">
-                                <span class="gcal-schedule-event-title">{event.summary}</span>
-                            </div>
-                             
-                        </div>
-                        {/each}
-                    </div>
+                    <span class="gcal-schedule-day-text" on:click={switchHourDisplay}>{key.slice(7)}</span>
                 </div>
-            {/each}
-        {/if}
+                
+
+                <div class="gcal-schedule-event-container">
+                    {#each events as event}
+                    <div class={containerWidth < 200 ? "gcal-schedule-event breakLine" : "gcal-schedule-event"} on:click="{(e) => goToEvent(event,e)}">
+                        <div class="gcal-schedule-event-info">
+                                <div class="{event.recurringEventId ? "gcal-schedule-circle-container-recurring" : "gcal-schedule-circle-container"}">
+                                    <div class="gcal-schedule-event-circle" style:background="{getColorFromEvent(event)}"></div>
+                                </div>
+                                <div class="gcal-schedule-time-container">
+                                    <span>{getDateString(event,hourFormat)}</span>
+                                </div>
+                        </div>
+                        <div class="gcal-schedule-event-title-container">
+                            <span class="gcal-schedule-event-title">{event.summary}</span>
+                        </div>
+                            
+                    </div>
+                    {/each}
+                </div>
+            </div>
+        {/each}
     </div>
     
     <style>
@@ -196,7 +188,6 @@
 		flex-direction: row;
 		align-items: center;
         gap: 5px;
-        flex: 0 0 100px;
         padding: 0px;
 	}
 

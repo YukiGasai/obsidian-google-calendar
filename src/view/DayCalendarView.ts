@@ -30,6 +30,7 @@ export class DayCalendarView extends ItemView {
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {
+		this.showSettings = this.timeline.$$.ctx[1];
 		menu.addItem((item) => {
 			item.setTitle("Close");
 			item.setIcon("cross");

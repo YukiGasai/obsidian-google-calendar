@@ -67,6 +67,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
+			dayOffset: 0,
 			navigation: true,
 		},
 		week: {
@@ -88,6 +89,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			exclude: [],
 			include: [],
 			timespan: 7,
+			dayOffset: 0,
 		},
 		web: {
 			type: "web",

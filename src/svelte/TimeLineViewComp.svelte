@@ -16,8 +16,8 @@ if(!codeBlockOptions.width) codeBlockOptions.width = 300;
 if(!codeBlockOptions.height) codeBlockOptions.height = 700;
 
 
-let startDate:moment.Moment = codeBlockOptions.date ? window.moment(codeBlockOptions.date ) : window.moment();
-let dateOffset = 0;
+let startDate: moment.Moment;
+let dateOffset = 0
 const minusOneWeek = () => dateOffset-= 7;
 const minusOneDay  = () => dateOffset-= 1;
 const backToday    = () => dateOffset = 0;
@@ -33,7 +33,12 @@ const openNewEventDialog = (event) => {
     }).open()
 }
 
-$: date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
+$: {
+    startDate = codeBlockOptions.date 
+        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
+        : window.moment().add(codeBlockOptions.dayOffset, "days");
+    date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
+}
 
 </script>
 <div style="padding-left: 10px; position: relative;">
@@ -48,7 +53,7 @@ $: date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset
                 <div class="gcal-nav-container">
                     <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
                     <button class="gcal-nav-button" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
-                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>Today</button>
+                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>{window.moment().isSame(startDate, "day") ? "Today" : "Start"}</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
                     <button class="gcal-new-event-button" aria-label="Create Event" on:click={openNewEventDialog}>+</button>

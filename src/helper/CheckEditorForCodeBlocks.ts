@@ -92,8 +92,7 @@ export async function checkEditorForCodeBlocks(
 		} else {
 			blockDate = window.moment(codeBlockOptions.date);
 		}
-		codeBlockOptions.moment = blockDate;
-
+		
 		el.style.padding = "10px"
 
 		if (codeBlockOptions.type == "web") {

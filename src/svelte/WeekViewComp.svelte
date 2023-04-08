@@ -19,7 +19,7 @@
     const backToday    = () => dateOffset = 0;
     const plusOneWeek  = () => dateOffset+= 7;
     const plusOneDay   = () => dateOffset+= 1;
-
+    let date;
     const openNewEventDialog = (event) => {  
 
         new EventDetailsModal({start:{}, end:{}}, () =>{
@@ -28,13 +28,17 @@
         }).open()
     }
 
-    $: date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
-    
+    $: {
+        startDate = codeBlockOptions.date 
+        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
+        : window.moment().add(codeBlockOptions.dayOffset, "days");
+        date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
+    }
     const getDatesToDisplay = (date) => {
         let datesToDisplay = [];
 
         for (let i = 0; i < codeBlockOptions.timespan; i++) {
-            datesToDisplay = [...datesToDisplay, date.clone().add(i + codeBlockOptions.dayOffset, "days")];
+            datesToDisplay = [...datesToDisplay, date.clone().add(i, "days")];
         }
 
         return datesToDisplay;
@@ -54,7 +58,7 @@
                 <div class="gcal-nav-container">
                     <button class="gcal-nav-button" aria-label="Back 1 week"    on:click={minusOneWeek}>&lt;&lt;</button>
                     <button class="gcal-nav-button" aria-label="Back 1 day"     on:click={minusOneDay}>&lt;</button>
-                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>Today</button>
+                    <button class="gcal-nav-button" aria-label="Jump to today"  on:click={backToday}>{window.moment().isSame(startDate, "day") ? "Today" : "Start"}</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 day"  on:click={plusOneDay}>&gt;</button>
                     <button class="gcal-nav-button" aria-label="Forward 1 week" on:click={plusOneWeek}>&gt;&gt;</button>
                 </div>

@@ -1,7 +1,8 @@
 <script lang="ts" >
 
 import type { GoogleEvent } from "../helper/types";
-
+import { quintOut } from 'svelte/easing';
+import { crossfade } from 'svelte/transition';
 import TreeMap from 'ts-treemap'
 import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
 import {getEventStartPosition, getEventHeight} from "../helper/Helper";
@@ -28,7 +29,7 @@ export let include;
 export let exclude;
 export let hourRange = [0, 24];
 
-let loading = true;
+let loading = false;
 let timeDisplayPosition = 0;
 let events:GoogleEvent[] = [];
 let eventLocations:Location[] = [];
@@ -37,22 +38,22 @@ const plugin = GoogleCalendarPlugin.getInstance();
 let hourFormat = plugin.settings.timelineHourFormat;
 
 
-const refreshData = async () => {
+const refreshData = async (date:moment.Moment) => {
+    if(loading) return;
+    loading = true;
     hourFormat = plugin.settings.timelineHourFormat;
-    await getEvents()
+    await getEvents(date)
     const dayPercentage = dateToPercent(new Date());
     timeDisplayPosition = Math.floor(height * dayPercentage);
+    loading = false;
 } 
 
 $: {
     //needed to update if the prop date changes i don't know why
-    date = date;
-    if(interval){
-        clearInterval(interval);
-    }
-    loading = true;
-    interval = setInterval(refreshData, 5000);
-    refreshData();
+    if(interval) clearInterval(interval);
+    
+    interval = setInterval(()=>refreshData(date), 5000);
+    refreshData(date);
 }
 
 const getLocationArray = () => {
@@ -99,9 +100,10 @@ const getLocationArray = () => {
     }
 }
 
-    const getEvents = async() => {
+    const getEvents = async(date:moment.Moment) => {
         
-        if(!date.isValid()){
+        if(!date?.isValid()){
+            loading = false;
             return;
         }
    
@@ -116,7 +118,6 @@ const getLocationArray = () => {
         eventLocations = [];
         getLocationArray()
     }
-    loading = false;
 }
 
 const goToEvent = (event:GoogleEvent, e:any) => {
@@ -125,7 +126,7 @@ const goToEvent = (event:GoogleEvent, e:any) => {
     }else{
         new EventDetailsModal(event, () => {
             googleClearCachedEvents();
-            date = date
+            refreshData(date);
         }).open();
     }
 }
@@ -134,13 +135,26 @@ onDestroy(() => {
     clearInterval(interval);
 })
 
+
+
+	const [send, receive] = crossfade({
+		duration: d => Math.sqrt(d * 200),
+
+		fallback(node, params) {
+			const style = getComputedStyle(node);
+			const transform = style.transform === 'none' ? '' : style.transform;
+
+			return {
+				duration: 600,
+				easing: quintOut,
+				css: t => `
+					transform: ${transform} scale(${t});
+					opacity: ${t}
+				`
+			};
+		}
+	});
 </script>
-
-
-
-{#if loading}
-    <p>Loading</p>
-{:else} 
 
 <div 
     style:height="{height}px"
@@ -162,8 +176,10 @@ onDestroy(() => {
     <div class="gcal-time-display" style:top="{timeDisplayPosition}px"/>
 {/if}
 
-    {#each eventLocations as location, i}
+    {#each eventLocations as location, i (i)}
         <div 
+            in:receive="{{key: i}}"
+            out:send="{{key: i}}"
             on:click={(e) => goToEvent(location.event,e)} 
             class="
                 googleCalendarEvent
@@ -188,7 +204,6 @@ onDestroy(() => {
     {/each}
 
 </div>
-{/if}
 
 <style>
     .googleCalendarEvent{

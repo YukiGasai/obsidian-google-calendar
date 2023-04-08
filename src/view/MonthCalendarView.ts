@@ -24,6 +24,7 @@ export class MonthCalendarView extends ItemView {
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {
+		this.showSettings = this.calendar.$$.ctx[1];
 		menu.addItem((item) => {
 			item.setTitle("Close");
 			item.setIcon("cross");
