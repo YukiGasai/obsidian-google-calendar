@@ -161,6 +161,10 @@ export const allColorNames = [
 	])
 ];
 
+export const allEventColorsNames = [
+	...Object.values(eventColors).map(color => color.name),
+];
+
 /**
  *  This function just returns the true color of an event
  * @param event  to get the color from

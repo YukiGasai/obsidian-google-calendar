@@ -6,6 +6,7 @@
     import { slide } from 'svelte/transition';
 	import GoogleCalendarPlugin from '../GoogleCalendarPlugin';
 	import { stringifyYaml } from 'obsidian';
+	import { allEventColorsNames } from '../googleApi/GoogleColors';
 
     export let codeBlockOptions: CodeBlockOptions;
     export let showSettings = false;
@@ -84,14 +85,14 @@
         {#if include !== undefined && calendars.length > 0}
                 <label for="navigation">Include</label>
                 <div class="setting">
-                    <MultiSelect bind:selected={include} options={calendars} />
+                    <MultiSelect bind:selected={include} options={[...calendars, ...allEventColorsNames]} />
                 </div>
         {/if}
 
         {#if exclude !== undefined && calendars.length > 0}
                 <label for="navigation">Exclude</label>
                 <div class="setting">
-                    <MultiSelect bind:selected={exclude} options={calendars} />
+                    <MultiSelect bind:selected={exclude} options={[...calendars, ...allEventColorsNames]} />
                 </div>
         {/if}
 
