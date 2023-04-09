@@ -1,15 +1,14 @@
 <script lang="ts">
-    import type { CodeBlockOptions, GoogleEvent } from "../helper/types";
+    import type { CodeBlockOptions, GoogleEvent } from "../../helper/types";
     
-    import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
-    import { getColorFromEvent } from "../googleApi/GoogleColors";
-    import { EventDetailsModal } from "../modal/EventDetailsModal";
-    import { EventListModal } from "../modal/EventListModal";
+    import { googleClearCachedEvents, listEvents } from "../../googleApi/GoogleListEvents";
+    import { getColorFromEvent } from "../../googleApi/GoogleColors";
+    import { EventDetailsModal } from "../../modal/EventDetailsModal";
+    import { EventListModal } from "../../modal/EventListModal";
     import { onDestroy } from "svelte";
-	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-	import ViewSettings from "./ViewSettings.svelte";
+	import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
+	import ViewSettings from "../components/ViewSettings.svelte";
     
-
     export let codeBlockOptions: CodeBlockOptions;
     export let isObsidianView = false;
     export let showSettings = false;
@@ -139,19 +138,27 @@
                 <div class="gcal-schedule-date-display">
                     <div 
                     on:click="{()=>goToDaySelect(events[0])}"
+                    on:keypress="{()=>goToDaySelect(events[0])}"                    
                     class="{checkForSameDate(events[0]) ? "gcal-schedule-day-circle today" : "gcal-schedule-day-circle"}"
                     style="display: flex; flex-direction: column;"
                     >
                         <span class="gcal-schedule-month-text">{key.slice(3,6)}</span>
                         <span class="gcal-schedule-day-number">{key.slice(0,2)}</span>
                     </div>
-                    <span class="gcal-schedule-day-text" on:click={switchHourDisplay}>{key.slice(7)}</span>
+                    <span 
+                        class="gcal-schedule-day-text" 
+                        on:click={switchHourDisplay}
+                        on:keypress={switchHourDisplay}
+                    >{key.slice(7)}</span>
                 </div>
                 
 
                 <div class="gcal-schedule-event-container">
                     {#each events as event}
-                    <div class={containerWidth < 200 ? "gcal-schedule-event breakLine" : "gcal-schedule-event"} on:click="{(e) => goToEvent(event,e)}">
+                    <div class={containerWidth < 200 ? "gcal-schedule-event breakLine" : "gcal-schedule-event"} 
+                        on:click="{(e) => goToEvent(event,e)}"
+                        on:keypress="{(e) => goToEvent(event,e)}"
+                    >
                         <div class="gcal-schedule-event-info">
                                 <div class="{event.recurringEventId ? "gcal-schedule-circle-container-recurring" : "gcal-schedule-circle-container"}">
                                     <div class="gcal-schedule-event-circle" style:background="{getColorFromEvent(event)}"></div>

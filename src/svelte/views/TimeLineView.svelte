@@ -1,14 +1,15 @@
 <script lang="ts" >
+    // Week view replaces the day view when the timespan is set to 1
 
-    import TimeLine from "./TimeLineComp.svelte";
-    import TimeLineHourText from "./TimeLineHourText.svelte";
-	import type { CodeBlockOptions, GoogleEvent } from "../helper/types";
-	import ViewSettings from "./ViewSettings.svelte";
-	import DayNavigation from "./DayNavigation.svelte";
+    import TimeLine from "../components/TimeLine.svelte";
+    import TimeLineHourText from "../components/TimeLineHourText.svelte";
+	import type { CodeBlockOptions, GoogleEvent } from "../../helper/types";
+	import ViewSettings from "../components/ViewSettings.svelte";
+	import DayNavigation from "../components/DayNavigation.svelte";
 	import { onDestroy } from "svelte";
-	import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
-	import { EventDetailsModal } from "../modal/EventDetailsModal";
-	import AllDayContainer from "./AllDayContainer.svelte";
+	import { googleClearCachedEvents, listEvents } from "../../googleApi/GoogleListEvents";
+	import { EventDetailsModal } from "../../modal/EventDetailsModal";
+	import AllDayContainer from "../components/AllDayContainer.svelte";
     
 
     export let codeBlockOptions: CodeBlockOptions;
@@ -94,7 +95,6 @@
             <DayNavigation bind:dateOffset bind:date bind:startDate />
         {/if}
 
-
         <div 
             class="gcal-week-container"
             style:grid-template-columns="auto repeat({codeBlockOptions.timespan}, minmax(0, 1fr))"
@@ -144,11 +144,10 @@
 
     .gcal-week-container {
         position: relative;
-        display: grid;
+        display: inline-grid;
         gap: 1em;
         grid-auto-flow: row;
         overflow: hidden;
-        
     }
 
     .gcal-week-container > * {

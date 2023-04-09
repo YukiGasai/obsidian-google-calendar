@@ -1,6 +1,6 @@
 import type { GoogleEvent } from "../helper/types";
 import { Editor, Modal } from "obsidian";
-import InsertEventsComp from "../svelte/InsertEventsComp.svelte";
+import InsertEvents from "../svelte/views/InsertEvents.svelte";
 import GoogleCalendarPlugin from './../GoogleCalendarPlugin';
 import _ from "lodash";
 
@@ -20,7 +20,7 @@ export class InsertEventsModal extends Modal {
 
     async onOpen(): Promise<void> {
         const { contentEl } = this;
-        new InsertEventsComp({
+        new InsertEvents({
             target: contentEl,
             props: {
                 onSubmit: this.onSubmit,

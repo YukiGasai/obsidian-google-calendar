@@ -1,10 +1,10 @@
 import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
-import ScheduleComp from "../svelte/ScheduleComp.svelte";
+import ScheduleView from "../svelte/views/ScheduleView.svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE = "google-calendar-view-schedule";
 export class ScheduleCalendarView extends ItemView {
-	calendar: ScheduleComp;
+	calendar: ScheduleView;
 	startDate: moment.Moment;
 	showSettings = false;
 
@@ -59,7 +59,7 @@ export class ScheduleCalendarView extends ItemView {
 		const plugin = GoogleCalendarPlugin.getInstance();
 		const options = plugin.settings.viewSettings["schedule"];
 	
-		this.calendar = new ScheduleComp({
+		this.calendar = new ScheduleView({
 			target: this.contentEl,
 			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings, },
 		});

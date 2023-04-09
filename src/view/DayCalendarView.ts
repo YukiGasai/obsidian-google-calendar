@@ -1,10 +1,10 @@
 import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
-import TimeLineViewComp from "../svelte/TimeLineViewComp.svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import TimeLineView from "../svelte/views/TimeLineView.svelte";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_DAY = "google-calendar-view-day";
 export class DayCalendarView extends ItemView {
-	timeline: TimeLineViewComp;
+	timeline: TimeLineView;
 	startDate: moment.Moment;
 	showSettings = false;
 
@@ -56,10 +56,10 @@ export class DayCalendarView extends ItemView {
 
 		const plugin = GoogleCalendarPlugin.getInstance();
 		const options = plugin.settings.viewSettings["day"];
-
-		this.timeline = new TimeLineViewComp({
+		options.timespan = 1;
+		this.timeline = new TimeLineView({
 			target: this.contentEl,
-			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings, },
+			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings },
 		});
 	}
 	async onClose(): Promise<void> {

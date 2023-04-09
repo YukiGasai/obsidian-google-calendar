@@ -2,7 +2,7 @@ import type { GoogleCalendar, GoogleEvent } from "../helper/types";
 
 import { Modal } from "obsidian";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-import EventDetailsComp from "../svelte/EventDetailsComp.svelte";
+import EventDetails from "../svelte/views/EventDetails.svelte";
 
 /**
  * This Class is used to create a modal in which the user can see more information about an event and can update and delete the event
@@ -28,7 +28,7 @@ export class EventDetailsModal extends Modal {
 
 	async onOpen(): Promise<void> {
 		const { contentEl } = this;
-		new EventDetailsComp({
+		new EventDetails({
 			target: contentEl,
 			props: {
 				event: this.selectedEvent,

@@ -1,20 +1,20 @@
 <script lang="ts">
     import type { ICalendarSource, IDayMetadata, IDot} from "obsidian-calendar-ui"
-    import type { CodeBlockOptions, GoogleEvent } from '../helper/types';
+    import type { CodeBlockOptions, GoogleEvent } from '../../helper/types';
     
     import { Calendar as CalendarBase } from "obsidian-calendar-ui";
-    import { EventListModal } from "../modal/EventListModal";
-    import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
+    import { EventListModal } from "../../modal/EventListModal";
+    import { googleClearCachedEvents, listEvents } from "../../googleApi/GoogleListEvents";
     import { onDestroy } from "svelte";
     import _ from "lodash"
-    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote, openPeriodicNote, openPeriodicNoteInNewWindow } from "../helper/DailyNoteHelper";
+    import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
+    import { getDailyNotes, getSingleDailyNote, getSingleWeeklyNote, openPeriodicNote, openPeriodicNoteInNewWindow } from "../../helper/DailyNoteHelper";
     import { createWeeklyNote } from "obsidian-daily-notes-interface";
 	import { Menu, Platform } from "obsidian";
-	import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "../view/DayCalendarView";
-	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../view/ScheduleCalendarView";
-	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../view/WeekCalendarView";
-	import ViewSettings from "./ViewSettings.svelte";
+	import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "../../view/DayCalendarView";
+	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../../view/ScheduleCalendarView";
+	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../../view/WeekCalendarView";
+	import ViewSettings from "../components/ViewSettings.svelte";
 
     export let codeBlockOptions: CodeBlockOptions;
     export let isObsidianView = false;

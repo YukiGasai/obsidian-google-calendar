@@ -1,10 +1,10 @@
 import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
-import CalendarComp from "../svelte/CalendarComp.svelte";
+import MonthView from "../svelte/views/MonthView.svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_MONTH = "google-calendar-view-month";
 export class MonthCalendarView extends ItemView {
-	calendar: CalendarComp;
+	calendar: MonthView;
 	showSettings = false;
 
 	constructor(leaf: WorkspaceLeaf) {
@@ -50,7 +50,7 @@ export class MonthCalendarView extends ItemView {
 
 		const plugin = GoogleCalendarPlugin.getInstance();
 		const options = plugin.settings.viewSettings["month"];
-		this.calendar = new CalendarComp({
+		this.calendar = new MonthView({
 			target: this.contentEl,
 			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings },
 		});

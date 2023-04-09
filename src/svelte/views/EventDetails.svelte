@@ -1,18 +1,18 @@
 <script lang="ts">
-    import type { GoogleCalendar, GoogleEvent } from "../helper/types";
+    import type { GoogleCalendar, GoogleEvent } from "../../helper/types";
     
-    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+    import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
     import { onMount } from 'svelte';
-    import { listCalendars } from "../googleApi/GoogleListCalendars";
-    import { deleteEvent } from "../googleApi/GoogleDeleteEvent";
-    import { googleUpdateEvent } from '../googleApi/GoogleUpdateEvent'
-    import { createEvent } from "../googleApi/GoogleCreateEvent";
+    import { listCalendars } from "../../googleApi/GoogleListCalendars";
+    import { deleteEvent } from "../../googleApi/GoogleDeleteEvent";
+    import { googleUpdateEvent } from '../../googleApi/GoogleUpdateEvent'
+    import { createEvent } from "../../googleApi/GoogleCreateEvent";
     import { RRule, RRuleSet, rrulestr } from "rrule";
     import _ from "lodash";
-	import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
+	import { CreateNotePromptModal } from "../../modal/CreateNotePromptModal";
     import type { TFile } from "obsidian";
-    import { createNotice } from "../helper/NoticeHelper";
-    import { findEventNote } from "../helper/Helper";
+    import { createNotice } from "../../helper/NoticeHelper";
+    import { findEventNote } from "../../helper/Helper";
     import { getEvent } from "src/googleApi/GoogleGetEvent";
     import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
 

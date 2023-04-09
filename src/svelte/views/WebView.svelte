@@ -1,12 +1,12 @@
 <script lang="ts">
-import ViewSettings from "./ViewSettings.svelte";
-import { getCurrentTheme } from "../helper/Helper";
-import type { CodeBlockOptions } from "../helper/types";
+import ViewSettings from "../components/ViewSettings.svelte";
+import { getCurrentTheme } from "../../helper/Helper";
+import type { CodeBlockOptions } from "../../helper/types";
 
 export let codeBlockOptions: CodeBlockOptions;
 export let isObsidianView = false;
 export let showSettings = false;
-let container;
+
 let date = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
 if(!codeBlockOptions.height) codeBlockOptions.height = 500;
 
@@ -73,7 +73,7 @@ $: updateCssAndJs(codeBlockOptions.theme);
 
 </script>
 
-<div class="box" bind:this={container}>
+<div class="box">
     {#if isObsidianView}
         <ViewSettings bind:codeBlockOptions bind:showSettings/>
     {/if}

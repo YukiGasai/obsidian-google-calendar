@@ -1,10 +1,10 @@
 import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
-import WeekViewComp from "../svelte/WeekViewComp.svelte";
+import TimeLineView from "../svelte/views/TimeLineView.svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_WEEK = "google-calendar-view-week";
 export class WeekCalendarView extends ItemView {
-	calendar: WeekViewComp;
+	calendar: TimeLineView;
 	startDate: moment.Moment;
 	showSettings = false;
 
@@ -57,7 +57,7 @@ export class WeekCalendarView extends ItemView {
 		const plugin = GoogleCalendarPlugin.getInstance();
 		const options = plugin.settings.viewSettings["week"];
 
-		this.calendar = new WeekViewComp({
+		this.calendar = new TimeLineView({
 			target: this.contentEl,
 			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings, },
 		});

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
-    import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+	import { getStartHeightOfHour, getEndHeightOfHour } from "../../helper/Helper";
+    import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
 
     const plugin = GoogleCalendarPlugin.getInstance();
     let hourFormat = plugin.settings.timelineHourFormat;
@@ -43,6 +43,7 @@
     {#each {length: 24} as _, i }
         <span class=gcal-hour-text
         on:click={switchHourDisplay}
+        on:keypress={switchHourDisplay}
         style:height="{height/24}px"
         style:font-size="{height/50}px" 
         >{getHourText(i,hourFormat)}</span>

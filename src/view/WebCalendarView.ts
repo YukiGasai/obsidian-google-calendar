@@ -1,10 +1,10 @@
 import { ItemView, Menu, WorkspaceLeaf } from "obsidian";
-import WebFrameComp from "../svelte/WebFrameComp.svelte";
+import WebView from "../svelte/views/WebView.svelte";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 export const VIEW_TYPE_GOOGLE_CALENDAR_WEB = "google-calendar-view-web";
 export class WebCalendarView extends ItemView {
-	calendar: WebFrameComp;
+	calendar: WebView;
 	showSettings = false;
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -50,7 +50,7 @@ export class WebCalendarView extends ItemView {
 		options.width = -1;
 
 
-		this.calendar = new WebFrameComp({
+		this.calendar = new WebView({
 			target: this.contentEl,
 			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings }
 		});

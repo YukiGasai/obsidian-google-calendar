@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { InsertEventsModal } from "../modal/InsertEventsModal";
-	import type { GoogleCalendar, GoogleEvent, Template } from "../helper/types";
+	import type { InsertEventsModal } from "../../modal/InsertEventsModal";
+	import type { GoogleCalendar, GoogleEvent, Template } from "../../helper/types";
 	import { onMount } from "svelte";
-	import { listCalendars } from "../googleApi/GoogleListCalendars";
-	import { GoogleEventSuggestionList } from "../suggest/GoogleEventSuggestionList";
-	import { listEvents } from "../googleApi/GoogleListEvents";
-	import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
-	import { AskNameModal } from "../modal/AskNameModal";
-	import { createNotice } from "../helper/NoticeHelper";
+	import { listCalendars } from "../../googleApi/GoogleListCalendars";
+	import { GoogleEventSuggestionList } from "../../suggest/GoogleEventSuggestionList";
+	import { listEvents } from "../../googleApi/GoogleListEvents";
+	import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
+	import { AskNameModal } from "../../modal/AskNameModal";
+	import { createNotice } from "../../helper/NoticeHelper";
 
     export let onSubmit :(printType:string, eventList: GoogleEvent[], tableOptions: string[], insertEventsModal: InsertEventsModal) => void;
     export let insertEventsModal: InsertEventsModal;

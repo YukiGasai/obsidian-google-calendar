@@ -1,6 +1,6 @@
 <script lang="ts">
-    import {EventDetailsModal} from "../modal/EventDetailsModal"
-    import { googleClearCachedEvents } from "../googleApi/GoogleListEvents";
+    import {EventDetailsModal} from "../../modal/EventDetailsModal"
+    import { googleClearCachedEvents } from "../../googleApi/GoogleListEvents";
 
     export let date;
     export let startDate;

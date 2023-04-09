@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getColorFromEvent } from "../googleApi/GoogleColors";
-	import type { GoogleEvent } from "../helper/types";
+	import { getColorFromEvent } from "../../googleApi/GoogleColors";
+	import type { GoogleEvent } from "../../helper/types";
 
     export let events: GoogleEvent[];
     export let goToEvent;
@@ -10,8 +10,7 @@
 
 <div class="eventContainer">
     {#each events as event}
-        <div 
-        class="
+        <div         class="
             googleCalendarEvent
             googleCalendarEvent_Calendar_Color_{event.parent.colorId}
             googleCalendarEvent_Event_Color_{event.parent.colorId}
@@ -22,6 +21,7 @@
         style:background={getColorFromEvent(event)}
         style:width={width > 0 ? width + 'px' : '100%'}
         on:click={(e) => goToEvent(event,e)} 
+        on:keypress={(e) => goToEvent(event,e)}
     >
     <span class="
         googleCalendarName

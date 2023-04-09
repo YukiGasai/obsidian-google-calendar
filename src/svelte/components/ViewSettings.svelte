@@ -2,12 +2,12 @@
     import MultiSelect from 'svelte-multiselect';
     import Switch from "./Switch.svelte";
     import RangeSlider from 'svelte-range-slider-pips/src';
-    import type { CodeBlockOptions } from "../helper/types";
-	import { googleListCalendars } from '../googleApi/GoogleListCalendars';
+    import type { CodeBlockOptions } from "../../helper/types";
+	import { googleListCalendars } from '../../googleApi/GoogleListCalendars';
 	import { onMount } from 'svelte';
-	import GoogleCalendarPlugin from '../GoogleCalendarPlugin';
+	import GoogleCalendarPlugin from '../../GoogleCalendarPlugin';
 	import { stringifyYaml } from 'obsidian';
-	import { allEventColorsNames } from '../googleApi/GoogleColors';
+	import { allEventColorsNames } from '../../googleApi/GoogleColors';
 
     export let codeBlockOptions: CodeBlockOptions;
     export let showSettings = false;

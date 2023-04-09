@@ -1,13 +1,13 @@
 <script lang="ts" >
-import timerStore from './extra/timerStore'
-import type { GoogleEvent } from "../helper/types";
+import timerStore from '../extra/timerStore'
+import type { GoogleEvent } from "../../helper/types";
 import { quintOut } from 'svelte/easing';
 import { crossfade } from 'svelte/transition';
 import TreeMap from 'ts-treemap'
-import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../helper/Helper";
-import {getEventStartPosition, getEventHeight} from "../helper/Helper";
-import {getColorFromEvent} from '../googleApi/GoogleColors'
-import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import { dateToPercent, getStartHeightOfHour, getEndHeightOfHour } from "../../helper/Helper";
+import {getEventStartPosition, getEventHeight} from "../../helper/Helper";
+import {getColorFromEvent} from '../../googleApi/GoogleColors'
+import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
 
 interface Location {
     event:GoogleEvent;
@@ -122,8 +122,8 @@ const [send, receive] = crossfade({
     {#each getLocationArray(events) as location, i (i)}
         <div 
             in:receive="{{key: i}}"
-            out:send="{{key: i}}"
             on:click={(e) => goToEvent(location.event,e)} 
+            on:keypress={(e) => goToEvent(location.event,e)}
             class="
                 googleCalendarEvent
                 googleCalendarEvent_Calendar_Color_{location.event.parent.colorId}
