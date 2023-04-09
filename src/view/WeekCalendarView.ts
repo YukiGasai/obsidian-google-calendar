@@ -30,15 +30,9 @@ export class WeekCalendarView extends ItemView {
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {
+		super.onPaneMenu(menu, source)
 		this.showSettings = this.calendar.$$.ctx[1];
 		menu.addItem((item) => {
-			item.setTitle("Close");
-			item.setIcon("cross");
-			item.onClick(() => {
-				this.leaf.detach();
-			});
-		})
-		.addItem((item) => {
 				item.setTitle("Refresh");
 				item.setIcon("sync");
 				item.onClick(() => {
