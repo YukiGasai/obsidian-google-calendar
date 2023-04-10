@@ -20,8 +20,7 @@
     export let isObsidianView = false;
     export let showSettings = false;
 
-    let displayedMonth = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
-
+    let displayedMonth;
     let dailyNoteList = getDailyNotes();
     let interval;
     let newDayInterval;
@@ -279,6 +278,11 @@
     }
 
     $: {
+
+
+        displayedMonth = codeBlockOptions.date ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "month") : window.moment().add(codeBlockOptions.dayOffset, "month");
+
+
         if(interval){
             clearInterval(interval);
         }

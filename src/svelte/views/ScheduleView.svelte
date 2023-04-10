@@ -8,31 +8,52 @@
     import { onDestroy } from "svelte";
 	import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
 	import ViewSettings from "../components/ViewSettings.svelte";
+    import DayNavigation from "../components/DayNavigation.svelte";
     
     export let codeBlockOptions: CodeBlockOptions;
     export let isObsidianView = false;
     export let showSettings = false;
-
+    
+    let plugin = GoogleCalendarPlugin.getInstance();
+    let startDate:moment.Moment = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
+    let dateOffset = 0;
     let date;
+    let loading = false;
+    let events:GoogleEvent[] = [];
     let interval;
     let days: Map<string, GoogleEvent[]> = new Map();
-    let loading = false;
-    let events = [];
-    let plugin = GoogleCalendarPlugin.getInstance();
     let hourFormat = plugin.settings.timelineHourFormat;
     let containerWidth;
+    
 
-    const getEvents = async (date) => {
+    const getEvents = async(date:moment.Moment) => {
+        if(loading) return;
+        if(!date?.isValid()){
+            loading = false;
+            return;
+        }
+
         hourFormat = plugin.settings.timelineHourFormat;
-        const newEvents = await listEvents({
+        let newEvents = await listEvents({
             startDate:date,
             endDate:date.clone().add(codeBlockOptions.timespan - 1, "day"),
             include: codeBlockOptions.include,
             exclude: codeBlockOptions.exclude
         });
 
+        newEvents = newEvents.filter(event => {
+            if(event.start.date) return codeBlockOptions.showAllDay;
+            const startMoment = window.moment(event.start.dateTime)
+            const endMoment = window.moment(event.end.dateTime);
+            const startHour = startMoment.minutes() > 0 ? startMoment.hour() + 1 : startMoment.hour();
+            const endHour   = endMoment.minutes()   > 0 ? endMoment.hour()   + 1 : endMoment.hour();
+            return (startHour >= codeBlockOptions.hourRange[0] && startHour <= codeBlockOptions.hourRange[1]) ||
+                   (endHour >= codeBlockOptions.hourRange[0] && endHour <= codeBlockOptions.hourRange[1]) ||
+                    (startHour < codeBlockOptions.hourRange[0] && endHour > codeBlockOptions.hourRange[1])
+        })
         //only reload if events change
         if(JSON.stringify(newEvents) == JSON.stringify(events)){
+            loading = false;
             return;
         }
         days.clear();
@@ -104,11 +125,13 @@
     }
 
     $: {
-        date = codeBlockOptions.date 
-            ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
-            : window.moment().add(codeBlockOptions.dayOffset, "days");
+        startDate = codeBlockOptions.date 
+        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
+        : window.moment().add(codeBlockOptions.dayOffset, "days");
+        date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
+
         if(interval){
-        clearInterval(interval);
+            clearInterval(interval);
         }
         interval = setInterval(() => getEvents(date), 5000);
         getEvents(date);
@@ -133,6 +156,9 @@
         <ViewSettings bind:codeBlockOptions bind:showSettings/>
     {/if}
     <div class ="gcal-schedule-container" bind:clientWidth={containerWidth}>
+        {#if codeBlockOptions.navigation && date}
+            <DayNavigation bind:dateOffset bind:date bind:startDate />
+        {/if}
         {#each [...days] as [key, events]}
             <div class={containerWidth < 550 ? "gcal-schedule-day-container breakLine" : "gcal-schedule-day-container"}>
                 <div class="gcal-schedule-date-display">

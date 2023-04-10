@@ -35,3 +35,18 @@
         </div>
     </div>    
 </div>
+
+
+<style>
+    .gcal-date-container{
+        margin-bottom: 10px;
+    }
+
+    .gcal-date-dayofweek, .gcal-date-main {
+        margin: 0px;
+    }
+
+    .gcal-nav-container {
+        margin-bottom: 1em;
+    }
+</style>

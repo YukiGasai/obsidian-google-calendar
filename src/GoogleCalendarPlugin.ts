@@ -14,7 +14,7 @@ import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/Month
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
+import { setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -68,35 +68,41 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			include: [],
 			hourRange: [0, 24],
 			dayOffset: 0,
-			navigation: true,
+			timespan: 1,
 			showAllDay: true,
+			navigation: true,
 		},
 		week: {
 			type: "week",
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
-			navigation: true,
 			dayOffset: 0,
 			timespan: 7,
 			showAllDay: true,
-		},
-		month: {
-			type: "month",
-			exclude: [],
-			include: [],
+			navigation: true,
 		},
 		schedule: {
 			type: "schedule",
 			exclude: [],
 			include: [],
+			hourRange: [0, 24],
+			dayOffset: 0,
 			timespan: 7,
+			showAllDay: true,
+			navigation: true,
+		},
+		month: {
+			type: "month",
+			exclude: [],
+			include: [],
 			dayOffset: 0,
 		},
 		web: {
 			type: "web",
 			theme: "auto",
-			view: "day",			
+			view: "day",	
+			dayOffset: 0,		
 		}
 	}
 };

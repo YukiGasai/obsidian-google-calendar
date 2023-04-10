@@ -7,7 +7,7 @@ export let codeBlockOptions: CodeBlockOptions;
 export let isObsidianView = false;
 export let showSettings = false;
 
-let date = codeBlockOptions.date ? window.moment(codeBlockOptions.date) : window.moment();
+let date;
 if(!codeBlockOptions.height) codeBlockOptions.height = 500;
 
 let frame;
@@ -69,7 +69,12 @@ function updateCssAndJs(theme) {
     }
 }
 
-$: updateCssAndJs(codeBlockOptions.theme);
+$: {
+    date = codeBlockOptions.date 
+        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "day") 
+        : window.moment().add(codeBlockOptions.dayOffset, "day");
+    updateCssAndJs(codeBlockOptions.theme);
+}
 
 </script>
 

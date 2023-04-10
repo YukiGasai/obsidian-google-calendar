@@ -99,13 +99,19 @@
             class="gcal-week-container"
             style:grid-template-columns="auto repeat({codeBlockOptions.timespan}, minmax(0, 1fr))"
         >
-            <div class="gcal-stop-overflow" />
-            {#each getDatesToDisplay(date) as day, i}
-                <div class="gcal-day-container">
-                    <span class="gcal-dayofweek">{day.format('ddd')}</span>
-                    <span class="gcal-day">{day.format('D')}</span>
-                </div>
-            {/each}
+            {#if codeBlockOptions.timespan > 1}
+                <div class="gcal-stop-overflow" />
+                {#each getDatesToDisplay(date) as day, i}
+                    <div class="gcal-day-container">
+                        <span class="gcal-dayofweek">{day.format('ddd')}</span>
+                        <span class="gcal-day">{day.format('D')}</span>
+                    </div>
+                {/each}
+            {:else}
+            <!-- Required if no header elements are displayed -->
+                <div class="gcal-stop-overflow" />
+                <div class="gcal-stop-overflow" />
+            {/if}
 
 
             {#if codeBlockOptions.showAllDay}

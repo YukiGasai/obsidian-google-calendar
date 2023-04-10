@@ -21,32 +21,38 @@
 
     let hourRange = codeBlockOptions.hourRange;
     let navigation = codeBlockOptions.navigation;
-    let timespan = codeBlockOptions.timespan;
+    let timespan = [codeBlockOptions.timespan];
     let include = codeBlockOptions.include;
     let exclude = codeBlockOptions.exclude;
     let view = codeBlockOptions.view;
     let theme = codeBlockOptions.theme;
-    let dayOffset = codeBlockOptions.dayOffset;
+    let dayOffset = [codeBlockOptions.dayOffset];
     let showAllDay = codeBlockOptions.showAllDay;
     $: {
         codeBlockOptions.hourRange = hourRange;
         codeBlockOptions.navigation = navigation;
-        codeBlockOptions.timespan = timespan;
+        codeBlockOptions.timespan = timespan[0];
         codeBlockOptions.include = include;
         codeBlockOptions.exclude = exclude;
         codeBlockOptions.view = view;
         codeBlockOptions.theme = theme;
-        codeBlockOptions.dayOffset = dayOffset
+        codeBlockOptions.dayOffset = dayOffset[0]
         codeBlockOptions.showAllDay = showAllDay;
         
         plugin.settings.viewSettings[codeBlockOptions.type] = {
             ...plugin.settings.viewSettings[codeBlockOptions.type],
-            hourRange, navigation, timespan, include, exclude, view, theme, dayOffset, showAllDay
+            hourRange, navigation, timespan: timespan[0], include, exclude, view, theme, dayOffset: dayOffset[0], showAllDay
         };
         plugin.saveSettings();
     }
     
     const copyCodeblock = () => {
+
+        const settingsObject: CodeBlockOptions = plugin.settings.viewSettings[codeBlockOptions.type];
+        delete settingsObject.width;
+        delete settingsObject.height;
+        if(settingsObject.type==='day') delete settingsObject.timespan;
+
         const yaml = stringifyYaml(plugin.settings.viewSettings[codeBlockOptions.type]);
         const codeBlock = `\`\`\`gEvent\n${yaml}\n\`\`\``;
         navigator.clipboard.writeText(codeBlock)
@@ -68,57 +74,57 @@
             <button on:click={closeSettings}>x</button>
         </div>
 
-        {#if ['day', 'week'].includes(codeBlockOptions.type)}
-                <label for="navigation">Navigation</label>
-                <div class="setting">
-                    <Switch bind:checked={navigation} />
-                </div>
+        {#if ['day', 'week', 'schedule'].includes(codeBlockOptions.type)}
+            <label for="navigation">Navigation</label>
+            <div class="setting">
+                <Switch bind:checked={navigation} />
+            </div>
         {/if}
 
-        {#if ['day', 'week'].includes(codeBlockOptions.type)}
-            <label for="navigation">Show All Day</label>
+        {#if ['day', 'week', 'schedule'].includes(codeBlockOptions.type)}
+            <label for="allDay">Show All Day</label>
             <div class="setting">
                 <Switch bind:checked={showAllDay} />
             </div>
         {/if}
 
-        {#if ['day', 'week'].includes(codeBlockOptions.type)}
-                <label for="hourRange">Hour Range</label>
-                <div class="setting rangeSettings">
-                    <RangeSlider pipstep={4} range bind:values={hourRange} min={0} max={24} step={1} all='label' pips float/>
-                </div>
+        {#if ['day', 'week', 'schedule'].includes(codeBlockOptions.type)}
+            <label for="hourRange">Hour Range</label>
+            <div class="setting rangeSettings">
+                <RangeSlider pipstep={4} range bind:values={hourRange} min={0} max={24} step={1} all='label' pips float/>
+            </div>
         {/if}
 
         {#if ['week', 'schedule'].includes(codeBlockOptions.type)}
-                <label for="navigation">Timespan</label>
-                <div class="setting rangeSettings">
-                    <RangeSlider pipstep={5} bind:values={timespan} min={0} max={15} step={1} all='label' pips float/>
-                </div>
+            <label for="timespan">Timespan</label>
+            <div class="setting rangeSettings">
+                <RangeSlider pipstep={5} bind:values={timespan} min={0} max={15} step={1} all='label' pips float/>
+            </div>
         {/if}
 
-        {#if ['day', 'week', 'schedule'].includes(codeBlockOptions.type)}
-            <label for="navigation">DayOffset</label>
+        {#if ['day', 'week', 'schedule', 'month', 'web'].includes(codeBlockOptions.type)}
+            <label for="dayOffset">DayOffset</label>
             <div class="setting rangeSettings">
                 <RangeSlider pipstep={5} bind:values={dayOffset} min={-15} max={15} step={1} all='label' pips float/>
             </div>
         {/if}
 
         {#if include !== undefined && ( exclude?.length === 0  || include?.length > 0) }
-                <label for="navigation">Include</label>
-                <div class="setting">
-                    <MultiSelect bind:selected={include} options={[...calendars, ...allEventColorsNames]} />
-                </div>
+            <label for="include">Include</label>
+            <div class="setting">
+                <MultiSelect bind:selected={include} options={[...calendars, ...allEventColorsNames]} />
+            </div>
         {/if}
 
         {#if exclude !== undefined && (include?.length === 0 || exclude?.length > 0)}
-                <label for="navigation">Exclude</label>
-                <div class="setting">
-                    <MultiSelect bind:selected={exclude} options={[...calendars, ...allEventColorsNames]} />
-                </div>
+            <label for="exclude">Exclude</label>
+            <div class="setting">
+                <MultiSelect bind:selected={exclude} options={[...calendars, ...allEventColorsNames]} />
+            </div>
         {/if}
 
         {#if ['web'].includes(codeBlockOptions.type)}
-            <label for="navigation">Default view</label>
+            <label for="defaultView<">Default view</label>
             <select name="view" bind:value={view}>
                 <option value="day">Day</option>
                 <option value="week">Week</option>
@@ -127,7 +133,7 @@
             </select>
         {/if}
         {#if ['web'].includes(codeBlockOptions.type)}
-            <label for="navigation">Color theme</label>
+            <label for="ColorTheme">Color theme</label>
             <select name="theme" bind:value={theme}>
                 <option value="auto">Auto</option>
                 <option value="light">Light</option>
