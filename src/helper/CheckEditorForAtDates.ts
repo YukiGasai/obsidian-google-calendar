@@ -14,7 +14,7 @@ export function checkEditorForAtDates(
 	plugin: GoogleCalendarPlugin
 ): void {
 	if (plugin.settings.atAnnotationEnabled == false) return;
-
+	//TODO add chonos date parser to add more date options here
 	// Run functions until one of the functions returns true to stop the chain.
 	checkForWord("@today", editor, plugin) ||
 		checkForWord("@tomorrow", editor, plugin) ||

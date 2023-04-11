@@ -4,7 +4,8 @@
  * from svelte components
  */
 
-import { CodeBlockOptions } from "../helper/types";
+import type { CodeBlockOptions } from "../helper/types";
+import * as chrono from 'chrono-node';
 import { MarkdownPostProcessorContext, parseYaml, Platform } from "obsidian";
 import WebView from "../svelte/views/WebView.svelte";
 import MonthView from "../svelte/views/MonthView.svelte";
@@ -24,43 +25,22 @@ export async function checkEditorForCodeBlocks(
 	el: HTMLElement,
 	ctx: MarkdownPostProcessorContext
 ): Promise<void> {
+	el.style.padding = "10px"
+
 	const parsedYaml = parseYaml(text) ?? {}
 
 	const codeBlockOptions:CodeBlockOptions = parsedYaml
 
-
-	// Id no type is set, default to day view
-	if (!codeBlockOptions.type) {
-		codeBlockOptions.type = "day";
-	}
-
-	if(!codeBlockOptions.exclude) {
-		codeBlockOptions.exclude = []
-	}
-
-	if(!codeBlockOptions.include) {
-		codeBlockOptions.include = []
-	}
-
-	if(codeBlockOptions.hourRange === undefined) {
-		codeBlockOptions.hourRange = [0, 24]
-	}
-
-	if(codeBlockOptions.timespan === undefined) {
-		codeBlockOptions.timespan = 7
-	}
-
-	if(codeBlockOptions.dayOffset === undefined) {
-		codeBlockOptions.dayOffset = 0
-	}
-
-	if(codeBlockOptions.navigation === undefined) {
-		codeBlockOptions.navigation = false;
-	}
-
-	if(codeBlockOptions.showAllDay === undefined) {
-		codeBlockOptions.showAllDay = true;
-	}
+	// Set default values for the codeblock options
+	codeBlockOptions.type = codeBlockOptions.type ?? "day";
+	codeBlockOptions.date = codeBlockOptions.date ?? "today";
+	codeBlockOptions.exclude = codeBlockOptions.exclude ?? [];
+	codeBlockOptions.include = codeBlockOptions.include ?? [];
+	codeBlockOptions.hourRange = codeBlockOptions.hourRange ?? [0, 24];
+	codeBlockOptions.timespan = codeBlockOptions.timespan ?? 7;
+	codeBlockOptions.dayOffset = codeBlockOptions.dayOffset ?? 0;
+	codeBlockOptions.navigation = codeBlockOptions.navigation ?? false;
+	codeBlockOptions.showAllDay = codeBlockOptions.showAllDay ?? true;
 
 	const momentFormatArray = [
 		"YYYY-MM-DD",
@@ -73,66 +53,55 @@ export async function checkEditorForCodeBlocks(
 		"DD.MM.YYYY",
 		"DD/MM/YYYY"
 	]
-
-	if (
-		codeBlockOptions.date == undefined ||
-		codeBlockOptions.date == "today" ||
-		codeBlockOptions.date == "tomorrow" ||
-		codeBlockOptions.date == "yesterday" ||
-		window.moment(codeBlockOptions.date, momentFormatArray, true).isValid()
-	) {
-		let blockDate: moment.Moment;
-
-		if (codeBlockOptions.date == undefined) {
-			blockDate = undefined
-		} else if (codeBlockOptions.date == "today") {
-			blockDate = window.moment();
-		} else if (codeBlockOptions.date == "tomorrow") {
-			blockDate = window.moment().add(1, "day");
-		} else if (codeBlockOptions.date == "yesterday") {
-			blockDate = window.moment().subtract(1, "day");
-		} else {
-			blockDate = window.moment(codeBlockOptions.date);
+	// Check if the date is valid
+	if(!window.moment(codeBlockOptions.date, momentFormatArray, true).isValid())
+	{
+		// Date is not valid check for special keywords
+		const parseResult = chrono.parseDate(codeBlockOptions.date); 
+		// Check if parsed keyword is a valid date
+		if(parseResult == null || !window.moment(parseResult).isValid()){
+			return;
 		}
+		codeBlockOptions.date = window.moment(parseResult).format("YYYY-MM-DD");
+	}
 		
-		el.style.padding = "10px"
+	// Create the right widget based on the type
 
-		if (codeBlockOptions.type == "web") {
-			if (Platform.isDesktopApp) {
-				ctx.addChild(
-					new SvelteBuilder(WebView, el, {
-						codeBlockOptions: codeBlockOptions
-					})
-				);
-			}
-		} else if (codeBlockOptions.type == "day") {
-			codeBlockOptions.timespan = 1;
+	if (codeBlockOptions.type == "web") {
+		if (Platform.isDesktopApp) {
 			ctx.addChild(
-				new SvelteBuilder(TimeLineView, el, {
-					codeBlockOptions: codeBlockOptions,
-				})
-			);
-
-		} else if (codeBlockOptions.type == "month") {
-
-			ctx.addChild(
-				new SvelteBuilder(MonthView, el, {
-					codeBlockOptions: codeBlockOptions,
-				})
-			);
-
-		} else if (codeBlockOptions.type == "schedule") {
-			ctx.addChild(
-				new SvelteBuilder(ScheduleView, el, {
-					codeBlockOptions: codeBlockOptions,
-				})
-			);
-		} else if (codeBlockOptions.type == "week") {
-			ctx.addChild(
-				new SvelteBuilder(TimeLineView, el, {
-					codeBlockOptions: codeBlockOptions,
+				new SvelteBuilder(WebView, el, {
+					codeBlockOptions: codeBlockOptions
 				})
 			);
 		}
+	} else if (codeBlockOptions.type == "day") {
+		codeBlockOptions.timespan = 1;
+		ctx.addChild(
+			new SvelteBuilder(TimeLineView, el, {
+				codeBlockOptions: codeBlockOptions,
+			})
+		);
+
+	} else if (codeBlockOptions.type == "month") {
+
+		ctx.addChild(
+			new SvelteBuilder(MonthView, el, {
+				codeBlockOptions: codeBlockOptions,
+			})
+		);
+
+	} else if (codeBlockOptions.type == "schedule") {
+		ctx.addChild(
+			new SvelteBuilder(ScheduleView, el, {
+				codeBlockOptions: codeBlockOptions,
+			})
+		);
+	} else if (codeBlockOptions.type == "week") {
+		ctx.addChild(
+			new SvelteBuilder(TimeLineView, el, {
+				codeBlockOptions: codeBlockOptions,
+			})
+		);
 	}
 }

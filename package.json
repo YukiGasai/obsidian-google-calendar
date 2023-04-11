@@ -1,6 +1,6 @@
 {
 	"name": "google-calendar",
-	"version": "1.9.8",
+	"version": "1.9.9",
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -36,6 +36,7 @@
 	],
 	"dependencies": {
 		"@popperjs/core": "^2.11.6",
+		"chrono-node": "^2.6.3",
 		"clipboardy": "^3.0.0",
 		"marked": "^4.2.4",
 		"obsidian-calendar-ui": "^0.3.12",
