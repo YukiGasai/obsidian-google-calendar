@@ -126,8 +126,8 @@
 
     $: {
         startDate = codeBlockOptions.date 
-        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "days") 
-        : window.moment().add(codeBlockOptions.dayOffset, "days");
+        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.offset, "days") 
+        : window.moment().add(codeBlockOptions.offset, "days");
         date = codeBlockOptions.navigation ? startDate.clone().local().add(dateOffset, "days") : startDate;
 
         if(interval){

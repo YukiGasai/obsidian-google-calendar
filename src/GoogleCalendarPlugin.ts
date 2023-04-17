@@ -11,6 +11,7 @@ import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
 import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
 import { WeekCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEEK } from "./view/WeekCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
+import { YearCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_YEAR } from "./view/YearCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
@@ -31,6 +32,7 @@ import { getEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
 import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
+
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	googleClientId: "",
@@ -67,7 +69,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
-			dayOffset: 0,
+			offset: 0,
 			timespan: 1,
 			showAllDay: true,
 			navigation: true,
@@ -77,7 +79,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
-			dayOffset: 0,
+			offset: 0,
 			timespan: 7,
 			showAllDay: true,
 			navigation: true,
@@ -87,7 +89,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			exclude: [],
 			include: [],
 			hourRange: [0, 24],
-			dayOffset: 0,
+			offset: 0,
 			timespan: 7,
 			showAllDay: true,
 			navigation: true,
@@ -96,13 +98,19 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			type: "month",
 			exclude: [],
 			include: [],
-			dayOffset: 0,
+			offset: 0,
+		},
+		year: {
+			type: "year",
+			exclude: [],
+			include: [],
+			offset: 0,
 		},
 		web: {
 			type: "web",
 			theme: "auto",
 			view: "day",	
-			dayOffset: 0,		
+			offset: 0,		
 		}
 	}
 };
@@ -238,6 +246,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 			(leaf: WorkspaceLeaf) => new MonthCalendarView(leaf)
 		);
 		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR_YEAR,
+			(leaf: WorkspaceLeaf) => new YearCalendarView(leaf)
+		);
+		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_WEB,
 			(leaf: WorkspaceLeaf) => new WebCalendarView(leaf)
 		);
@@ -278,6 +290,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 			name: "Open gCal month view",
 			callback: () =>
 				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_MONTH)
+		});
+
+		//Open Year view
+		this.addCommand({
+			id: "open-google-calendar-year-view",
+			name: "Open gCal year view",
+			callback: () =>
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_YEAR)
 		});
 
 		//Open web view
@@ -622,6 +642,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_DAY);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEEK);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_MONTH);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_YEAR);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
 

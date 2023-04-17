@@ -322,7 +322,7 @@ export interface IGoogleCalendarPluginApi {
 	createEventNote: (event:GoogleEvent, eventDirectory: string, templatePath: string) => Promise<TFile>,
 }
 export interface CodeBlockOptions {
-	type?: "web" | "month" | "day" | "schedule" | "week";
+	type?: "web" | "month" | "day" | "schedule" | "week" | "year";
 	date?: string;
 	width?: number;
 	height?: number;
@@ -334,6 +334,9 @@ export interface CodeBlockOptions {
 	theme?: string;
 	hourRange?: number[];
 	showAllDay?: boolean;
+	offset?: number;
+	size?: number;
+	// Keep this for backwards compatibility with old code blocks replacing with offset
 	dayOffset?: number;
 }
 

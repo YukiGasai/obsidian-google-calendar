@@ -71,8 +71,8 @@ function updateCssAndJs(theme) {
 
 $: {
     date = codeBlockOptions.date 
-        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "day") 
-        : window.moment().add(codeBlockOptions.dayOffset, "day");
+        ? window.moment(codeBlockOptions.date).add(codeBlockOptions.offset, "day") 
+        : window.moment().add(codeBlockOptions.offset, "day");
     updateCssAndJs(codeBlockOptions.theme);
 }
 

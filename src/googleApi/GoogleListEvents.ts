@@ -177,7 +177,7 @@ async function requestEventsFromApi(
 		url += `&timeMax=${endString}`;
 
 		if (tmpRequestResult && tmpRequestResult.nextPageToken) {
-			url += `&nextPageToken=${tmpRequestResult.nextPageToken}`;
+			url += `&pageToken=${tmpRequestResult.nextPageToken}`;
 		}
 
 		tmpRequestResult = await callRequest(url, "GET", null);
@@ -188,7 +188,7 @@ async function requestEventsFromApi(
 		});
 
 		totalEventList = [...totalEventList, ...newList];
-	} while (tmpRequestResult.items.length == resultSizes);
+	} while (tmpRequestResult.items.length == resultSizes && tmpRequestResult.nextPageToken);
 
 	return totalEventList;
 }

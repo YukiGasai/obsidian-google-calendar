@@ -11,6 +11,7 @@ import WebView from "../svelte/views/WebView.svelte";
 import MonthView from "../svelte/views/MonthView.svelte";
 import ScheduleView from "../svelte/views/ScheduleView.svelte"
 import TimeLineView from "../svelte/views/TimeLineView.svelte"
+import YearView from "../svelte/views/YearView.svelte";
 import { SvelteBuilder } from "../svelte/SvelteBuilder";
 
 /**
@@ -38,9 +39,16 @@ export async function checkEditorForCodeBlocks(
 	codeBlockOptions.include = codeBlockOptions.include ?? [];
 	codeBlockOptions.hourRange = codeBlockOptions.hourRange ?? [0, 24];
 	codeBlockOptions.timespan = codeBlockOptions.timespan ?? 7;
-	codeBlockOptions.dayOffset = codeBlockOptions.dayOffset ?? 0;
+	codeBlockOptions.offset = codeBlockOptions.offset ?? 0;
 	codeBlockOptions.navigation = codeBlockOptions.navigation ?? false;
 	codeBlockOptions.showAllDay = codeBlockOptions.showAllDay ?? true;
+	codeBlockOptions.size = codeBlockOptions.size ?? 10;
+
+
+
+	if(codeBlockOptions.dayOffset){
+		codeBlockOptions.offset = codeBlockOptions.dayOffset;
+	}
 
 	const momentFormatArray = [
 		"YYYY-MM-DD",
@@ -100,6 +108,12 @@ export async function checkEditorForCodeBlocks(
 	} else if (codeBlockOptions.type == "week") {
 		ctx.addChild(
 			new SvelteBuilder(TimeLineView, el, {
+				codeBlockOptions: codeBlockOptions,
+			})
+		);
+	} else if (codeBlockOptions.type == "year") {
+		ctx.addChild(
+			new SvelteBuilder(YearView, el, {
 				codeBlockOptions: codeBlockOptions,
 			})
 		);

@@ -26,8 +26,9 @@
     let exclude = codeBlockOptions.exclude;
     let view = codeBlockOptions.view;
     let theme = codeBlockOptions.theme;
-    let dayOffset = [codeBlockOptions.dayOffset];
+    let offset = [codeBlockOptions.offset];
     let showAllDay = codeBlockOptions.showAllDay;
+    let size = [codeBlockOptions.size];
     $: {
         codeBlockOptions.hourRange = hourRange;
         codeBlockOptions.navigation = navigation;
@@ -36,12 +37,13 @@
         codeBlockOptions.exclude = exclude;
         codeBlockOptions.view = view;
         codeBlockOptions.theme = theme;
-        codeBlockOptions.dayOffset = dayOffset[0]
+        codeBlockOptions.offset = offset[0]
+        codeBlockOptions.size = size[0]
         codeBlockOptions.showAllDay = showAllDay;
         
         plugin.settings.viewSettings[codeBlockOptions.type] = {
             ...plugin.settings.viewSettings[codeBlockOptions.type],
-            hourRange, navigation, timespan: timespan[0], include, exclude, view, theme, dayOffset: dayOffset[0], showAllDay
+            hourRange, navigation, timespan: timespan[0], include, exclude, view, theme, offset: offset[0], showAllDay, size: size[0]
         };
         plugin.saveSettings();
     }
@@ -74,7 +76,7 @@
             <button on:click={closeSettings}>x</button>
         </div>
 
-        {#if ['day', 'week', 'schedule'].includes(codeBlockOptions.type)}
+        {#if ['day', 'week', 'year', 'schedule'].includes(codeBlockOptions.type)}
             <label for="navigation">Navigation</label>
             <div class="setting">
                 <Switch bind:checked={navigation} />
@@ -102,12 +104,19 @@
             </div>
         {/if}
 
-        {#if ['day', 'week', 'schedule', 'month', 'web'].includes(codeBlockOptions.type)}
-            <label for="dayOffset">DayOffset</label>
+        {#if ['day', 'week', 'month', 'year', 'schedule', 'web'].includes(codeBlockOptions.type)}
+            <label for="offset">Offset</label>
             <div class="setting rangeSettings">
-                <RangeSlider pipstep={5} bind:values={dayOffset} min={-15} max={15} step={1} all='label' pips float/>
+                <RangeSlider pipstep={5} bind:values={offset} min={-15} max={15} step={1} all='label' pips float/>
             </div>
         {/if}
+
+        {#if ['year'].includes(codeBlockOptions.type)}
+        <label for="size">Size</label>
+        <div class="setting rangeSettings">
+            <RangeSlider pipstep={5} bind:values={size} min={5} max={30} step={1} all='label' pips float/>
+        </div>
+    {/if}
 
         {#if include !== undefined && ( exclude?.length === 0  || include?.length > 0) }
             <label for="include">Include</label>

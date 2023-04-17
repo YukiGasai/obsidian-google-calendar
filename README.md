@@ -65,6 +65,18 @@ A timeline view to see all events over a day
 
 ![](https://i.imgur.com/f9nYmOn.png)
 
+#### Week view
+
+A timeline view to see all events over a week
+
+![](https://i.imgur.com/KDYTaIJ.png)
+
+#### Year view
+
+A Github like calendar view to see all events over a year
+
+![](https://i.imgur.com/rlcitLA.png)
+
 #### Schedule view
 
 A schedule view to see all your event in a order
@@ -98,7 +110,7 @@ Other Options are @tomorrow, @yesterday, @+1 @-1
 
 ### CodeBlock
 
-This plugin adds a custom codeBlock gEvent to insert the Web, Month and day and schedule view inside file. To options are parsed with yaml.
+This plugin adds a custom codeBlock gEvent to insert the Web, Day, Week, Month, year and schedule view inside file. To options are parsed with yaml. You can use the settings from the views to copy the configuration as a codeblock.
 
 #### Parameters
 

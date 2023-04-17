@@ -280,7 +280,7 @@
     $: {
 
 
-        displayedMonth = codeBlockOptions.date ? window.moment(codeBlockOptions.date).add(codeBlockOptions.dayOffset, "month") : window.moment().add(codeBlockOptions.dayOffset, "month");
+        displayedMonth = codeBlockOptions.date ? window.moment(codeBlockOptions.date).add(codeBlockOptions.offset, "month") : window.moment().add(codeBlockOptions.offset, "month");
 
 
         if(interval){
