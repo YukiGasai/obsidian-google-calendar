@@ -105,6 +105,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 			exclude: [],
 			include: [],
 			offset: 0,
+			size: 15,
 		},
 		web: {
 			type: "web",

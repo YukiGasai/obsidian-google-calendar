@@ -30,7 +30,7 @@ export async function googleDeleteEvent(
     }
 
     if(calendarId === ""){
-		throw new GoogleApiError("Could not create Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
+		throw new GoogleApiError("Could not delete Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
     }
 
 	// Use the recurrence id to delete all events from a recurring task

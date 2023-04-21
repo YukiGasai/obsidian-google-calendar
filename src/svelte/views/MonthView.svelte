@@ -15,6 +15,7 @@
 	import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "../../view/ScheduleCalendarView";
 	import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "../../view/WeekCalendarView";
 	import ViewSettings from "../components/ViewSettings.svelte";
+	import { onMount } from "svelte";
 
     export let codeBlockOptions: CodeBlockOptions;
     export let isObsidianView = false;
@@ -277,24 +278,26 @@
         return true;
     }
 
-    $: {
 
-
+    onMount(() => {
         displayedMonth = codeBlockOptions.date ? window.moment(codeBlockOptions.date).add(codeBlockOptions.offset, "month") : window.moment().add(codeBlockOptions.offset, "month");
+    })
 
 
-        if(interval){
-            clearInterval(interval);
+    $: {
+        if(displayedMonth){
+            if(interval){
+                clearInterval(interval);
+            }
+            interval = setInterval(() => getSource(displayedMonth), 1000)
+
+            if(newDayInterval){
+                clearInterval(newDayInterval);
+            }
+            newDayInterval = setInterval(() => today = window.moment(), 60000)
+
+            getSource(displayedMonth)
         }
-        interval = setInterval(() => getSource(displayedMonth), 1000)
-
-        if(newDayInterval){
-            clearInterval(newDayInterval);
-        }
-        newDayInterval = setInterval(() => today = window.moment(), 60000)
-
-        getSource(displayedMonth)
-
     }
     onDestroy(() => {
         clearInterval(interval);
