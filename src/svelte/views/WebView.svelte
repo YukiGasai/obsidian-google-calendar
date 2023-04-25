@@ -6,13 +6,15 @@ import type { CodeBlockOptions } from "../../helper/types";
 export let codeBlockOptions: CodeBlockOptions;
 export let isObsidianView = false;
 export let showSettings = false;
-
+let webViewUrl;
+let frame;
 let date;
+
 if(!codeBlockOptions.height) codeBlockOptions.height = 500;
 
-let frame;
 
 const getWebUrl = (view) => {
+    if(webViewUrl) return webViewUrl;
     if(!date.isValid()) {
         return `https://calendar.google.com/calendar/u/0/r/${view}/`
     }
@@ -20,6 +22,8 @@ const getWebUrl = (view) => {
     const dateString = date.format("yyyy/M/D");
     return`https://calendar.google.com/calendar/u/0/r/${view}/${dateString}`;
 }
+
+
 
 function updateCssAndJs(theme) {
     if(frame) {
@@ -73,6 +77,7 @@ $: {
     date = codeBlockOptions.date 
         ? window.moment(codeBlockOptions.date).add(codeBlockOptions.offset, "day") 
         : window.moment().add(codeBlockOptions.offset, "day");
+     webViewUrl = getWebUrl(codeBlockOptions.view);
     updateCssAndJs(codeBlockOptions.theme);
 }
 
@@ -80,26 +85,26 @@ $: {
 
 <div class="box">
     {#if isObsidianView}
-        <ViewSettings bind:codeBlockOptions bind:showSettings/>
+        <ViewSettings bind:codeBlockOptions bind:showSettings bind:webViewUrl/>
     {/if}
     <div class="content">
     {#if codeBlockOptions.width == -1}
     <webview 
-        src={getWebUrl(codeBlockOptions.view)}
+        src={webViewUrl}
         allowpopups
         class="fullSize"
         bind:this={frame}
     />
     {:else if !codeBlockOptions.width}
     <webview 
-        src={getWebUrl(codeBlockOptions.view)}
+        src={webViewUrl}
         allowpopups
         style:height="{codeBlockOptions.height}px"
         bind:this={frame}
     />
     {:else}
     <webview 
-        src={getWebUrl(codeBlockOptions.view)}
+        src={webViewUrl}
         allowpopups
         style:width="{codeBlockOptions.width}px"
         style:height="{codeBlockOptions.height}px"

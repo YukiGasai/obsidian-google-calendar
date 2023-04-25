@@ -11,6 +11,7 @@
 
     export let codeBlockOptions: CodeBlockOptions;
     export let showSettings = false;
+    export let webViewUrl = '';
     let calendars = [];
     let plugin = GoogleCalendarPlugin.getInstance();
 
@@ -148,6 +149,9 @@
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
             </select>
+        {/if}
+        {#if ['web'].includes(codeBlockOptions.type)}
+        <button on:click={() => webViewUrl = `https://accounts.google.com`}>Open Login</button>
         {/if}
     </div>
     {/if}
