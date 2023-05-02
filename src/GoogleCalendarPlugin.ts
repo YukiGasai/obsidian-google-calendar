@@ -162,7 +162,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		return leaf 
 	};
 
-	onLayoutReady = (): void => {
+	onLayoutReady = async (): Promise<void> => {
 		checkForNewDailyNotes(this);
 		checkForNewWeeklyNotes(this);
 		//Get the template plugin to run their commands
@@ -177,6 +177,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 		if (templaterPlugin && templaterPlugin._loaded) {
 			this.templaterPlugin = templaterPlugin;
 		}
+
+		
+		await checkForEventNotes(this);
+
 	}
 
 	async onload(): Promise<void> {
@@ -184,8 +188,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 		GoogleCalendarPlugin.instance = this;
 		this.api = new GoogleCalendarPluginApi().make();
 		await this.loadSettings();
-		await checkForEventNotes(this);
-
 
 		this.app.workspace.onLayoutReady(this.onLayoutReady);
 
