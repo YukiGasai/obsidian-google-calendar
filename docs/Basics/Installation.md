@@ -5,9 +5,8 @@ The creation of a public OAUTH client to skip the setup is WIP.
 
 ## Install Plugin
 
--   One click install from [community plugin store](obsidian://show-plugin?id=google-calendar)
--   Go to settings and activate plugin
-
+- One click install from [community plugin store](obsidian://show-plugin?id=google-calendar)
+- Go to settings and activate plugin
 
 ## Setup Google Calendar plugin
 
@@ -17,14 +16,6 @@ The creation of a public OAUTH client to skip the setup is WIP.
     </embed>
 </object>
 
--   Go into the plugin settings
--   Insert your client id and secret in the input fields
--   Press Login and authenticate with google
-
-
-## Mobile setup
-
--   Login on a desktop device
--   Use the `Copy Google Refresh Token to Clipboard` command on that device
--   Install the plugin on the phone
--   Instead of `Login` paste the token from the desktop device into the Refresh token field on the phone
+- Go into the plugin settings
+- Insert your client id and secret in the input fields
+- Press Login and authenticate with google

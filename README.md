@@ -13,19 +13,15 @@ Manage your Google Calendar from inside Obsidian
 
 ## Installation
 
-### Test client reached user limit use own client
-
-The user limit of the test client is hit. This means that new Google accounts can't use the test client until it's verified by Google. I am working on getting the verification. For now, please resort to using your own client instead.
-
 - One click install from [community plugin store](obsidian://show-plugin?id=google-calendar)
 - Go to settings and activate plugin
 - Go into plugin settings
-- To _test_ the plugin set `Use own authentication client` to false
+- Create a own OAuth client (The public test client is full and will not work anymore)
 - Press Login and authenticate with google
 
-The function to use a public OAuth client is in beta and could be removed at any time.
-
 ### Create a own OAuth client (its easy)
+
+[Here](https://yukigasai.github.io/obsidian-google-calendar/#/Basics/Installation) is a step by step guide describing the process with images.
 
 - [Create Google Cloud Project](https://console.cloud.google.com/projectcreate?)
 - [Activate Google Calendar API](https://console.cloud.google.com/marketplace/product/google/calendar-json.googleapis.com)

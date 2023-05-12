@@ -14,6 +14,7 @@ import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
 import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
+import { OAuthAlertModal } from "../modal/OAuthAlertModal";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -33,9 +34,23 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		containerEl.createEl("h2", { text: "Settings for Google Calendar" });
 		containerEl.createEl("h4", { text: "Please restart Obsidian to let changes take effect" })
 
+
+		const clientDesc = document.createDocumentFragment();
+		clientDesc.append(
+			"Use own authentication client",
+			clientDesc.createEl("br"),
+			"Check the ",
+			clientDesc.createEl("a", {
+				href: "https://yukigasai.github.io/obsidian-google-calendar/#/Basics/Installation",
+				text: "documentation",
+			}),
+			" to find out how to create a own client."
+		);
+
+
 		new Setting(containerEl)
 			.setName("Use own authentication client")
-			.setDesc("Please create your own client.")
+			.setDesc(clientDesc)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.useCustomClient)
@@ -43,6 +58,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						setRefreshToken("");
 						setAccessToken("");
 						setExpirationTime(0);
+						if (value === false) {
+							new OAuthAlertModal(app).open();
+						}
 						this.plugin.settings.useCustomClient = value;
 						await this.plugin.saveSettings();
 						this.display();
@@ -109,9 +127,9 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							this.display();
 						} else {
 							if (Platform.isMobileApp) {
-								if(this.plugin.settings.useCustomClient){
+								if (this.plugin.settings.useCustomClient) {
 									StartLoginGoogleMobile();
-								}else{
+								} else {
 									window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
 								}
 							} else {
@@ -129,7 +147,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				cb.setLimits(this.plugin.settings.useCustomClient ? 10 : 60, 360, 1);
 				cb.setDynamicTooltip();
 				cb.onChange(async value => {
-					if(value < 60 && !this.plugin.settings.useCustomClient)return;
+					if (value < 60 && !this.plugin.settings.useCustomClient) return;
 					this.plugin.settings.refreshInterval = value;
 					await this.plugin.saveSettings();
 				})
@@ -246,16 +264,16 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-		.setName("Auto create Event Notes Marker")
-		.setDesc("Specify the marker that will be used to find events to create notes. Keep empty to create a note for all events.")
-		.setClass("SubSettings")
-		.addText(text => {
-			text.setValue(this.plugin.settings.autoCreateEventNotesMarker);
-			text.onChange(async value => {
-				this.plugin.settings.autoCreateEventNotesMarker = value;
-				await this.plugin.saveSettings();
-			});   
-		})
+			.setName("Auto create Event Notes Marker")
+			.setDesc("Specify the marker that will be used to find events to create notes. Keep empty to create a note for all events.")
+			.setClass("SubSettings")
+			.addText(text => {
+				text.setValue(this.plugin.settings.autoCreateEventNotesMarker);
+				text.onChange(async value => {
+					this.plugin.settings.autoCreateEventNotesMarker = value;
+					await this.plugin.saveSettings();
+				});
+			})
 
 		new Setting(containerEl)
 			.setName("Keep auto created Notes open")
@@ -301,29 +319,29 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			});
 
 
-        new Setting(containerEl)
-            .setName("Event Note Prefix")
-            .setDesc("Optional prefix for event notes to improve performance")
-            .setClass("SubSettings")
-            .addText(text => {
-                text.setValue(this.plugin.settings.optionalNotePrefix);
-                text.onChange(async value => {
-                    this.plugin.settings.optionalNotePrefix = value;
-                    await this.plugin.saveSettings();
-                });   
-            })
+		new Setting(containerEl)
+			.setName("Event Note Prefix")
+			.setDesc("Optional prefix for event notes to improve performance")
+			.setClass("SubSettings")
+			.addText(text => {
+				text.setValue(this.plugin.settings.optionalNotePrefix);
+				text.onChange(async value => {
+					this.plugin.settings.optionalNotePrefix = value;
+					await this.plugin.saveSettings();
+				});
+			})
 
-        new Setting(containerEl)
-            .setName("Event Note Name Format")
-            .setDesc("Define how the event note name should look like")
-            .setClass("SubSettings")
-            .addText(text => {
-                text.setValue(this.plugin.settings.eventNoteNameFormat);
-                text.onChange(async value => {
-                    	this.plugin.settings.eventNoteNameFormat = value;
-                    	await this.plugin.saveSettings();
-                });   
-            })
+		new Setting(containerEl)
+			.setName("Event Note Name Format")
+			.setDesc("Define how the event note name should look like")
+			.setClass("SubSettings")
+			.addText(text => {
+				text.setValue(this.plugin.settings.eventNoteNameFormat);
+				text.onChange(async value => {
+					this.plugin.settings.eventNoteNameFormat = value;
+					await this.plugin.saveSettings();
+				});
+			})
 
 		new Setting(containerEl)
 			.setName("Debug Mode")
