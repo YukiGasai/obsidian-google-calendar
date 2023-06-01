@@ -43,12 +43,12 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {
         // Create a event note for all events if the trigger text is empty
-        if(plugin.settings.autoCreateEventNotesMarker === "") {
+        if (plugin.settings.autoCreateEventNotesMarker === "") {
             await createNoteFromEvent(events[i], plugin.settings.defaultFolder, plugin.settings.defaultTemplate, true)
-        }else{
-            
+        } else {
+
             const regex = new RegExp(`:([^:]*-)?${plugin.settings.autoCreateEventNotesMarker}-?([^:]*)?:`)
-        
+
             //regex will check for text and extract a template name if it exists
             const match = events[i].description?.match(regex) ?? [];
             if (match.length == 3) {
@@ -148,6 +148,10 @@ function replacePathPlaceholders(plugin: GoogleCalendarPlugin, event: GoogleEven
 
     //check description for {{date-day}} string replace it with the current numeric day.
     folderName = folderName.replace("{{date-day}}", window.moment().format("DD"));
+    folderName = folderName.replace("{date-hour}}", window.moment().format("hh"));
+    folderName = folderName.replace("{date-hour24}}", window.moment().format("HH"));
+    folderName = folderName.replace("{date-minute}}", window.moment().format("mm"));
+
 
     //check description for {{event-date}} string replace with event start date
     folderName = folderName.replace("{{event-date}}", window.moment(event.start.date ?? event.start.dateTime).format("YYYY-MM-DD"));
@@ -163,6 +167,19 @@ function replacePathPlaceholders(plugin: GoogleCalendarPlugin, event: GoogleEven
 
     //check description for {{event-title}} string replace with event title
     folderName = folderName.replace("{{event-title}}", event.summary ?? "event-title");
+
+    folderName = folderName.replace("{{event-start-hour}}", event.start.dateTime ? window.moment(event.start.dateTime).format("hh") : "00");
+
+    folderName = folderName.replace("{{event-start-hour24}}", event.start.dateTime ? window.moment(event.start.dateTime).format("HH") : "00");
+
+    folderName = folderName.replace("{{event-start-minute}}", event.start.dateTime ? window.moment(event.start.dateTime).format("mm") : "00");
+
+    folderName = folderName.replace("{{event-end-hour}}", event.end.dateTime ? window.moment(event.end.dateTime).format("hh") : "00");
+
+    folderName = folderName.replace("{{event-end-hour24}}", event.end.dateTime ? window.moment(event.end.dateTime).format("HH") : "00");
+
+    folderName = folderName.replace("{{event-end-minute}}", event.end.dateTime ? window.moment(event.end.dateTime).format("mm") : "00");
+
     return folderName;
 }
 
@@ -199,7 +216,7 @@ async function checkIfFileExists(event: GoogleEvent, filePath: string, isAutoCre
 
     if (await adapter.exists(filePath)) {
         let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
-        if(!isAutoCreated) {
+        if (!isAutoCreated) {
             createNotice(`EventNote ${event.summary} already exists.`)
             new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
         }
@@ -223,7 +240,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     if (folderName) {
         folderName = replacePathPlaceholders(plugin, event, folderName);
     }
-    
+
     const filePath = await getEventNoteFilePath(plugin, event, folderName);
     //check if file already exists
     const existingFile = await checkIfFileExists(event, filePath, isAutoCreated);
@@ -231,10 +248,10 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     //Create file with no content
     let file;
-    try{
+    try {
         file = await vault.create(filePath, '');
         createNotice(`EventNote ${event.summary} created.`)
-    }catch(err) {
+    } catch (err) {
         return null
     }
 
