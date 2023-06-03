@@ -112,7 +112,7 @@ This plugin adds a custom codeBlock gEvent to insert the Web, Day, Week, Month, 
 
 ````
     ```gEvent
-        type: [web, month, day] necessary
+        type: [web, month, day, schedule] necessary
         date: [today, tomorrow, yesterday, A specific date] optional
         width: number optional
         height: number  optional
