@@ -15,7 +15,7 @@ import { YearCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_YEAR } from "./view/YearCal
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
+import { isLoggedIn, setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
 import { EventListModal } from './modal/EventListModal';
 import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
 import { EventDetailsModal } from "./modal/EventDetailsModal";
@@ -31,10 +31,12 @@ import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 import { getEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
-import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
+import { pkceFlowLocalEnd } from "src/googleApi/oauth/pkceLocalFlow";
+import { pkceFlowServerEnd } from "src/googleApi/oauth/pkceServerFlow";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
+	encryptToken: true,
 	googleClientId: "",
 	googleClientSecret: "",
 	googleRefreshToken: "",
@@ -48,8 +50,8 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,
-    optionalNotePrefix: "",
-    eventNoteNameFormat: "{{prefix}}{{event-title}}",
+	optionalNotePrefix: "",
+	eventNoteNameFormat: "{{prefix}}{{event-title}}",
 	defaultCalendar: "",
 	calendarBlackList: [],
 	insertTemplates: [],
@@ -110,8 +112,8 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 		web: {
 			type: "web",
 			theme: "auto",
-			view: "day",	
-			offset: 0,		
+			view: "day",
+			offset: 0,
 		}
 	}
 };
@@ -142,11 +144,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
 		) {
-			if(Platform.isMobile || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEB || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEEK) {
+			if (Platform.isMobile || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEB || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEEK) {
 				await this.app.workspace.getLeaf(true).setViewState({
 					type: viewId
 				});
-			}else{
+			} else {
 				await this.app.workspace.getRightLeaf(false).setViewState({
 					type: viewId,
 				});
@@ -159,7 +161,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.app.workspace.revealLeaf(leaf);
 
-		return leaf 
+		return leaf
 	};
 
 	onLayoutReady = async (): Promise<void> => {
@@ -178,7 +180,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.templaterPlugin = templaterPlugin;
 		}
 
-		
+
 		await checkForEventNotes(this);
 
 	}
@@ -429,7 +431,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		});
 
 
-        this.addCommand({
+		this.addCommand({
 			id: "google-calendar-get-todays-tasks",
 			name: "Get Today's gCal Tasks",
 
@@ -604,20 +606,22 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.addSettingTab(this.settingsTab);
 
+		// Register a custom protocol handler to get the code from the redirect url
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
-			// Login for mobile custom client
-			if(!Platform.isDesktop && req.code) {
-				FinishLoginGoogleMobile(req.code, req.state)
-				return
+
+			// Don't allow login if already logged in
+			if (isLoggedIn()) return
+
+			// Local PKCE flow to get the code and exchange it for a token
+			if (req.code && req.state && req.scope === "https://www.googleapis.com/auth/calendar") {
+				await pkceFlowLocalEnd(req.code, req.state)
+				return;
 			}
 
-			// Login for Mobile client with public client
-			if(Platform.isMobile && req.at){
-				setAccessToken(req['at']);
-				setRefreshToken(req['rt']);
-				setExpirationTime(+new Date() + 3600000);
-				new Notice("Login successful!");
-				this.settingsTab.display();
+			// Server PKCE flow to get the token directly encrypted with public key of plugin
+			if (req.token) {
+				await pkceFlowServerEnd(req.token)
+				return
 			}
 		});
 

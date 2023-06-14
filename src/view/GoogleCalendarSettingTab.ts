@@ -1,4 +1,4 @@
-import type { Template } from "../helper/types";
+import { InfoModalType, Template } from "../helper/types";
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { createNotice } from "src/helper/NoticeHelper";
 import {
@@ -6,34 +6,56 @@ import {
 	App,
 	Setting,
 	Notice,
-	Platform,
 } from "obsidian";
-import { LoginGoogle, StartLoginGoogleMobile } from "../googleApi/GoogleAuth";
-import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
+import { clearClient, clearTokens, getClientId, getClientSecret, getRefreshToken, isLoggedIn, setClientId, setClientSecret, } from "../helper/LocalStorage";
 import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
 import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
-import { OAuthAlertModal } from "../modal/OAuthAlertModal";
+import { SettingsInfoModal } from "../modal/SettingsInfoModal";
+import { pkceFlowServerStart } from "../googleApi/oauth/pkceServerFlow";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
-
+	clientId: string;
+	clientSecret = '';
+	oauthServer = '';
 	constructor(app: App, plugin: GoogleCalendarPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+		this.oauthServer = this.plugin.settings.googleOAuthServer;
+		if (this.plugin.settings.encryptToken) {
+			(async () => {
+				this.clientId = await getClientId();
+				this.clientSecret = await getClientSecret();
+			})();
+		}
 	}
 
-	display(): void {
+	async display(): Promise<void> {
 		const { containerEl } = this;
-
-		const isLoggedIn = getRefreshToken();
-
 		containerEl.empty();
 
 		containerEl.createEl("h2", { text: "Settings for Google Calendar" });
 		containerEl.createEl("h4", { text: "Please restart Obsidian to let changes take effect" })
 
+
+		new Setting(containerEl)
+			.setName('Protect google Login')
+			.setDesc('This will encrypt the google login data with a password you set.')
+			.addToggle(toggle => {
+				toggle.setValue(this.plugin.settings.encryptToken)
+				toggle.onChange(async (value) => {
+					if (value === false) {
+						new SettingsInfoModal(this.app, InfoModalType.ENCRYPT_INFO).open();
+					}
+					this.plugin.settings.encryptToken = value;
+					await this.plugin.saveSettings();
+					clearTokens();
+					clearClient();
+					this.display();
+				});
+			});
 
 		const clientDesc = document.createDocumentFragment();
 		clientDesc.append(
@@ -48,19 +70,19 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		);
 
 
+
+
 		new Setting(containerEl)
 			.setName("Use own authentication client")
-			.setDesc(clientDesc)
+			.setDesc("Please create your own client.")
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.useCustomClient)
 					.onChange(async (value) => {
-						setRefreshToken("");
-						setAccessToken("");
-						setExpirationTime(0);
 						if (value === false) {
-							new OAuthAlertModal(app).open();
+							new SettingsInfoModal(this.app, InfoModalType.USE_OWN_CLIENT).open();
 						}
+						clearTokens();
 						this.plugin.settings.useCustomClient = value;
 						await this.plugin.saveSettings();
 						this.display();
@@ -76,26 +98,41 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.addText((text) =>
 					text
 						.setPlaceholder("Enter your client id")
-						.setValue(this.plugin.settings.googleClientId)
-						.onChange(async (value) => {
-							this.plugin.settings.googleClientId = value.trim();
-							await this.plugin.saveSettings();
+						.setValue(this.clientId)
+						.onChange(value => {
+							this.clientId = value.trim();
 						})
-				);
+				)
+
 
 			new Setting(containerEl)
 				.setName("ClientSecret")
 				.setDesc("Google client secret")
 				.setClass("SubSettings")
-				.addText((text) =>
+				.addText((text) => {
+					text.inputEl.type = "password";
 					text
 						.setPlaceholder("Enter your client secret")
-						.setValue(this.plugin.settings.googleClientSecret)
-						.onChange(async (value) => {
-							this.plugin.settings.googleClientSecret = value.trim();
-							await this.plugin.saveSettings();
+						.setValue(this.clientSecret)
+						.onChange(value => {
+							this.clientSecret = value.trim();
+						})
+				})
+
+			new Setting(containerEl)
+				.setName("Save")
+				.setDesc("Save the client id and secret")
+				.setClass("SubSettings")
+				.addButton((button) =>
+					button
+						.setButtonText("Save")
+						.onClick(async () => {
+							await setClientId(this.clientId);
+							await setClientSecret(this.clientSecret);
+							this.display();
 						})
 				);
+
 		} else {
 
 			new Setting(containerEl)
@@ -104,40 +141,58 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				.setClass("SubSettings")
 				.addText(text => {
 					text
-						.setValue(this.plugin.settings.googleOAuthServer)
-						.onChange(async (value) => {
-							this.plugin.settings.googleOAuthServer = value.trim();
-							await this.plugin.saveSettings();
+						.setValue(this.oauthServer)
+						.onChange(value => {
+							this.oauthServer = value.trim();
 						})
 				})
+				.addButton((button) =>
+					button
+						.setButtonText("Save")
+						.onClick(async () => {
+							this.plugin.settings.googleOAuthServer = this.oauthServer;
+							await this.plugin.saveSettings();
+							this.display();
+						})
+				);
 
 		}
 
-		new Setting(containerEl)
-			.setName("Login with google")
-			.addButton(button => {
-				button
-					.setButtonText(isLoggedIn ? "Logout" : "Login")
-					.onClick(() => {
-						if (isLoggedIn) {
-							setRefreshToken("");
-							setAccessToken("");
-							setExpirationTime(0);
-							this.hide();
-							this.display();
-						} else {
-							if (Platform.isMobileApp) {
-								if (this.plugin.settings.useCustomClient) {
-									StartLoginGoogleMobile();
-								} else {
-									window.open(`${this.plugin.settings.googleOAuthServer}/api/google`)
-								}
-							} else {
-								LoginGoogle()
-							}
-						}
+		const getLoginButtonStatus = async () => {
+			if (this.plugin.settings.useCustomClient) {
+				return (await getClientId() === '') || (await getClientSecret() === '');
+			} else {
+				return this.plugin.settings.googleOAuthServer === '';
+			}
+		}
+
+		if (isLoggedIn()) {
+			new Setting(containerEl)
+				.setName("Logout")
+				.setDesc("Logout from google")
+				.addButton((button) => {
+					button.setClass("login-with-google-btn")
+					button.setButtonText("Sign out from Google")
+					button.onClick(() => {
+						clearTokens();
+						this.display();
 					})
-			})
+				})
+		} else {
+			const buttonState = await getLoginButtonStatus()
+			new Setting(containerEl)
+				.setName("Login")
+				.setDesc("Login with google")
+				.addButton((button) => {
+					button.setDisabled(buttonState)
+					button.setClass("login-with-google-btn")
+					button.setButtonText("Sign in with Google")
+					button.onClick(() => {
+						pkceFlowServerStart();
+					})
+				})
+		}
+
 
 		new Setting(containerEl)
 			.setName("Refresh Interval")
@@ -541,7 +596,8 @@ export function settingsAreCorret(): boolean {
 
 export function settingsAreCompleteAndLoggedIn(): boolean {
 
-	if (!getRefreshToken() || getRefreshToken() == "") {
+	const refreshToken = window.localStorage.getItem("google_calendar_plugin_refresh_key")
+	if (!refreshToken || refreshToken == "") {
 		createNotice(
 			"Google Calendar missing settings or not logged in"
 		);

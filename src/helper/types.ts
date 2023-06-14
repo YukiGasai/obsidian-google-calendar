@@ -7,50 +7,51 @@ import type { SplitDirection, TFile } from "obsidian";
 
 
 export interface GoogleCalendarPluginSettings {
-    // Authentication settings
+	// Authentication settings
+	encryptToken: boolean;
 	useCustomClient: boolean;
-    googleOAuthServer: string;
-    googleClientId: string;
-    googleClientSecret: string;
-    googleRefreshToken: string;
-	
-    // Notification settings
-    useNotification: boolean;
+	googleOAuthServer: string;
+	googleClientId: string;
+	googleClientSecret: string;
+	googleRefreshToken: string;
+
+	// Notification settings
+	useNotification: boolean;
 	showNotice: boolean;
-	
-    // Event note settings
-    eventNoteNameFormat: string;
-    optionalNotePrefix: string;
-    defaultTemplate: string;
+
+	// Event note settings
+	eventNoteNameFormat: string;
+	optionalNotePrefix: string;
+	defaultTemplate: string;
 	defaultFolder: string;
-    autoCreateEventNotes: boolean;
-		autoCreateEventNotesMarker: string;
-        autoCreateEventKeepOpen: boolean;
-        importStartOffset: number;
-        importEndOffset: number;
+	autoCreateEventNotes: boolean;
+	autoCreateEventNotesMarker: string;
+	autoCreateEventKeepOpen: boolean;
+	importStartOffset: number;
+	importEndOffset: number;
 
-    // Calendar settings
-    defaultCalendar: string;
-    calendarBlackList: [string, string][];
-    insertTemplates: Template[];
-    useDefaultTemplate: boolean;
-    
-    // Daily note settings
-    activateDailyNoteAddon: boolean;
-    dailyNoteDotColor: string;
-    useWeeklyNotes: boolean;
-    
-    // Hidden settings
-    timelineHourFormat: number;
-    usDateFormat: boolean;
+	// Calendar settings
+	defaultCalendar: string;
+	calendarBlackList: [string, string][];
+	insertTemplates: Template[];
+	useDefaultTemplate: boolean;
 
-    // General settings
-    refreshInterval: number;
-    atAnnotationEnabled: boolean;
-    debugMode: boolean;
+	// Daily note settings
+	activateDailyNoteAddon: boolean;
+	dailyNoteDotColor: string;
+	useWeeklyNotes: boolean;
+
+	// Hidden settings
+	timelineHourFormat: number;
+	usDateFormat: boolean;
+
+	// General settings
+	refreshInterval: number;
+	atAnnotationEnabled: boolean;
+	debugMode: boolean;
 
 	viewSettings: { [type in string]: CodeBlockOptions };
-    }
+}
 
 export interface Template {
 	name: string,
@@ -316,10 +317,10 @@ export interface IGoogleCalendarPluginApi {
 	getEvent: (id: string, calendarId: string) => Promise<GoogleEvent>,
 	getEvents: (input: ListOptions) => Promise<GoogleEvent[]>,
 	getCalendars: () => Promise<GoogleCalendar[]>,
-    createEvent: (input:GoogleEvent) => Promise<GoogleEvent>,
-    deleteEvent: (event:GoogleEvent, deleteAll:boolean) => Promise<boolean>,
-    updateEvent: (event:GoogleEvent, updateSingle: boolean) => Promise<GoogleEvent>,
-	createEventNote: (event:GoogleEvent, eventDirectory: string, templatePath: string) => Promise<TFile>,
+	createEvent: (input: GoogleEvent) => Promise<GoogleEvent>,
+	deleteEvent: (event: GoogleEvent, deleteAll: boolean) => Promise<boolean>,
+	updateEvent: (event: GoogleEvent, updateSingle: boolean) => Promise<GoogleEvent>,
+	createEventNote: (event: GoogleEvent, eventDirectory: string, templatePath: string) => Promise<TFile>,
 }
 export interface CodeBlockOptions {
 	type?: "web" | "month" | "day" | "schedule" | "week" | "year";
@@ -350,11 +351,11 @@ export type EventNoteQueryResult = {
 
 
 export type CustomTask = {
-    event: GoogleEvent;
-    steps: number;
-    goal: number;
-    current: number;
-    done: boolean;
+	event: GoogleEvent;
+	steps: number;
+	goal: number;
+	current: number;
+	done: boolean;
 }
 
 export interface OpenPeriodicNoteOptions {
@@ -368,4 +369,20 @@ export interface ApiRequestData {
 	url: string;
 	method: string;
 	body?: any;
+}
+
+export interface PKCELocalSession {
+	state: string;
+	codeVerifier: string;
+}
+
+
+export interface PKCEServerSession {
+	keys: CryptoKeyPair;
+	state: string;
+}
+
+export enum InfoModalType {
+	USE_OWN_CLIENT = 1,
+	ENCRYPT_INFO = 2,
 }
