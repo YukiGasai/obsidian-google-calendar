@@ -23,7 +23,7 @@ import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEve
 import { TemplateSuggest } from "./suggest/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
-import { findEventNote, getCurrentTheme } from "./helper/Helper";
+import { findEventNote, getCurrentTheme, scopeTest } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 import { checkForNewDailyNotes, checkForNewWeeklyNotes } from "./helper/DailyNoteHelper";
 import { createEvent } from "../src/googleApi/GoogleCreateEvent";
@@ -612,8 +612,13 @@ export default class GoogleCalendarPlugin extends Plugin {
 			// Don't allow login if already logged in
 			if (isLoggedIn()) return
 
+
+			// Check if the scope is valid
+			if (!req.scope || !scopeTest(req.scope)) return
+
+
 			// Local PKCE flow to get the code and exchange it for a token
-			if (req.code && req.state && req.scope === "https://www.googleapis.com/auth/calendar") {
+			if (req.code && req.state) {
 				await pkceFlowLocalEnd(req.code, req.state)
 				return;
 			}

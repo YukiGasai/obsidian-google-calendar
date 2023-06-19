@@ -70,7 +70,7 @@ export const getCurrentTheme = (): string => {
 
 
 export const sanitizeFileName = (name: string): string => {
-    if(!name) return "";
+	if (!name) return "";
 	return name.trim()
 		.replace('<', 'lt')
 		.replace('>', 'gt')
@@ -86,7 +86,7 @@ export const sanitizeFileName = (name: string): string => {
 
 
 const checkNotesForEventId = (files, eventId: string): [TFile[], TFile[], TFile[]] => {
-    return files.reduce(([withID, withOutID, withWrongID], file) => {
+	return files.reduce(([withID, withOutID, withWrongID], file) => {
 		const frontmatter = app.metadataCache.getFileCache(file).frontmatter;
 		if (frontmatter?.['event-id'] === eventId) {
 			return [[...withID, file], withOutID, withWrongID]
@@ -102,8 +102,8 @@ const findEventNoteByTitle = (event: GoogleEvent): EventNoteQueryResult => {
 	const filesWithName = app.vault.getFiles().filter(file =>
 		file.basename == sanitizeFileName(event.summary)
 	)
-	
-    const [filesWithId, filesWithOutId] = checkNotesForEventId(filesWithName, event.id)
+
+	const [filesWithId, filesWithOutId] = checkNotesForEventId(filesWithName, event.id)
 
 	return {
 		event: event,
@@ -114,17 +114,17 @@ const findEventNoteByTitle = (event: GoogleEvent): EventNoteQueryResult => {
 
 const findEventNoteForAllFiles = (event: GoogleEvent): EventNoteQueryResult => {
 	const files = app.vault.getFiles();
-	
-    for (let index = 0; index < files.length; index++) {
-        const frontmatter = app.metadataCache.getFileCache(files[index]).frontmatter;
-        if(frontmatter?.['event-id'] === event.id) {
-            return {
-                event: event,
-                file: files[index],
-                match: "id"
-            }
-        }
-    }
+
+	for (let index = 0; index < files.length; index++) {
+		const frontmatter = app.metadataCache.getFileCache(files[index]).frontmatter;
+		if (frontmatter?.['event-id'] === event.id) {
+			return {
+				event: event,
+				file: files[index],
+				match: "id"
+			}
+		}
+	}
 
 	return {
 		event: event,
@@ -136,9 +136,9 @@ const findEventNoteForAllFiles = (event: GoogleEvent): EventNoteQueryResult => {
 
 const findEventNoteForAllPrefixedFiles = (event: GoogleEvent, plugin: GoogleCalendarPlugin): EventNoteQueryResult => {
 	const filesWithName = app.vault.getFiles().filter(file =>
-    	file.basename.startsWith(plugin.settings.optionalNotePrefix)
+		file.basename.startsWith(plugin.settings.optionalNotePrefix)
 	)
-    const [filesWithId, filesWithOutId] = checkNotesForEventId(filesWithName, event.id)
+	const [filesWithId, filesWithOutId] = checkNotesForEventId(filesWithName, event.id)
 
 	return {
 		event: event,
@@ -148,12 +148,22 @@ const findEventNoteForAllPrefixedFiles = (event: GoogleEvent, plugin: GoogleCale
 }
 
 export const findEventNote = (event: GoogleEvent, plugin: GoogleCalendarPlugin): EventNoteQueryResult => {
-    //First check with good performance for file title for the event note
-    const titleResult = findEventNoteByTitle(event);
-    if(titleResult.match == "id" && titleResult.file) return titleResult;
+	//First check with good performance for file title for the event note
+	const titleResult = findEventNoteByTitle(event);
+	if (titleResult.match == "id" && titleResult.file) return titleResult;
 
-    //Bad performance, check every file for the event id
-    const finalResult = findEventNoteForAllPrefixedFiles(event, plugin);
+	//Bad performance, check every file for the event id
+	const finalResult = findEventNoteForAllPrefixedFiles(event, plugin);
 
-    return finalResult;
+	return finalResult;
+}
+
+export const scopeTest = (scopesString: string): boolean => {
+
+	const scopes = scopesString.split(" ");
+
+	// Allow only calendar scopes
+	// Allow /calendar scope for compatibility with old clients
+	const allowedScopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly"];
+	return scopes.every(scope => allowedScopes.indexOf(scope) > -1);
 }

@@ -1,7 +1,7 @@
-import { getAccessToken } from "../helper/LocalStorage";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { GoogleApiError } from "../googleApi/GoogleApiError";
 import { requestUrl } from "obsidian";
+import { getValidAccessToken } from "src/helper/GetValidAccessToken";
 
 export const callRequest = async (url: string, method: string, body: any, noAuth = false): Promise<any> => {
 
@@ -9,7 +9,7 @@ export const callRequest = async (url: string, method: string, body: any, noAuth
 
     const requestHeaders = { 'Content-Type': 'application/json' };
     if (noAuth == false) {
-        const bearer = await getAccessToken();
+        const bearer = await getValidAccessToken();
         if (!bearer) {
             throw new GoogleApiError("Error Google API request",
                 { method, url, body, },

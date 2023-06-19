@@ -7,13 +7,14 @@ import {
 	Setting,
 	Notice,
 } from "obsidian";
-import { clearClient, clearTokens, getClientId, getClientSecret, getRefreshToken, isLoggedIn, setClientId, setClientSecret, } from "../helper/LocalStorage";
+import { clearClient, clearTokens, getClientId, getClientSecret, isLoggedIn, setClientId, setClientSecret, } from "../helper/LocalStorage";
 import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
 import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
 import { SettingsInfoModal } from "../modal/SettingsInfoModal";
 import { pkceFlowServerStart } from "../googleApi/oauth/pkceServerFlow";
+import { pkceFlowLocalStart } from "../googleApi/oauth/pkceLocalFlow";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -24,12 +25,10 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.oauthServer = this.plugin.settings.googleOAuthServer;
-		if (this.plugin.settings.encryptToken) {
-			(async () => {
-				this.clientId = await getClientId();
-				this.clientSecret = await getClientSecret();
-			})();
-		}
+		(async () => {
+			this.clientId = await getClientId();
+			this.clientSecret = await getClientSecret();
+		})();
 	}
 
 	async display(): Promise<void> {
@@ -188,7 +187,11 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					button.setClass("login-with-google-btn")
 					button.setButtonText("Sign in with Google")
 					button.onClick(() => {
-						pkceFlowServerStart();
+						if (this.plugin.settings.useCustomClient) {
+							pkceFlowLocalStart();
+						} else {
+							pkceFlowServerStart();
+						}
 					})
 				})
 		}

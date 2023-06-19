@@ -1,5 +1,5 @@
 import { setAccessToken, setExpirationTime, setRefreshToken } from "../../helper/LocalStorage";
-import { generateRsaKeys, rsaKeyToString } from "../../helper/crypt/pkceHelper";
+import { arrayBufferToUtf8String, generateRsaKeys, rsaKeyToString } from "../../helper/crypt/pkceHelper";
 import type { PKCEServerSession } from "../../helper/types";
 import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
 
@@ -35,15 +35,16 @@ export const pkceFlowServerEnd = async (encryptedText) => {
         Buffer.from(encryptedText, 'base64')
     )
 
-    const tokenString = Buffer.from(tokenEncoded).toString('utf-8');
+    const tokenString = arrayBufferToUtf8String(tokenEncoded);
 
     const token = JSON.parse(tokenString);
 
-    const { access_token, refresh_token, expires_in } = token;
+    const [access_token, refresh_token] = token;
+    const expirationTime = 4000;
 
     await setRefreshToken(refresh_token);
     await setAccessToken(access_token);
-    setExpirationTime(+new Date() + expires_in * 1000)
+    setExpirationTime(+new Date() + expirationTime * 1000)
 
     session = null;
     plugin.settingsTab.display();
