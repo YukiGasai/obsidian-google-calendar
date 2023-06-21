@@ -53,7 +53,7 @@ export async function googleCreateEvent(event: GoogleEvent | any): Promise<Googl
         throw new GoogleApiError("Could not create Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
     }
 
-    const createdEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events`, 'POST', event)
+    const createdEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/eventsconferenceDataVersion=1`, 'POST', event)
     return createdEvent;
 }
 
