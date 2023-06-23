@@ -22,7 +22,7 @@
     let calendars: GoogleCalendar[];
     let loading = true;
     let fullDay:boolean;
-
+	let isBusy: boolean;
 
 
     
@@ -58,12 +58,22 @@
             delete event.end.date;
         }
 
+		isBusy
+			? (event.transparency = 'opaque')
+			: (event.transparency = 'transparent');
+
         return event;
     }
 
     onMount(async () => {
 
         fullDay = event?.start?.dateTime == undefined && event?.start?.date !== undefined;
+
+		if (!event?.transparency) {
+            isBusy = true;
+        } else {
+            isBusy = event?.transparency == 'opaque';
+        }
 
         calendars = await listCalendars();
         loading = false;
@@ -290,6 +300,11 @@ $: {
 
     <label for="reoccurring">Reoccurring</label>
     <input type="text" name="Reoccurring" bind:value="{recurringText}" disabled={event.id != null} >
+
+	<div class="googleFullDayContainer">
+		<label for="isBusy">Show me as Busy?</label>
+		<input type="checkbox" name="isBusy" bind:checked={isBusy} />
+	</div>
 
     <div class="googleEventButtonContainer">
         {#if event.id}

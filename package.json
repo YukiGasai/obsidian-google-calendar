@@ -1,6 +1,6 @@
 {
 	"name": "google-calendar",
-	"version": "1.9.18",
+	"version": "1.9.19",
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"main": "main.js",
 	"scripts": {
