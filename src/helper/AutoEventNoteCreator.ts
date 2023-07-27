@@ -67,7 +67,7 @@ const insertEventIdInFrontmatter = (event: GoogleEvent, fileContent: string, pos
     let frontmatterText = fileContent.substring(start, end);
 
     //event-id is already in the frontmatter
-    if (frontmatterText.contains("event-id:")) {
+    if (frontmatterText.contains("event-id:") || fileContent.contains("event-id: "+event.id)) {
         return fileContent;
     }
     //no frontmatter exists yet so we create one with the event-id
@@ -351,8 +351,8 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         const originalTemplateFileContent = await vault.cachedRead(templateFile);
 
         //Get template with injected event data
-        let newContent = insertEventIdInFrontmatter(event, originalTemplateFileContent, app.metadataCache.getFileCache(templateFile).frontmatter?.position);
-        newContent = injectEventDetails(event, newContent);
+        let newContent = injectEventDetails(event, originalTemplateFileContent);
+        newContent = insertEventIdInFrontmatter(event, newContent, app.metadataCache.getFileCache(templateFile).frontmatter?.position);
 
         if (useTemplater && newContent.contains("{{") && newContent.contains("}}")) {
             return false;
