@@ -19,13 +19,13 @@ async function waitForPassword() {
 		await new Promise(resolve => setTimeout(resolve, 1000));
 }
 
-const getPassword = async (): Promise<string> => {
+const getPassword = async (createNew = false): Promise<string> => {
 	if (tokenPassword) return tokenPassword;
 	if (!getPasswordModalIsOpen) {
 		new PasswordEnterModal(GoogleCalendarPlugin.getInstance().app, (enteredPassword: string) => {
 			setTokenPassword(enteredPassword);
 			getPasswordModalIsOpen = false;
-		}).open();
+		}, createNew).open();
 		getPasswordModalIsOpen = true;
 	}
 
@@ -128,7 +128,7 @@ export const setAccessToken = async (googleAccessToken: string): Promise<void> =
  */
 export const setRefreshToken = async (googleRefreshToken: string): Promise<void> => {
 	if (GoogleCalendarPlugin.getInstance().settings.encryptToken) {
-		const password = await getPassword();
+		const password = await getPassword(true);
 		googleRefreshToken = await aesGcmEncrypt(googleRefreshToken, password);
 	}
 	window.localStorage.setItem(GOOGLE_CALENDAR_PLUGIN_REFRESH_KEY, googleRefreshToken);

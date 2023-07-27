@@ -7,7 +7,7 @@ import {
 	Setting,
 	Notice,
 } from "obsidian";
-import { clearClient, clearTokens, getClientId, getClientSecret, isLoggedIn, setClientId, setClientSecret, } from "../helper/LocalStorage";
+import { clearClient, clearTokens, getClientId, getClientSecret, isLoggedIn, setClientId, setClientSecret, setTokenPassword, } from "../helper/LocalStorage";
 import { listCalendars } from "../googleApi/GoogleListCalendars";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
@@ -52,6 +52,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					clearTokens();
 					clearClient();
+					setTokenPassword(null)
 					this.display();
 				});
 			});
