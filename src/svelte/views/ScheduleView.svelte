@@ -150,6 +150,12 @@
         plugin.saveSettings();
     }
 
+    const getSingleEventClassList = (event): string => {
+        let classList = "gcal-schedule-event";
+        if(containerWidth < 200) classList += " gcal-schedule-breakLine";
+        if(window.moment(event.end.date ?? event.end.dateTime).isBefore(window.moment(), "minute")) classList += " gcal-schedule-pastEvent";
+        return classList;
+    }
     
     </script>
     {#if isObsidianView}
@@ -160,7 +166,7 @@
             <DayNavigation bind:dateOffset bind:date bind:startDate />
         {/if}
         {#each [...days] as [key, events]}
-            <div class={containerWidth < 550 ? "gcal-schedule-day-container breakLine" : "gcal-schedule-day-container"}>
+            <div class={containerWidth < 550 ? "gcal-schedule-day-container gcal-schedule-breakLine" : "gcal-schedule-day-container"}>
                 <div class="gcal-schedule-date-display">
                     <div 
                     on:click="{()=>goToDaySelect(events[0])}"
@@ -181,7 +187,7 @@
 
                 <div class="gcal-schedule-event-container">
                     {#each events as event}
-                    <div class={containerWidth < 200 ? "gcal-schedule-event breakLine" : "gcal-schedule-event"} 
+                    <div class={getSingleEventClassList(event)}
                         on:click="{(e) => goToEvent(event,e)}"
                         on:keypress="{(e) => goToEvent(event,e)}"
                     >
@@ -334,9 +340,13 @@
         text-overflow: ellipsis;
     }
 
-    .breakLine {
+    .gcal-schedule-breakLine {
         flex-direction: column;
         margin-bottom:10px;
+    }
+
+    .gcal-schedule-pastEvent {
+        opacity: 0.5;
     }
     
     </style>
