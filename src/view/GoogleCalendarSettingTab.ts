@@ -468,7 +468,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 						const [id, summery] = value.split("_=_");
 						if (!calendarBlackList.contains([id, summery])) {
 							this.plugin.settings.calendarBlackList = [
-								...calendarBlackList,
+								...this.plugin.settings.calendarBlackList,
 								[id, summery],
 							];
 
