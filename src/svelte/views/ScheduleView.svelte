@@ -161,10 +161,14 @@
     {#if isObsidianView}
         <ViewSettings bind:codeBlockOptions bind:showSettings/>
     {/if}
+
     <div class ="gcal-schedule-container" bind:clientWidth={containerWidth}>
         {#if codeBlockOptions.navigation && date}
             <DayNavigation bind:dateOffset bind:date bind:startDate />
         {/if}
+        {#if !events?.length}
+        <span>No events</span>
+        {:else}
         {#each [...days] as [key, events]}
             <div class={containerWidth < 550 ? "gcal-schedule-day-container gcal-schedule-breakLine" : "gcal-schedule-day-container"}>
                 <div class="gcal-schedule-date-display">
@@ -181,7 +185,7 @@
                         class="gcal-schedule-day-text" 
                         on:click={switchHourDisplay}
                         on:keypress={switchHourDisplay}
-                    >{key.slice(7)}</span>
+                    >{key.split(",")[1]}</span>
                 </div>
                 
 
@@ -198,17 +202,18 @@
                                 <div class="gcal-schedule-time-container">
                                     <span>{getDateString(event,hourFormat)}</span>
                                 </div>
-                        </div>
+                    </div>
                         <div class="gcal-schedule-event-title-container">
                             <span class="gcal-schedule-event-title">{event.summary}</span>
-                        </div>
-                            
+                        </div>   
                     </div>
                     {/each}
                 </div>
             </div>
         {/each}
+        {/if}
     </div>
+
     
     <style>
 
@@ -308,7 +313,6 @@
 		line-height: 30px;
 		font-size: 30px;
 		color: rgb(164, 164, 164);
-        top: 1.5px;
 		white-space: nowrap;
 	}
 

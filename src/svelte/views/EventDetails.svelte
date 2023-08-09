@@ -138,14 +138,6 @@
         }
 	});
 
-    //Event Handler
-
-    const changeDescription = (e:Event) => {
-       if(e.target instanceof HTMLTextAreaElement){
-           event.description = e.target.value;
-       } 
-    }
-
     const changeCalendar = (e:Event) => {
         const selectElement = e.target;
 
@@ -363,6 +355,12 @@ $: {
         height:40px;
         font-size: 35px;
         text-align: center;
+    }
+
+    input[type="text"],
+    input[type="datetime-local"],
+    input[type="date"] {
+        background: var(--background);
     }
 
     label{

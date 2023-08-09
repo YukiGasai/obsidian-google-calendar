@@ -4,8 +4,7 @@
     import { marked } from 'marked';
 
     export let event: GoogleEvent;
-    console.log(event);
-    let isPreview= true;
+    let isPreview = event.id  !== undefined;
 
     const convertDescriptionToMarkdown = () => {
         const turndownService = new TurndownService();
@@ -66,6 +65,11 @@
         margin: 0;
     }
 
+    .gcal-description-texarea:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
     .gcal-icon-button{
         display: flex;
         justify-content: center;
@@ -85,9 +89,13 @@
     
     .gcal-description-container{
         width: 100%;
-        border: 1px solid var(--light0);
         border-radius: 10px;
         padding: 10px;
         overflow: scroll;
+        border: var(--input-border-width) solid var(--background-modifier-border);
+    }
+
+    .gcal-description-container:focus-within {
+        box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
     }
 </style>
