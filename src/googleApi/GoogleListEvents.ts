@@ -211,7 +211,6 @@ function resolveMultiDayEventsHelper(
 		if (currentEvent.start.date) {
 			return [...allEvents, currentEvent];
 		}
-		console.log(currentEvent)
 		const endMoment = window.moment(currentEvent.end.dateTime);
 		let startMoment = window.moment(currentEvent.start.dateTime);
 

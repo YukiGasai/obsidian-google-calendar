@@ -50,7 +50,6 @@
             include: codeBlockOptions.include,
             exclude: codeBlockOptions.exclude
         });    
-        console.log("newEvents", newEvents)
         if(JSON.stringify(newEvents) != JSON.stringify(events)){
             events = newEvents;
         }
