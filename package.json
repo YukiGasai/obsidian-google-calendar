@@ -1,6 +1,6 @@
 {
 	"name": "google-calendar",
-	"version": "1.9.21",
+	"version": "1.9.22",
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -45,6 +45,7 @@
 		"server-destroy": "^1.0.1",
 		"svelte-multiselect": "^8.6.0",
 		"svelte-range-slider-pips": "^2.1.1",
-		"ts-treemap": "^1.1.0"
+		"ts-treemap": "^1.1.0",
+		"turndown": "^7.1.2"
 	}
 }

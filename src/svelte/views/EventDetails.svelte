@@ -15,6 +15,7 @@
     import { findEventNote } from "../../helper/Helper";
     import { getEvent } from "src/googleApi/GoogleGetEvent";
     import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
+	import EventDescriptionInput from "../components/EventDescriptionInput.svelte";
 
     export let event: GoogleEvent;
     export let closeFunction :() => void;
@@ -136,13 +137,6 @@
             }
         }
 	});
-
-    const getDescription = () => {
-        if(event.description){
-		    return event.description.replace(/<\/?[^>]+(>|$)/g, "");
-        }
-        return ""
-    }
 
     //Event Handler
 
@@ -267,9 +261,7 @@ $: {
    
     <input class="summaryInput" name="summary" type="text" placeholder="Summary" bind:value="{event.summary}">
 
-    <label for="description">Description</label>
-    <textarea name="description" on:change="{changeDescription}">{getDescription()}</textarea>
-
+    <EventDescriptionInput bind:event={event} />
    
     {#if loading}
         <span>Loading</span>
