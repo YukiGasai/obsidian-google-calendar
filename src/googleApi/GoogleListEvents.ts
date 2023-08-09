@@ -240,6 +240,16 @@ function resolveMultiDayEventsHelper(
 			startMoment.add(1, "days").startOf("day");
 		}
 
+
+		//Limit the events to the requested time span
+		if (date && endDate) {
+			singleDayEventList = singleDayEventList.filter((event) => {
+				const eventStart = window.moment(event.start.dateTime);
+				return eventStart.isBetween(date, endDate, "day", "[]");
+			});
+		}
+
+
 		return [...allEvents, ...singleDayEventList];
 
 	}, []);
