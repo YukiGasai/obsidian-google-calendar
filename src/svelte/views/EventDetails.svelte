@@ -24,9 +24,8 @@
     let loading = true;
     let fullDay:boolean;
 	let isBusy: boolean;
+    let selectedCalendarId = "";
 
-
-    
     let plugin = GoogleCalendarPlugin.getInstance();
 
     let inputStartDateTime:string;
@@ -35,6 +34,7 @@
     let recurringText = "";
     let eventNoteQueryResult = findEventNote(event, plugin);
 
+    // Make sure the date is always rounded to the next 15 minutes
     function getEmptyDate() {
         const minutes = 15;
         const ms = 1000 * 60 * minutes;
@@ -42,10 +42,11 @@
         return window.moment(new Date(Math.round(new Date().getTime() / ms) * ms));
     }
 
-
+    
     function addEventDate(_event: GoogleEvent) : GoogleEvent {
 
         const event = _.cloneDeep(_event);
+        event.parent = calendars.find(calendar => calendar.id === selectedCalendarId);
 
         if(fullDay){
             event.start.date = window.moment(inputStartDate).format("YYYY-MM-DD");
@@ -81,17 +82,17 @@
         }
 
         calendars = await listCalendars();
+        selectedCalendarId = event?.parent?.id ?? plugin?.settings?.defaultCalendar;
+        if(!selectedCalendarId) {
+            selectedCalendarId = calendars[0].id;
+        }
+
         loading = false;
 
         //New event all blank
         if(event.id == undefined){
             event.summary = event.summary ?? "";
             event.description = event.description ?? "";
-
-            event.parent = calendars.find(calendar => calendar.id === plugin.settings.defaultCalendar);
-            if(!event.parent) {
-                event.parent = calendars[calendars.length - 1];
-            }
        
             recurringText = "";
 
@@ -100,7 +101,7 @@
             inputEndDateTime = startTime.add(1, "hour").format("YYYY-MM-DDTHH:mm");
             inputStartDate = startTime.format("YYYY-MM-DD");
 
-            
+
 
             if(event.start.date){
                 inputStartDate = window.moment(event.start.date).format("YYYY-MM-DD");
@@ -142,10 +143,9 @@
         const selectElement = e.target;
 
         if(selectElement instanceof HTMLSelectElement){
-
+            
             const value = selectElement.value;
-            event.parent.id = value;
-
+            selectedCalendarId = value;
         }
     }
 
@@ -264,7 +264,7 @@ $: {
     <select name="calendar" class="dropdown" on:change="{changeCalendar}" disabled={event?.id !== undefined}>
         
         {#each calendars as calendar}
-            <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id == event?.parent?.id}">{calendar.summary}</option>
+            <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id === selectedCalendarId}">{calendar.summary}</option>
         {/each}
     </select>
     

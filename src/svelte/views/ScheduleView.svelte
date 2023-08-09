@@ -268,6 +268,7 @@
     }
 
 	.gcal-schedule-day-text {
+        min-width: 30px;
 		font-size: medium;
 	}
 
