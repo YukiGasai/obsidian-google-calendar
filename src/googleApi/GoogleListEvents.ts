@@ -205,50 +205,46 @@ function resolveMultiDayEventsHelper(
 	date?: moment.Moment,
 	endDate?: moment.Moment
 ): GoogleEvent[] {
-	let extraEvents: GoogleEvent[] = [];
 
-	totalEventList.forEach((tmp: GoogleEvent) => {
-		if (!tmp.start.dateTime || !tmp.end.dateTime) return;
+	return totalEventList.reduce((allEvents, currentEvent: GoogleEvent):GoogleEvent[] => {
+		//Ignore all day events
+		if (currentEvent.start.date) {
+			return [...allEvents, currentEvent];
+		}
+		console.log(currentEvent)
+		const endMoment = window.moment(currentEvent.end.dateTime);
+		let startMoment = window.moment(currentEvent.start.dateTime);
 
-		const endMoment = window.moment(tmp.end.dateTime);
-		let startMoment = window.moment(tmp.start.dateTime);
+		// Ignore non multi day events
+		if (startMoment.isSame(endMoment, "day") || endMoment.isSame(startMoment.clone().add(1, "day").startOf("day"), "minute")) {
+			return [...allEvents, currentEvent];
+		}
 
-		if (startMoment.isSame(endMoment, "day")) return;
+		let singleDayEventList: GoogleEvent[] = [];
 
-		let extraEventsTmp: GoogleEvent[] = [];
+		// Amount of days the event spans
+		const totalDays = endMoment.clone().endOf("day").diff(startMoment.clone().startOf("day"), "days") + 1;
+		const title = currentEvent.summary;
 
-		const totalDays = endMoment.endOf("day").diff(startMoment.startOf("day"), "days") + 1;
+		// Create the events for all the days except the last one
+		for (let dayCount = 1; dayCount <= totalDays; dayCount++) {
+			const newEvent =  _.cloneDeep(currentEvent);
+			newEvent.start.dateTime = startMoment.toISOString();
+			if (dayCount == totalDays) {
+				newEvent.end.dateTime = endMoment.toISOString();
+			}else {
+				newEvent.end.dateTime = startMoment.endOf("day").toISOString();
+			}
+			newEvent.summary = `${title} (${dayCount}/${totalDays})`;
+			newEvent.eventType = "multiDay";
+			singleDayEventList.push(newEvent);
+			startMoment.add(1, "days").startOf("day");
+		}
 
-		const title = tmp.summary;
+		return [...allEvents, ...singleDayEventList];
 
-		let dayCount = 1;
+	}, []);
 
-		do {
-			tmp.summary = `${title} (Day ${dayCount}/${totalDays})`
-			tmp.eventType = "multiDay";
-			extraEventsTmp = [...extraEventsTmp, structuredClone(tmp)];
-			dayCount++;
-			startMoment = startMoment.add(1, "days");
-			tmp.start.dateTime = startMoment.format("YYYY-MM-DD HH:mm");
-		} while (!startMoment.isAfter(endMoment, "day"));
-
-
-		extraEventsTmp = extraEventsTmp.filter(event => {
-			const startMoment = window.moment(event.start.dateTime);
-			if (date && startMoment.isBefore(date, "day")) return false;
-			if (endDate && startMoment.isSameOrAfter(endDate, "day")) return false;
-			return true;
-		})
-
-		tmp.eventType = "delete";
-
-		extraEvents = [...extraEvents, ...extraEventsTmp];
-
-	});
-
-	totalEventList = [...totalEventList, ...extraEvents];
-
-	return totalEventList;
 }
 
 // Check if the range if events is already cached

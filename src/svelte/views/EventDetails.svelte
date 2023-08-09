@@ -67,6 +67,10 @@
 
     onMount(async () => {
 
+        if(event.eventType === "multiDay") {
+            event = await getEvent(event.id, event.parent.id);
+        }
+
         fullDay = event?.start?.dateTime == undefined && event?.start?.date !== undefined;
 
 		if (!event?.transparency) {
