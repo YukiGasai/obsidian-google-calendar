@@ -305,9 +305,6 @@ $: {
                 {/if}
 
                 {#if eventNoteQueryResult.file}
-                    {#if eventNoteQueryResult.match == "title"}
-                        <button on:click="{createNote}">Create Event Note for this date</button>
-                    {/if}
                     <button on:click="{openNote}">Open Event Note</button>
                 {:else}
                     <button on:click="{createNote}">Create Event Note</button>

@@ -32,7 +32,7 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
     const fileContent = await app.vault.adapter.read(normalizePath(view.file.path));
 
     //Use a copy to prevent problems when running the command multiple times
-    const frontmatter: any = _.cloneDeep(app?.metadataCache?.getFileCache(view.file).frontmatter) ?? {};
+    const frontmatter: any = _.cloneDeep(app?.metadataCache?.getFileCache(view.file)?.frontmatter) ?? {};
     //Get dataview frontmatter form the file
     const regexp = /\[([^[]*)::([^[]*)\]/gm;
     let matches;
@@ -211,7 +211,7 @@ const getFrontMatterMapping = (frontmatter: FrontMatterCache): Map<string, strin
             return mapping
         }
 
-        frontmatter = app?.metadataCache?.getFileCache(file).frontmatter;
+        frontmatter = app?.metadataCache?.getFileCache(file)?.frontmatter;
         if (!frontmatter) {
             createNotice(`Mapping Error, file "${newPath}" does not contain frontmatter.`);
             return mapping;

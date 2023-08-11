@@ -6,7 +6,7 @@ import { normalizePath, Pos, TFile } from "obsidian";
 import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import _ from "lodash";
-import { sanitizeFileName } from "./Helper";
+import { findEventNote, sanitizeFileName } from "./Helper";
 import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
 
 /**
@@ -210,19 +210,37 @@ async function getEventNoteFilePath(plugin: GoogleCalendarPlugin, event: GoogleE
     return normalizePath(`${folderPath}/${sanitizedFileName}.md`);
 }
 
-async function checkIfFileExists(event: GoogleEvent, filePath: string, isAutoCreated: boolean): Promise<TFile> | null {
+// Check if a file already exists.
+// If the file does exist it will returns a number to append to the file name so a new file can be created
+async function getFileSuffix(folderName: string, filePath: string): Promise<string> {
     const { vault } = app;
     const { adapter } = vault;
 
-    if (await adapter.exists(filePath)) {
-        let existingFile = vault.getAbstractFileByPath(filePath) as TFile;
-        if (!isAutoCreated) {
-            createNotice(`EventNote ${event.summary} already exists.`)
-            new CreateNotePromptModal(event, (newNote: TFile) => existingFile = newNote).open();
-        }
-        return existingFile
+    const fileExists = await adapter.exists(filePath);
+    // No suffix needed because the file doesn't exist
+    if(!fileExists) {
+        return filePath;
     }
-    return;
+
+    //Get Filename without extension
+    const fileName = filePath.split(".").slice(0, -1).join(".");
+
+    // Get all files in a folder
+    let {files: filesInFolder} = await adapter.list(folderName);
+    
+    // Filter to only get files matching with the event name
+    const fileIndex = filesInFolder
+        .filter(file => file.startsWith(fileName))
+        .reduce((max, file) => {
+            file = file.replace(fileName, "");
+            file = file.replace(".md", "");
+            file = file.replace(/[\(\)\s]+/g, "");
+            if(file === "" && max === 1) return 1;
+            const fileNumber =  parseInt(file);
+            return fileNumber > max ? fileNumber : max;
+        }, 1);
+
+    return `${fileName} (${fileIndex + 1}).md`;
 }
 
 /**
@@ -234,6 +252,12 @@ async function checkIfFileExists(event: GoogleEvent, filePath: string, isAutoCre
  */
 export const createNoteFromEvent = async (event: GoogleEvent, folderName?: string, templateName?: string, isAutoCreated = false): Promise<TFile> => {
     const plugin = GoogleCalendarPlugin.getInstance();
+    
+    const existingEventNote = findEventNote(event, plugin);
+    if(existingEventNote.file) {
+        createNotice(`EventNote ${event.summary} already exists.`);
+        return existingEventNote.file;
+    }
     const { vault } = app;
     const { adapter } = vault;
 
@@ -241,10 +265,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         folderName = replacePathPlaceholders(plugin, event, folderName);
     }
 
-    const filePath = await getEventNoteFilePath(plugin, event, folderName);
+    let filePath = await getEventNoteFilePath(plugin, event, folderName);
     //check if file already exists
-    const existingFile = await checkIfFileExists(event, filePath, isAutoCreated);
-    if (existingFile) return existingFile;
+    filePath = await getFileSuffix(folderName, filePath);
 
     //Create file with no content
     let file;
@@ -286,24 +309,33 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         active: true
     });
 
-    if (plugin.templaterPlugin && plugin.coreTemplatePlugin) {
-        const wasInserted = await insertTemplate(true);
-        if (!wasInserted) {
-            const wasInsertedAgain = await insertTemplate(false);
-            if (!wasInsertedAgain) {
+    try {
+        if (plugin.templaterPlugin && plugin.coreTemplatePlugin) {
+            const wasInserted = await insertTemplate(true);
+            if (!wasInserted) {
+                const wasInsertedAgain = await insertTemplate(false);
+                if (!wasInsertedAgain) {
+                    createNotice("Template not compatible")
+                    throw new Error("Template not compatible")
+                }
+            }
+        } else if (plugin.templaterPlugin) {
+            const wasInserted = await insertTemplate(true);
+            if (!wasInserted) {
                 createNotice("Template not compatible")
+                throw new Error("Template not compatible")
+
+            }
+        } else if (plugin.coreTemplatePlugin) {
+            const wasInserted = await insertTemplate(false);
+            if (!wasInserted) {
+                createNotice("Template not compatible")
+                throw new Error("Template not compatible")
             }
         }
-    } else if (plugin.templaterPlugin) {
-        const wasInserted = await insertTemplate(true);
-        if (!wasInserted) {
-            createNotice("Template not compatible")
-        }
-    } else if (plugin.coreTemplatePlugin) {
-        const wasInserted = await insertTemplate(false);
-        if (!wasInserted) {
-            createNotice("Template not compatible")
-        }
+    } catch(err) {
+        const fileContent = insertEventIdInFrontmatter(event, "", null);
+        await adapter.write(filePath, fileContent);
     }
 
 
@@ -316,50 +348,49 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
 
     async function insertTemplate(useTemplater: boolean): Promise<boolean> {
-
         //Get the default template path from the plugin settings
-        let tempalteFolderPath;
-        if (useTemplater) {
-            tempalteFolderPath = normalizePath(plugin?.templaterPlugin?.settings?.templates_folder);
-        } else {
-            tempalteFolderPath = normalizePath(plugin?.coreTemplatePlugin?.instance?.options?.folder);
-        }
-
+        let templateFolderPath = useTemplater 
+        ? normalizePath(plugin.templaterPlugin.settings.templates_folder)
+        : normalizePath(plugin.coreTemplatePlugin.instance.options.folder);
+  
         //Chek if the template name or path exists
         let templateFilePath;
-        if (await adapter.exists(templateName)) {
+        // Check if template exists if the template name is the full path to the file
+        if ((await adapter.exists(templateName))) {
             templateFilePath = templateName;
         } else {
             //Get Path to template file and check if it exists
-            templateFilePath = `${tempalteFolderPath}/${templateName}`;
-            if (tempalteFolderPath === "/") {
+            templateFilePath = `${templateFolderPath}/${templateName}`;
+            if (templateFolderPath === "/") {
                 templateFilePath = templateName;
             }
         }
-
-        if (!await adapter.exists(templateFilePath)) {
+        // Check if the template file exists after the path was generated
+        if (!(await adapter.exists(templateFilePath))) {
             createNotice(`Template: ${templateName} doesn't exit.`)
-            return false;
+            throw new Error(`Template: ${templateName} doesn't exit.`)
         }
 
         //Get the file from the path
         const templateFile = vault.getAbstractFileByPath(templateFilePath);
 
-        //Read in templatefile
+        //Read in template file
         if (!(templateFile instanceof TFile)) return false;
 
         const originalTemplateFileContent = await vault.cachedRead(templateFile);
 
         //Get template with injected event data
         let newContent = injectEventDetails(event, originalTemplateFileContent);
-        newContent = insertEventIdInFrontmatter(event, newContent, app.metadataCache.getFileCache(templateFile).frontmatter?.position);
+        newContent = insertEventIdInFrontmatter(event, newContent, app.metadataCache.getFileCache(templateFile)?.frontmatter?.position);
 
+        // Check if the template contains templater or core template syntax after the custom {{ }} are removed by the injection
         if (useTemplater && newContent.contains("{{") && newContent.contains("}}")) {
             return false;
         } else if (!useTemplater && newContent.contains("<%") && newContent.contains("%>")) {
             return false;
         }
 
+        //Write the new content to a temporary file to use as a temporary template
         const tmpTemplateFilePath = templateFile.path + ".tmp";
 
         await adapter.write(tmpTemplateFilePath, newContent);

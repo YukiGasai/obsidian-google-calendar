@@ -345,7 +345,6 @@ export interface CodeBlockOptions {
 export type EventNoteQueryResult = {
 	event: GoogleEvent;
 	file: TFile | null;
-	match: "id" | "title";
 }
 
 
