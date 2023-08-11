@@ -67,7 +67,7 @@ const insertEventIdInFrontmatter = (event: GoogleEvent, fileContent: string, pos
     let frontmatterText = fileContent.substring(start, end);
 
     //event-id is already in the frontmatter
-    if (frontmatterText.contains("event-id:") || fileContent.contains("event-id: "+event.id)) {
+    if (fileContent.contains("event-id:")) {
         return fileContent;
     }
     //no frontmatter exists yet so we create one with the event-id
