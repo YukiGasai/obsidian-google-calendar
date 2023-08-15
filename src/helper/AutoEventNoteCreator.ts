@@ -7,7 +7,6 @@ import { createNotice } from "./NoticeHelper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import _ from "lodash";
 import { findEventNote, sanitizeFileName } from "./Helper";
-import { CreateNotePromptModal } from "../modal/CreateNotePromptModal";
 
 /**
  * This function implements the automatic creation of notes from a google calendar event
@@ -38,7 +37,24 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     const endDate = window.moment().local().add(endOffset, "day")
 
     //get all events in the import time range
-    const events = await listEvents({ startDate, endDate });
+    let events = await listEvents({ startDate, endDate });
+
+    // Don't allow multi day events to be created automatically
+    events = events.filter(event => event.eventType !== "multiDay")
+
+    // Remove events that contain the ignore marker
+    if(plugin.settings.autoCreateEventNotesIgnoreList.length) {
+        events = events.filter(event =>
+            !plugin.settings.autoCreateEventNotesIgnoreList.some(ignoreText => {
+                    // Check if the ignore text is a regex pattern
+                    if(ignoreText.startsWith("/") && ignoreText.endsWith("/")) {
+                        const regex = new RegExp(ignoreText.slice(1, -1));
+                        return regex.test(event.summary) || regex.test(event.description);
+                    }
+                    return event.description?.includes(ignoreText) || event.summary?.includes(ignoreText)
+                })
+        )
+    }
 
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {
@@ -255,7 +271,9 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
     
     const existingEventNote = findEventNote(event, plugin);
     if(existingEventNote.file) {
-        createNotice(`EventNote ${event.summary} already exists.`);
+        if (!isAutoCreated) {
+            createNotice(`EventNote ${event.summary} already exists.`);
+        }
         return existingEventNote.file;
     }
     const { vault } = app;

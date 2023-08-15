@@ -45,6 +45,7 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	showNotice: true,
 	autoCreateEventNotes: true,
 	autoCreateEventNotesMarker: "obsidian",
+	autoCreateEventNotesIgnoreList: [],
 	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,

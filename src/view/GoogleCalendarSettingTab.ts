@@ -18,7 +18,7 @@ import { OAuthAlertModal } from "../modal/OAuthAlertModal";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
-
+	ignoreListText = "";
 	constructor(app: App, plugin: GoogleCalendarPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
@@ -276,6 +276,44 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			})
 
 		new Setting(containerEl)
+			.setName("Auto create Ignore List")
+			.setDesc("A list of strings, if contained in the event summary or description, the event will not be auto imported")
+			.setClass("SubSettings")
+			.addText(text => {
+				text.setValue(this.ignoreListText);
+				text.onChange(value => {
+					this.ignoreListText = value;
+				});
+			})
+			.addButton(button => {
+				button.setButtonText("Add");
+				button.onClick(async () => {
+					this.plugin.settings.autoCreateEventNotesIgnoreList = [
+						...this.plugin.settings.autoCreateEventNotesIgnoreList,
+						this.ignoreListText
+					];
+					this.ignoreListText = "";
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			})
+
+		for (const ignorePattern of this.plugin.settings.autoCreateEventNotesIgnoreList ) {
+			new Setting(containerEl)
+				.setName(ignorePattern)
+				.setClass("SubSettings")
+				.addButton(button => {
+					button.setButtonText("Remove");
+					button.onClick(async () => {
+						this.plugin.settings.autoCreateEventNotesIgnoreList.remove(ignorePattern);
+						await this.plugin.saveSettings();
+						this.display();
+					})
+				});
+		}
+
+
+		new Setting(containerEl)
 			.setName("Keep auto created Notes open")
 			.setDesc("When creating a new note should it stay open for direct editing")
 			.setClass("SubSettings")
@@ -473,34 +511,21 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 							];
 
 							await this.plugin.saveSettings();
+							this.display();
 						}
-						const setting = new Setting(containerEl)
-							.setClass("SubSettings")
-							.setName(summery)
-							.addButton((button) => {
-								button.setButtonText("Remove");
-								button.onClick(async () => {
-									this.plugin.settings.calendarBlackList.remove([
-										id,
-										summery,
-									]);
-									setting.settingEl.remove();
-									await this.plugin.saveSettings();
-								});
-							});
 					});
 				});
 
 			calendarBlackList.forEach((calendar) => {
-				const setting = new Setting(containerEl)
+				new Setting(containerEl)
 					.setClass("SubSettings")
 					.setName(calendar[1])
 					.addButton((button) => {
 						button.setButtonText("Remove");
 						button.onClick(async () => {
 							this.plugin.settings.calendarBlackList.remove(calendar);
-							setting.settingEl.remove();
 							await this.plugin.saveSettings();
+							this.display();
 						});
 					});
 			});
