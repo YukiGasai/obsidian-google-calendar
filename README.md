@@ -124,6 +124,15 @@ This plugin adds a custom codeBlock gEvent to insert the Web, Day, Week, Month, 
         hourRange: [start, end] only for day view
     ```
 ````
+Instead of declaring the parameters directly javascript can be used to set them dynamically. Signal a javascript expression by using `;` as prefix and suffix.
+Example:
+~~~
+```gEvent
+type: week
+date: ;window.moment().startOf("week");
+navigation: true
+```
+~~~
 
 ### Auto create Notes
 

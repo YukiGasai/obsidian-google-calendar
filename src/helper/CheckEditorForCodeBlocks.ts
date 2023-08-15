@@ -32,6 +32,19 @@ export async function checkEditorForCodeBlocks(
 
 	const codeBlockOptions:CodeBlockOptions = parsedYaml
 
+	// Allow the user to enter js as value for parameter
+	for (let [key, value] of  Object.entries(parsedYaml)) {
+		// Check if a parameter is using js
+		if (typeof value === "string" && value.startsWith(";") && value.endsWith(";")) {
+			// Remove the js tags
+			let newValue = value.slice(1, -1);
+			newValue = newValue.trim();
+			// Evaluate the js code and set the value to the result
+			// Eval is a security risk but the user can only execute code on his own machine
+			codeBlockOptions[key] = eval(newValue);
+		}
+	}
+
 	// Set default values for the codeblock options
 	codeBlockOptions.type = codeBlockOptions.type ?? "day";
 	codeBlockOptions.date = codeBlockOptions.date ?? "today";
