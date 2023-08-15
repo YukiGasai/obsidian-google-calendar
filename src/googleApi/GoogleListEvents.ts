@@ -207,12 +207,10 @@ function resolveMultiDayEventsHelper(
 ): GoogleEvent[] {
 
 	return totalEventList.reduce((allEvents, currentEvent: GoogleEvent):GoogleEvent[] => {
-		//Ignore all day events
-		if (currentEvent.start.date) {
-			return [...allEvents, currentEvent];
-		}
-		const endMoment = window.moment(currentEvent.end.dateTime);
-		let startMoment = window.moment(currentEvent.start.dateTime);
+		const isAllDayEvent = currentEvent.start.date && !currentEvent.start.dateTime;
+
+		const endMoment = window.moment(currentEvent.end.dateTime || currentEvent.end.date);
+		let startMoment = window.moment(currentEvent.start.dateTime || currentEvent.start.date);
 
 		// Ignore non multi day events
 		if (startMoment.isSame(endMoment, "day") || endMoment.isSame(startMoment.clone().add(1, "day").startOf("day"), "minute")) {
@@ -222,17 +220,34 @@ function resolveMultiDayEventsHelper(
 		let singleDayEventList: GoogleEvent[] = [];
 
 		// Amount of days the event spans
-		const totalDays = endMoment.clone().endOf("day").diff(startMoment.clone().startOf("day"), "days") + 1;
+		let totalDays = endMoment.clone().endOf("day").diff(startMoment.clone().startOf("day"), "days") + 1;
+		if(isAllDayEvent) totalDays--;
 		const title = currentEvent.summary;
 
 		// Create the events for all the days except the last one
 		for (let dayCount = 1; dayCount <= totalDays; dayCount++) {
 			const newEvent =  _.cloneDeep(currentEvent);
-			newEvent.start.dateTime = startMoment.toISOString();
+			if(isAllDayEvent){
+				newEvent.start.date = startMoment.format("YYYY-MM-DD");
+			} else {
+				newEvent.start.dateTime = startMoment.toISOString();
+			}
 			if (dayCount == totalDays) {
-				newEvent.end.dateTime = endMoment.toISOString();
+
+				if(isAllDayEvent){
+					newEvent.end.date = endMoment.format("YYYY-MM-DD");
+				} else {
+					newEvent.end.dateTime = endMoment.toISOString();
+				}
+
 			}else {
-				newEvent.end.dateTime = startMoment.endOf("day").toISOString();
+
+				if(isAllDayEvent){
+					newEvent.end.date = startMoment.endOf("day").format("YYYY-MM-DD");
+				} else {
+					newEvent.end.dateTime = startMoment.endOf("day").toISOString();
+				}
+
 			}
 			newEvent.summary = `${title} (${dayCount}/${totalDays})`;
 			newEvent.eventType = "multiDay";
@@ -244,7 +259,7 @@ function resolveMultiDayEventsHelper(
 		//Limit the events to the requested time span
 		if (date && endDate) {
 			singleDayEventList = singleDayEventList.filter((event) => {
-				const eventStart = window.moment(event.start.dateTime);
+				const eventStart = window.moment(event.start.dateTime ?? event.start.date);
 				return eventStart.isBetween(date, endDate, "day", "[]");
 			});
 		}
