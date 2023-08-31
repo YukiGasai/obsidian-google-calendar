@@ -53,7 +53,7 @@
 	};
 
 	const goToEvent = (event: GoogleEvent, e: any) => {
-		if (e.shiftKey) {
+		if (e?.shiftKey) {
 			window.open(event.htmlLink);
 		} else {
 			new EventDetailsModal(event, () => {

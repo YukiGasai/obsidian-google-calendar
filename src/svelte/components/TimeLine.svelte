@@ -8,10 +8,15 @@
 		dateToPercent,
 		getStartHeightOfHour,
 		getEndHeightOfHour,
+		getStartFromEventHeight,
+		nearestMinutes,
 	} from '../../helper/Helper';
 	import { getEventStartPosition, getEventHeight } from '../../helper/Helper';
 	import { getColorFromEvent } from '../../googleApi/GoogleColors';
 	import GoogleCalendarPlugin from '../../GoogleCalendarPlugin';
+	import { updateEvent } from '../../googleApi/GoogleUpdateEvent';
+	import { getEvent } from '../../googleApi/GoogleGetEvent';
+	import { googleClearCachedEvents } from '../../googleApi/GoogleListEvents';
 
 	interface Location {
 		event: GoogleEvent;
@@ -28,6 +33,7 @@
 	export let day;
 	export let hourRange;
 	export let goToEvent;
+	let locations: Location[] = [];
 
 	const getRedTimeLinePosition = (time) => {
 		const dayPercentage = dateToPercent(time);
@@ -102,6 +108,73 @@
 			};
 		},
 	});
+	let lastDragDetails = {
+		time: null,
+		event: null,
+		e: null
+	}
+
+	const updateEventWithPosition = async (event, e) => {
+		const top = e.target.style.top.replace('px', '');
+		const bottom = parseInt(top) + e.target.clientHeight;
+		let {start, end} = getStartFromEventHeight(height, top, bottom);
+		const latestEvent = await getEvent(event.id, event.parent.id);
+		latestEvent.start.dateTime = nearestMinutes(15, window.moment(start)).format();
+		latestEvent.end.dateTime = nearestMinutes(15, window.moment(end)).format();
+
+		// Event didn't move this was just a long click
+		if(event.start.dateTime === latestEvent.start.dateTime &&
+		 event.end.dateTime === latestEvent.end.dateTime) {
+			goToEvent(latestEvent, lastDragDetails.e);
+			return;
+		}
+		await updateEvent(latestEvent, false)
+		googleClearCachedEvents();
+		events = [...events];
+	}
+
+	const handleMouseDown = (e) => {
+		lastDragDetails.time = new Date().getTime();
+		lastDragDetails.e = e;
+		const event = events.find((event) => event.id == e.target.id);
+		lastDragDetails.event = event;
+		e.target.style.zIndex = 1000;
+	};
+
+	const handleMouseUp = () => {
+		if (!lastDragDetails.time) return;
+		if (lastDragDetails.time && new Date().getTime() - lastDragDetails.time < 200) {
+			goToEvent(lastDragDetails.event, lastDragDetails.e);
+		}else{
+			updateEventWithPosition(lastDragDetails.event, lastDragDetails.e)
+		}
+		lastDragDetails.e.target.style.zIndex = 0;
+		lastDragDetails.time = null;
+		lastDragDetails.event = null;
+		lastDragDetails.e = null;
+	};
+
+	function handleMouseMove(e) {
+		if(!lastDragDetails.time) return;
+        if(lastDragDetails.time && new Date().getTime() - lastDragDetails.time < 200) {
+            return;
+        }
+		let top = lastDragDetails.e.target.style.top.replace('px', '');
+		top = parseInt(top) + e.movementY;
+		if(top < 0) {
+			top = 0;
+		} 
+		if(top > height - lastDragDetails.e.target.clientHeight){
+			 top = height - lastDragDetails.e.target.clientHeight;
+		}
+		lastDragDetails.e.target.style.top = top + 'px';
+	}
+
+	$: if (events) {
+		locations = getLocationArray(events);
+	}
+
+
 </script>
 
 <div
@@ -134,36 +207,38 @@
 		/>
 	{/if}
 
-	{#each getLocationArray(events) as location, i (i)}
-		<div
-			in:receive={{ key: i }}
-			on:click={(e) => goToEvent(location.event, e)}
-			on:keypress={(e) => goToEvent(location.event, e)}
-			class="
-                googleCalendarEvent
-                googleCalendarEvent_Calendar_Color_{location.event.parent
-				.colorId}
-                googleCalendarEvent_Event_Color_{location.event.parent.colorId}
-                googleCalendarEvent_Id_{location.event.parent.id}
-                "
-			id={location.event.id}
-			style:top="{location.y}px"
-			style:left="{location.x}%"
-			style:width="{location.width}%"
-			style:height="{location.height}px"
-			style:background={getColorFromEvent(location.event)}
-		>
-			<span
+	{#each locations as location, i (i)}
+			<div
+				in:receive={{ key: i }}
+				on:mousedown={(e) => handleMouseDown(e)}
+				on:keypress={(e) => goToEvent(location.event, e)}
 				class="
-            googleCalendarName
-            googleCalendarName_Calendar_Color_{location.event.parent.colorId}
-            googleCalendarName_Event_Color_{location.event.parent.colorId}
-            googleCalendarName_Id_{location.event.parent.id}
-            ">{location.event.summary}</span
+					googleCalendarEvent
+					googleCalendarEvent_Calendar_Color_{location.event.parent
+					.colorId}
+					googleCalendarEvent_Event_Color_{location.event.parent.colorId}
+					googleCalendarEvent_Id_{location.event.parent.id}
+					"
+				id={location.event.id}
+				style:top="{location.y}px"
+				style:left="{location.x}%"
+				style:width="{location.width}%"
+				style:height="{location.height}px"
+				style:background={getColorFromEvent(location.event)}
 			>
-		</div>
+				<span
+					class="
+				googleCalendarName
+				googleCalendarName_Calendar_Color_{location.event.parent.colorId}
+				googleCalendarName_Event_Color_{location.event.parent.colorId}
+				googleCalendarName_Id_{location.event.parent.id}
+				">{location.event.summary}</span
+				>
+			</div>
+
 	{/each}
 </div>
+<svelte:window on:mouseup={handleMouseUp} on:mousemove={handleMouseMove} />
 
 <style>
 	.googleCalendarEvent {
@@ -177,6 +252,11 @@
 		font-size: small;
 		box-shadow: 3px 2px 8px 4px rgba(0, 0, 0, 0.36);
 		overflow: hidden;
+		user-select: none;
+	}
+
+	.googleCalendarName {
+		pointer-events: none;
 	}
 
 	.gcal-timeline-container {

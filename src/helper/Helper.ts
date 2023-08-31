@@ -10,6 +10,17 @@ export function dateToPercent(date: Date): number {
 	return date.getHours() / 24 + date.getMinutes() / (60 * 24);
 }
 
+export function percentToDate(percent: number): Date {
+
+	const minutes = percent * 24 * 60;
+	const hours = Math.floor(minutes / 60);
+	const minutesLeft = Math.floor(minutes - hours * 60);
+	const date = new Date();
+	date.setHours(hours);
+	date.setMinutes(minutesLeft);
+	return date;
+}
+
 /**
  * This function calculates the y position of a event in a timeline view
  * The height is the percentage the day has gone when the event starts
@@ -55,6 +66,13 @@ export function getEventHeight(
 	return timeLineHeight * (endPercentage - startPercentage);
 }
 
+export function getStartFromEventHeight(timeLineHeight: number, eventStartPos: number, eventEndPos: number): { start: Date, end: Date } {
+	return {
+		start: percentToDate(eventStartPos / timeLineHeight),
+		end: percentToDate(eventEndPos / timeLineHeight),
+	}
+}
+
 export function getStartHeightOfHour(timeLineHeight: number, hour: number): number {
 	return (timeLineHeight / 24) * hour;
 }
@@ -66,6 +84,11 @@ export function getEndHeightOfHour(timeLineHeight: number, hour: number): number
 export const getCurrentTheme = (): string => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return (app.vault as any).config.theme ? ((app.vault as any).config.theme == "obsidian" ? "dark" : "light") : "dark";
+}
+
+export function nearestMinutes(interval: number, someMoment: moment.Moment): moment.Moment {
+	const roundedMinutes = Math.round(someMoment.clone().minute() / interval) * interval;
+	return someMoment.clone().minute(roundedMinutes).second(0);
 }
 
 
