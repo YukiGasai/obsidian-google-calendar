@@ -10,7 +10,7 @@
 	export let goToEvent;
     export let timelineHeight: number
     export let timelineWidth: number
-
+    let realWidth = 0;
     const updateEventWithPosition = async (drag: MouseControlData) => {
 		const top = drag.endState.top;
 		const bottom = top + drag.endState.height;
@@ -37,21 +37,30 @@
     let onDragLongClick = (data: MouseControlData) => {
         console.log("onDragLongClick", data);
     };
+
+    let getEventClassList = (width): string => {
+        const baseList = [
+            "googleCalendarEvent", 
+            `googleCalendarEvent_Calendar_Color_${location.event.parent.colorId}`,
+            `googleCalendarEvent_Event_Color_${location.event.parent.colorId}`,
+            `googleCalendarEvent_Id_${location.event.parent.id}`
+        ]
+        if(width < 60) {
+            baseList.push("textSmall")
+        }
+        return baseList.join(" ");
+    }
+
 </script>
 <div
-class="
-    googleCalendarEvent
-    googleCalendarEvent_Calendar_Color_{location.event.parent
-    .colorId}
-    googleCalendarEvent_Event_Color_{location.event.parent.colorId}
-    googleCalendarEvent_Id_{location.event.parent.id}
-    "
+class="{getEventClassList(realWidth)}"
 id={location.event.id}
 style:top="{location.y}px"
 style:left="calc({location.x}% + {location.x / 100} * 16px)"
 style:width="{location.width}%"
 style:height="{location.height}px"
 style:background={getColorFromEvent(location.event)}
+bind:clientWidth={realWidth}
 >
 <span
     class="
@@ -86,9 +95,16 @@ googleCalendarName_Id_{location.event.parent.id}
 		overflow: hidden;
 		user-select: none;
 	}
+    
+    .textSmall {
+        padding: 0;
+    }
 
 	.googleCalendarName {
 		pointer-events: none;
+        max-width: 100%;
+        word-break: break-word;
+        hyphens: auto;
 	}
 
     .hourText {
