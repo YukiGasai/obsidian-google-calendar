@@ -158,6 +158,7 @@
 	.gcal-stop-overflow {
 		min-width: 0;
 		min-height: 0;
+		overflow: hidden;
 	}
 
 	.gcal-week-container {

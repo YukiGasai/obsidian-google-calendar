@@ -16,6 +16,7 @@
     let handleMoveStart = (e: MouseEvent, moveType: MoveType) => {
         e.stopImmediatePropagation();
         (e.target as HTMLDivElement).parentElement.style.zIndex = "1000";
+        (e.target as HTMLDivElement).parentElement.parentElement.parentElement.style.overflow = "visible"
         let rect = (e.target as HTMLDivElement).getBoundingClientRect();
         let x = e.clientX - rect.left;
         horizontal = timelineWidth * ( left / 100 ) + x
@@ -85,14 +86,18 @@
                 drag.endState.left = drag.startState.left;
                 width = drag.endState.width;
                 left = drag.endState.left;
+                (e.target as HTMLDivElement).parentElement.parentElement.parentElement.style.overflow = "hidden"
                 onDragLongClick(drag);
             }else {
+                
                 onDrag(drag);
             }
         } else {
+            (e.target as HTMLDivElement).parentElement.parentElement.parentElement.style.overflow = "hidden"
             onDragClick(drag);
         }
-        drag = null;
+        (drag.e.target as HTMLDivElement).parentElement.style.zIndex = "0";
+        drag.time = null;
         horizontal = 0;
     }
 

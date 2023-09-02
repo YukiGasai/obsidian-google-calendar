@@ -76,8 +76,12 @@
 		return eventLocations;
 	};
 
+	let timeline: HTMLDivElement;
 	$: if (events) {
 		locations = getLocationArray(events);
+		if(timeline){
+		timeline.parentElement.style.overflow = "hidden"
+		}
 	}
 </script>
 
@@ -91,6 +95,7 @@
 	)}px 0px"
 	class="gcal-timeline"
 	bind:clientWidth={realWidth}
+	bind:this={timeline}
 >
 	<div class="gcal-timeline-container">
 		<div class="gcal-hour-line-container">
