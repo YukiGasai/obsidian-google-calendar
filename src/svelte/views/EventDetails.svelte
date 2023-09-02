@@ -360,6 +360,20 @@ $: {
         background: var(--background);
     }
 
+    input[type='date'],
+    input[type='datetime-local'] {
+        background: var(--background-modifier-form-field);
+        border: 1px solid var(--background-modifier-border);
+        color: var(--text-normal);
+        font-family: inherit;
+        padding: 5px 25px;
+        font-size: 16px;
+        border-radius: 4px;
+        outline: none;
+        height: 30px;
+    }
+
+
     label{
         margin-top: 5px;
     }
