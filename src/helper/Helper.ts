@@ -10,12 +10,12 @@ export function dateToPercent(date: Date): number {
 	return date.getHours() / 24 + date.getMinutes() / (60 * 24);
 }
 
-export function percentToDate(percent: number): Date {
+export function percentToDate(percent: number, initDate: Date): Date {
 
 	const minutes = percent * 24 * 60;
 	const hours = Math.floor(minutes / 60);
 	const minutesLeft = Math.floor(minutes - hours * 60);
-	const date = new Date();
+	const date = new Date(initDate);
 	date.setHours(hours);
 	date.setMinutes(minutesLeft);
 	return date;
@@ -66,10 +66,10 @@ export function getEventHeight(
 	return timeLineHeight * (endPercentage - startPercentage);
 }
 
-export function getStartFromEventHeight(timeLineHeight: number, eventStartPos: number, eventEndPos: number): { start: Date, end: Date } {
+export function getStartFromEventHeight(timeLineHeight: number, eventStartPos: number, eventEndPos: number, initDate: Date): { start: Date, end: Date } {
 	return {
-		start: percentToDate(eventStartPos / timeLineHeight),
-		end: percentToDate(eventEndPos / timeLineHeight),
+		start: percentToDate(eventStartPos / timeLineHeight, initDate),
+		end: percentToDate(eventEndPos / timeLineHeight, initDate),
 	}
 }
 

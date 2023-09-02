@@ -156,7 +156,6 @@
 
 <style>
 	.gcal-stop-overflow {
-		overflow: hidden;
 		min-width: 0;
 		min-height: 0;
 	}
@@ -164,7 +163,7 @@
 	.gcal-week-container {
 		position: relative;
 		display: inline-grid;
-		gap: 1em;
+		gap: 16px;
 		grid-auto-flow: row;
 		overflow: hidden;
 	}

@@ -17,14 +17,16 @@ export async function googleGetEvent(eventId: string, calendarId: string): Promi
 	};
 
 	const foundEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`, "GET", null)
-	foundEvent.parent = (await googleListCalendars()).find(calendar => calendar.id === calendarId);
+	const calendars = await googleListCalendars();
+
+	foundEvent.parent = calendars.find(calendar => calendar.id === calendarId);
 
 	return foundEvent;
 }
 
 export async function getEvent(eventId: string, calendarId?: string): Promise<GoogleEvent> {
 	try {
-		const foundEvent = await googleGetEvent(eventId, calendarId);
+		let foundEvent = await googleGetEvent(eventId, calendarId);
 		return foundEvent;
 	} catch (error) {
         if(!(error instanceof GoogleApiError)){

@@ -369,3 +369,37 @@ export interface ApiRequestData {
 	method: string;
 	body?: any;
 }
+
+export enum MoveType {
+	DRAG,
+	RESIZE_TOP,
+	RESIZE_BOTTOM,
+}
+
+export interface MouseControlData {
+	moveType: MoveType;
+	time?: number;
+	e?: MouseEvent;
+	startState: {
+		top: number;
+		left: number;
+		height: number;
+		width: number;
+	},
+	endState: {
+		top: number;
+		left: number;
+		height: number;
+		width: number;
+		horizontal: number;
+	}
+}
+
+export interface Location {
+	event: GoogleEvent;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	fullDay: boolean;
+}
