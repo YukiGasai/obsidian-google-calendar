@@ -2,13 +2,17 @@
 	import type { GoogleEvent } from "../../helper/types";
     import TurndownService from 'turndown';
     import { marked } from 'marked';
+	import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
+	import { de } from "chrono-node";
 
     export let event: GoogleEvent;
     let isPreview = event.id  !== undefined;
 
     const convertDescriptionToMarkdown = () => {
         const turndownService = new TurndownService();
-        return turndownService.turndown(event.description ?? "");
+        let markdown = turndownService.turndown(event.description ?? "");
+        // Replace google escaped links with normal obsidian links
+        return markdown.replace(/\\\[\\\[([^(\\\])]*)\\\]\\\]/g, `[[$1]]`);
     }
 
     const updateEventDescription = (e) => {
@@ -21,6 +25,32 @@
         isPreview = !isPreview;
     }
 
+    let getDescriptionHtml = (description) => {
+        const plugin = GoogleCalendarPlugin.getInstance();
+        const vaultName = plugin.app.vault.getName();
+        // Replace obsidian link with a anchor tag to open the file with the obsidian protocol
+
+        const regexForLinks = /\[\[([^\|\]]*)\|?([^\]]*)\]\]/g;
+        let matchesForLink;
+        const outputForLink = [];
+        do {
+            matchesForLink = regexForLinks.exec(description);
+            outputForLink.push(matchesForLink);
+        } while (matchesForLink);
+
+
+        outputForLink.forEach(match => {
+            if (match) {
+                if (match[2]) {
+                    description = description.replace(match[0], `<a href='obsidian://open?vault=${vaultName}&file=${match[1]}'>${match[2]}</a>`, );
+                } else {
+                    description = description.replace(match[0], `<a href='obsidian://open?vault=${vaultName}&file=${match[1]}'>${match[1]}</a>`, );
+                }
+            }
+        });
+
+        return description;
+    }
 </script>
 <div>
     <label for="description" class="gcal-description-label">
@@ -38,7 +68,7 @@
   
         {#if isPreview}
         <div class="gcal-description-container">
-            {@html event.description ?? ""}
+            {@html getDescriptionHtml(event.description ?? "")}
         </div>
         {:else}
         <div class="gcal-description-container" style:padding="10px 0 0 10px">
