@@ -7,7 +7,7 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
 import { GoogleApiError } from "./GoogleApiError";
 
 let cachedCalendars: GoogleCalendar[] = []
-let lock = false;
+const lock = false;
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
@@ -48,13 +48,38 @@ export async function googleListCalendars(): Promise<GoogleCalendar[]> {
 
 	const calendarList: GoogleCalendarList = await callRequest(`https://www.googleapis.com/calendar/v3/users/me/calendarList`, "GET", null)
 
-	cachedCalendars = calendarList.items;
+	// Display calendar list like Google Calendar. Primary Cal at the top, and others sorted alphabetically
+	cachedCalendars = sortByField(calendarList.items, "summary", "primary");
 
-	const calendars = filterCalendarsByBlackList(plugin, calendarList.items);
+	const calendars = filterCalendarsByBlackList(plugin, cachedCalendars);
 
 	return calendars;
 }
 
+/**
+ * Helper function to sort calendars by field and priorityField
+ */
+function sortByField<T>(items: T[], field: keyof T, priorityField: keyof T ): T[] {
+	return items.sort((a, b) => {
+        if (a[priorityField] && !b[priorityField]) {
+            return -1;
+        } else if (!a[priorityField] && b[priorityField]) {
+            return 1;
+        }
+
+        const valueA = String(a[field]).toLowerCase();
+        const valueB = String(b[field]).toLowerCase();
+
+        if (valueA < valueB) {
+            return -1;
+        }
+        if (valueA > valueB) {
+            return 1;
+        }
+
+        return 0;
+    });
+}
 
 export async function listCalendars(): Promise<GoogleCalendar[]> {
 
@@ -64,7 +89,7 @@ export async function listCalendars(): Promise<GoogleCalendar[]> {
 	} catch(error) {
 		switch (error.status) {
 			case 401: break;
-			case 999: 
+			case 999:
 				createNotice(error.message)
 				break;
 			default:
