@@ -90,7 +90,7 @@
 				dateTime: startMoment.clone().add(1, "hour").format()
 			},
 		}
-		goToEvent(newEvent)
+		goToEvent(newEvent, e)
 	}
 
 	let timeline: HTMLDivElement;
