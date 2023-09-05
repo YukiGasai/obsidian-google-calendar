@@ -6,6 +6,8 @@
 		dateToPercent,
 		getStartHeightOfHour,
 		getEndHeightOfHour,
+		getStartFromEventHeight,
+		nearestMinutes,
 	} from '../../helper/Helper';
 	import { getEventStartPosition, getEventHeight } from '../../helper/Helper';
 	import GoogleCalendarPlugin from '../../GoogleCalendarPlugin';
@@ -76,6 +78,21 @@
 		return eventLocations;
 	};
 
+	let openCreateEventDialog = (e:MouseEvent) => {
+		let y = e.clientY - timeline.getBoundingClientRect().top;
+		const {start, end} = getStartFromEventHeight(height, y, y + 10, new Date(day));
+		const startMoment = nearestMinutes(15, window.moment(start)); 
+		const newEvent:GoogleEvent = {
+			start: {
+				dateTime: startMoment.format()
+			},
+			end: {
+				dateTime: startMoment.clone().add(1, "hour").format()
+			},
+		}
+		goToEvent(newEvent)
+	}
+
 	let timeline: HTMLDivElement;
 	$: if (events) {
 		locations = getLocationArray(events);
@@ -96,6 +113,7 @@
 	class="gcal-timeline"
 	bind:clientWidth={realWidth}
 	bind:this={timeline}
+	on:dblclick={openCreateEventDialog}
 >
 	<div class="gcal-timeline-container">
 		<div class="gcal-hour-line-container">
