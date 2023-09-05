@@ -1,4 +1,4 @@
-import type { GoogleCalendarPluginSettings, IGoogleCalendarPluginApi } from "./helper/types";
+import type { GoogleCalendarPluginSettings, GoogleEvent, IGoogleCalendarPluginApi } from "./helper/types";
 import { Editor, EventRef, MarkdownView, Notice, Platform, Plugin, TFile, WorkspaceLeaf } from "obsidian";
 import {
 	GoogleCalendarSettingTab,
@@ -13,6 +13,7 @@ import { WeekCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEEK } from "./view/WeekCal
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
 import { YearCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_YEAR } from "./view/YearCalendarView";
 import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
+import { EventView, VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from "./view/EventDetailsView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
 import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
 import { setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
@@ -138,7 +139,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 	events: EventRef[] = [];
 
 
-	initView = async (viewId: string): Promise<WorkspaceLeaf> => {
+	initView = async (viewId: string, event?: GoogleEvent, closeFunction?: () => void): Promise<WorkspaceLeaf> => {
 		if (
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
@@ -157,6 +158,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 		const leaf = this.app.workspace
 			.getLeavesOfType(viewId)
 			.first()
+
+		console.log(typeof leaf)
+
+		if (viewId === VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS &&
+			leaf.view instanceof EventView ) {
+			leaf.view.setEvent(event);
+			leaf.view.setCloseFunction(closeFunction);
+		}
 
 		this.app.workspace.revealLeaf(leaf);
 
@@ -261,7 +270,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 			VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE,
 			(leaf: WorkspaceLeaf) => new ScheduleCalendarView(leaf)
 		);
-
+		this.registerView(
+			VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS,
+			(leaf: WorkspaceLeaf) => new EventView(leaf, { start: {}, end: {}}, () => {})
+		);
 
 		this.registerEvent(
 			this.app.workspace.on(
@@ -323,7 +335,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		//Create event command
 		this.addCommand({
 			id: "create-google-calendar-event",
-			name: "Create gCal Event",
+			name: "Create gCal Event inside Popup",
 
 			checkCallback: (checking: boolean) => {
 				const canRun = settingsAreCompleteAndLoggedIn();
@@ -340,6 +352,28 @@ export default class GoogleCalendarPlugin extends Plugin {
 					googleClearCachedEvents()
 				}).open()
 
+			},
+		});
+
+		//Create event command
+		this.addCommand({
+			id: "create-google-calendar-event-view",
+			name: "Create gCal Event inside View",
+
+			checkCallback: (checking: boolean) => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, ({ start: {}, end: {} }), () => { 
+					googleClearCachedEvents();
+				});
 			},
 		});
 
@@ -649,7 +683,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_YEAR);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_WEB);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE);
-
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS);
 
 		for (const event in this.events) {
 			this.app.vault.offref(event);

@@ -1,13 +1,13 @@
-import type { GoogleEvent, ModalSelectMode } from "../helper/types";
-
+import type { GoogleEvent } from "../helper/types";
 import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
 import { FuzzySuggestModal, TFile } from "obsidian";
 import { EventDetailsModal } from './EventDetailsModal';
-import { listEvents } from "../googleApi/GoogleListEvents";
+import { googleClearCachedEvents, listEvents } from "../googleApi/GoogleListEvents";
 import { CreateNotePromptModal } from './CreateNotePromptModal';
 import { createNoteFromEvent } from "../helper/AutoEventNoteCreator";
 import { createDailyNote } from 'obsidian-daily-notes-interface';
 import { getSingleDailyNote } from "../helper/DailyNoteHelper";
+import { VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from "../view/EventDetailsView";
 /**
  * This class is used to display a select modal in which the user can select an event
 */
@@ -40,14 +40,22 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		this.inputEl.addEventListener("keydown", async (ev) => {
 			let dateUpdated = false;
 			const list = this.getSuggestions(this.inputEl.value);
+			const newEvent = {
+				summary: this.inputEl.value,
+				start: {
+					date: currentDate.format()
+				},
+				end: {}
+			}
 			if (!list.length && ev.key == "Enter") {
-				new EventDetailsModal({
-					summary: this.inputEl.value,
-					start: {
-						date: currentDate.format()
-					},
-					end: {}
-				}, () => { this.eventsChanged = true; this.close() }).open()
+				if(ev.shiftKey) {
+					this.plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, newEvent, () => {
+						googleClearCachedEvents();
+					})
+					this.onClose();
+				}else{
+					new EventDetailsModal(newEvent, () => { this.eventsChanged = true; this.close() }).open()
+				}
 			}
 
 			if (ev.key == "ArrowRight") {
@@ -103,7 +111,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		}
 	}
 
-	async onChooseItem(item: GoogleEvent): Promise<void> {
+	async onChooseItem(item: GoogleEvent, e: MouseEvent | KeyboardEvent): Promise<void> {
 		if (item.id == "xxx") {
 			let note = getSingleDailyNote(this.currentDate);
 			if (!note) {
@@ -118,7 +126,15 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		}
 		if (this.modalSelectMode == "details") {
 			this.open();
-			new EventDetailsModal(item, () => this.eventsChanged = true).open();
+
+			if(e.shiftKey) {
+				this.plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, item, () => {
+					googleClearCachedEvents();
+				})
+				this.onClose();
+			} else {
+				new EventDetailsModal(item, () => this.eventsChanged = true).open();
+			}
 		} else if (this.modalSelectMode == "createNote") {
 			if (this.plugin.settings.useDefaultTemplate) {
 				createNoteFromEvent(item, this.plugin.settings.defaultFolder, this.plugin.settings.defaultTemplate)

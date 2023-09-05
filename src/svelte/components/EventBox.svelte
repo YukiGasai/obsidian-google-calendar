@@ -93,6 +93,7 @@ googleCalendarName_Id_{location.event.parent.id}
 		box-shadow: 3px 2px 8px 4px rgba(0, 0, 0, 0.36);
 		overflow: hidden;
 		user-select: none;
+        z-index: 1;
 	}
     
     .textSmall {

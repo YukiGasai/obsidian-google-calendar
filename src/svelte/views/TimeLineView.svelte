@@ -13,6 +13,8 @@
 	} from '../../googleApi/GoogleListEvents';
 	import { EventDetailsModal } from '../../modal/EventDetailsModal';
 	import AllDayContainer from '../components/AllDayContainer.svelte';
+	import GoogleCalendarPlugin from '../../GoogleCalendarPlugin';
+	import { VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from '../../view/EventDetailsView';
 
 	export let codeBlockOptions: CodeBlockOptions;
 	export let isObsidianView = false;
@@ -26,6 +28,7 @@
 	let loading = false;
 	let events: GoogleEvent[] = [];
 	let interval;
+	let plugin = GoogleCalendarPlugin.getInstance();
 
 	const getEvents = async (date: moment.Moment) => {
 		if (!date?.isValid()) {
@@ -54,7 +57,10 @@
 
 	const goToEvent = (event: GoogleEvent, e: any) => {
 		if (e?.shiftKey) {
-			window.open(event.htmlLink);
+			plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, event, () => {
+				googleClearCachedEvents();
+				refreshData(date);
+			})
 		} else {
 			new EventDetailsModal(event, () => {
 				googleClearCachedEvents();

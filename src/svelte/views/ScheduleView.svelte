@@ -9,6 +9,7 @@
 	import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
 	import ViewSettings from "../components/ViewSettings.svelte";
     import DayNavigation from "../components/DayNavigation.svelte";
+	import { VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from "../../view/EventDetailsView";
     
     export let codeBlockOptions: CodeBlockOptions;
     export let isObsidianView = false;
@@ -101,7 +102,10 @@
 
     const goToEvent = (event:GoogleEvent, e:any) => {
         if(e.shiftKey){
-            window.open(event.htmlLink);
+            plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, event, () => {
+				googleClearCachedEvents();
+				getEvents(date);
+			})
         }else{
             new EventDetailsModal(event, () => {
                 googleClearCachedEvents();

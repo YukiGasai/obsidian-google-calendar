@@ -1,10 +1,13 @@
 <script lang="ts">
-    import {EventDetailsModal} from "../../modal/EventDetailsModal"
+    import { EventDetailsModal } from "../../modal/EventDetailsModal"
     import { googleClearCachedEvents } from "../../googleApi/GoogleListEvents";
+	import { VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from "../../view/EventDetailsView";
+    import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
 
     export let date;
     export let startDate;
     export let dateOffset;
+    let plugin = GoogleCalendarPlugin.getInstance();
 
     const minusOneWeek = () => dateOffset-= 7;
     const minusOneDay  = () => dateOffset-= 1;
@@ -12,11 +15,18 @@
     const plusOneWeek  = () => dateOffset+= 7;
     const plusOneDay   = () => dateOffset+= 1;
 
-    const openNewEventDialog = (event) => {  
-        new EventDetailsModal({start:{}, end:{}}, () =>{
-            googleClearCachedEvents()
-            date=date;
-        }).open()
+    const openNewEventDialog = (e: MouseEvent) => {  
+        if(e.shiftKey) {
+            plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, {start:{}, end:{}}, () => {
+					googleClearCachedEvents();
+                    date=date;
+            })
+        }else {
+            new EventDetailsModal({start:{}, end:{}}, () =>{
+                googleClearCachedEvents()
+                date=date;
+            }).open()
+        }
     }
 
 </script>
