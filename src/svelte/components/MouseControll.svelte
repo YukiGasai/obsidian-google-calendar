@@ -14,7 +14,6 @@
     let drag: MouseControlData = null;
     let horizontal = 0;
     let handleMoveStart = (e: MouseEvent, moveType: MoveType) => {
-        e.stopImmediatePropagation();
         (e.target as HTMLDivElement).parentElement.style.zIndex = "1000";
         (e.target as HTMLDivElement).parentElement.parentElement.parentElement.style.overflow = "visible"
         let rect = (e.target as HTMLDivElement).getBoundingClientRect();
@@ -124,6 +123,7 @@
         left: 0;
         width: 100%;
         height: 100%;
+        z-index: 0;
     }
 
     .bottomHandle,
@@ -133,6 +133,7 @@
         width: 100%;
         left: 0;
         cursor: row-resize;
+        z-index: 0;
     }
 
     .bottomHandle:hover,

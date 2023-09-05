@@ -1,6 +1,5 @@
-import type { TFile } from "obsidian";
 import type { EventNoteQueryResult, GoogleEvent } from "./types";
-import type GoogleCalendarPlugin from "../GoogleCalendarPlugin";
+import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 
 /**
  * @param date to convert
@@ -128,4 +127,31 @@ const findEventNoteForAllFiles = (event: GoogleEvent): EventNoteQueryResult => {
 
 export const findEventNote = (event: GoogleEvent, plugin: GoogleCalendarPlugin): EventNoteQueryResult => {
     return findEventNoteForAllFiles(event);
+}
+
+export const obsidianLinkToAnchor = (text:string): string => {
+	const plugin = GoogleCalendarPlugin.getInstance();
+	const vaultName = plugin.app.vault.getName();
+	// Replace obsidian link with a anchor tag to open the file with the obsidian protocol
+
+	const regexForLinks = /\[\[([^\|\]]*)\|?([^\]]*)\]\]/g;
+	let matchesForLink;
+	const outputForLink = [];
+	do {
+		matchesForLink = regexForLinks.exec(text);
+		outputForLink.push(matchesForLink);
+	} while (matchesForLink);
+
+
+	outputForLink.forEach(match => {
+		if (match) {
+			if (match[2]) {
+				text = text.replace(match[0], `<a href='obsidian://open?vault=${vaultName}&file=${match[1]}'>${match[2]}</a>`, );
+			} else {
+				text = text.replace(match[0], `<a href='obsidian://open?vault=${vaultName}&file=${match[1]}'>${match[1]}</a>`, );
+			}
+		}
+	});
+
+	return text;
 }

@@ -35,3 +35,8 @@
 .rangeSettings .rangeSlider {
 	width: 300px;
 }
+
+.googleCalendarName a {
+	z-index: 2;
+	pointer-events: all;
+}

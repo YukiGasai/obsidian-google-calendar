@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getStartFromEventHeight, nearestMinutes } from "../../helper/Helper";
+	import { getStartFromEventHeight, nearestMinutes, obsidianLinkToAnchor } from "../../helper/Helper";
 	import { getColorFromEvent } from "../../googleApi/GoogleColors";
     import type { MouseControlData, Location, GoogleEvent } from "../../helper/types";
     import MouseControll from "./MouseControll.svelte";
@@ -68,8 +68,7 @@ googleCalendarName
 googleCalendarName_Calendar_Color_{location.event.parent.colorId}
 googleCalendarName_Event_Color_{location.event.parent.colorId}
 googleCalendarName_Id_{location.event.parent.id}
-">{location.event.summary}</span
->
+">{@html obsidianLinkToAnchor(location.event.summary)}</span>
 <MouseControll 
         bind:left={location.x}
         bind:top={location.y}
@@ -105,6 +104,7 @@ googleCalendarName_Id_{location.event.parent.id}
         max-width: 100%;
         word-break: break-word;
         hyphens: auto;
+        z-index: 1;
 	}
 
     .hourText {

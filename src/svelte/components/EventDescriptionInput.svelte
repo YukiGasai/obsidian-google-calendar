@@ -2,8 +2,7 @@
 	import type { GoogleEvent } from "../../helper/types";
     import TurndownService from 'turndown';
     import { marked } from 'marked';
-	import GoogleCalendarPlugin from "../../GoogleCalendarPlugin";
-	import { de } from "chrono-node";
+	import { obsidianLinkToAnchor } from "../../helper/Helper";
 
     export let event: GoogleEvent;
     let isPreview = event.id  !== undefined;
@@ -25,32 +24,6 @@
         isPreview = !isPreview;
     }
 
-    let getDescriptionHtml = (description) => {
-        const plugin = GoogleCalendarPlugin.getInstance();
-        const vaultName = plugin.app.vault.getName();
-        // Replace obsidian link with a anchor tag to open the file with the obsidian protocol
-
-        const regexForLinks = /\[\[([^\|\]]*)\|?([^\]]*)\]\]/g;
-        let matchesForLink;
-        const outputForLink = [];
-        do {
-            matchesForLink = regexForLinks.exec(description);
-            outputForLink.push(matchesForLink);
-        } while (matchesForLink);
-
-
-        outputForLink.forEach(match => {
-            if (match) {
-                if (match[2]) {
-                    description = description.replace(match[0], `<a href='obsidian://open?vault=${vaultName}&file=${match[1]}'>${match[2]}</a>`, );
-                } else {
-                    description = description.replace(match[0], `<a href='obsidian://open?vault=${vaultName}&file=${match[1]}'>${match[1]}</a>`, );
-                }
-            }
-        });
-
-        return description;
-    }
 </script>
 <div>
     <label for="description" class="gcal-description-label">
@@ -68,7 +41,7 @@
   
         {#if isPreview}
         <div class="gcal-description-container">
-            {@html getDescriptionHtml(event.description ?? "")}
+            {@html obsidianLinkToAnchor(event.description ?? "")}
         </div>
         {:else}
         <div class="gcal-description-container" style:padding="10px 0 0 10px">
