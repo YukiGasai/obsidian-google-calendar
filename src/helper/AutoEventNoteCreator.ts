@@ -75,29 +75,27 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     }
 }
 
-const insertEventIdInFrontmatter = (event: GoogleEvent, fileContent: string, position: Pos): string => {
-
-    const start = position?.start?.offset ?? 0;
-    const end = position?.end?.offset ?? 0;
-
-    let frontmatterText = fileContent.substring(start, end);
-
-    //event-id is already in the frontmatter
+const insertEventIdInFrontmatter = (event: GoogleEvent, fileContent: string): string => {
+    // If event id is already set do nothing
     if (fileContent.contains("event-id:")) {
         return fileContent;
     }
-    //no frontmatter exists yet so we create one with the event-id
-    if (!frontmatterText.contains("---")) {
-        frontmatterText = `---\nevent-id: ${event.id}\n---\n`;
-    } else {
-        //frontmatter exists but no event-id so we add it
-        frontmatterText = frontmatterText.replace("---", `---\nevent-id: ${event.id}`);
+
+    // Frontmatter exists but no event-id so we add it
+    if(fileContent.startsWith("---")) {
+        return fileContent.replace("---", `---\nevent-id: ${event.id}`);
     }
 
-    //replace the old frontmatter with the new one
-    fileContent = fileContent.substring(0, start) + frontmatterText + fileContent.substring(end);
+    // Trying to handle templater insertions with frontmatter using something like this <% "---" %>
+    fileContent.contains("---");
+    const templaterRegex = /(<%[^%]*)---([^%]*%>)/
+    const newFileContent = fileContent.replace(templaterRegex, "$1---$2\nevent-id: " + event.id)
+    if(newFileContent !== fileContent) {
+        return newFileContent;
+    }
 
-    return fileContent;
+    //No frontmatter so we add it
+    return `---\nevent-id: ${event.id}\n---\n${fileContent}`;
 }
 
 const injectEventDetails = (event: GoogleEvent, inputText: string): string => {
@@ -298,8 +296,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
     //check if the template plugin is active and a template name is given
     if ((!plugin.coreTemplatePlugin && !plugin.templaterPlugin) || !templateName) {
-
-        const fileContent = insertEventIdInFrontmatter(event, "", null);
+        const fileContent = insertEventIdInFrontmatter(event, "");
 
         await adapter.write(filePath, fileContent);
 
@@ -352,7 +349,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
             }
         }
     } catch(err) {
-        const fileContent = insertEventIdInFrontmatter(event, "", null);
+        const fileContent = insertEventIdInFrontmatter(event, "");
         await adapter.write(filePath, fileContent);
     }
 
@@ -371,7 +368,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         ? normalizePath(plugin.templaterPlugin.settings.templates_folder)
         : normalizePath(plugin.coreTemplatePlugin.instance.options.folder);
   
-        //Chek if the template name or path exists
+        //Check if the template name or path exists
         let templateFilePath;
         // Check if template exists if the template name is the full path to the file
         if ((await adapter.exists(templateName))) {
@@ -399,7 +396,7 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
 
         //Get template with injected event data
         let newContent = injectEventDetails(event, originalTemplateFileContent);
-        newContent = insertEventIdInFrontmatter(event, newContent, app.metadataCache.getFileCache(templateFile)?.frontmatter?.position);
+        newContent = insertEventIdInFrontmatter(event, newContent);
 
         // Check if the template contains templater or core template syntax after the custom {{ }} are removed by the injection
         if (useTemplater && newContent.contains("{{") && newContent.contains("}}")) {
