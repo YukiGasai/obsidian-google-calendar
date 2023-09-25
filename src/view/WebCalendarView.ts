@@ -40,7 +40,7 @@ export class WebCalendarView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "globe-2";
 	}
 
 	async onOpen(): Promise<void> {

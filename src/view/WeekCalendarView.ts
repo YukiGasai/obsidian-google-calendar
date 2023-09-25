@@ -20,7 +20,7 @@ export class WeekCalendarView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "calendar-range";
 	}
 
 	setDate = (date: moment.Moment) => {

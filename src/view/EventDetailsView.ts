@@ -23,7 +23,7 @@ export class EventView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "calendar-plus";
 	}
 
 	setEvent = (event: GoogleEvent) => {

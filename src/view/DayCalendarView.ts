@@ -20,7 +20,7 @@ export class DayCalendarView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "layout-template";
 	}
 
 	setDate = (date: moment.Moment) => {

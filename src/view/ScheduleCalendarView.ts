@@ -22,7 +22,7 @@ export class ScheduleCalendarView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "layout-list";
 	}
 
 	setDate = (date: moment.Moment) => {

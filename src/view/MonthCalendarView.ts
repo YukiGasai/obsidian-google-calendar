@@ -20,7 +20,7 @@ export class MonthCalendarView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "calendar-days";
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {

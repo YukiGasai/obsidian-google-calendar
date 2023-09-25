@@ -40,7 +40,7 @@ export class YearCalendarView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "calendar-with-checkmark";
+		return "github";
 	}
 
 	async onOpen(): Promise<void> {
