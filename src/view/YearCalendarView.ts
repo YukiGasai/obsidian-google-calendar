@@ -13,7 +13,7 @@ export class YearCalendarView extends ItemView {
 		return VIEW_TYPE_GOOGLE_CALENDAR_YEAR;
 	}
 	getDisplayText(): string {
-		return "Calendar Year View";
+		return "GCal Year View";
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {

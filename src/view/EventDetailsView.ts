@@ -19,7 +19,7 @@ export class EventView extends ItemView {
 		return VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS;
 	}
 	getDisplayText(): string {
-		return "EventDetails View";
+		return "GCal EventDetails View";
 	}
 
 	getIcon(): string {

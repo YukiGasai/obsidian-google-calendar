@@ -16,7 +16,7 @@ export class DayCalendarView extends ItemView {
 		return VIEW_TYPE_GOOGLE_CALENDAR_DAY;
 	}
 	getDisplayText(): string {
-		return "Timeline View";
+		return "GCal Timeline View";
 	}
 
 	getIcon(): string {

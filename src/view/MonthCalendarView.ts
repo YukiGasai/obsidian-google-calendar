@@ -16,7 +16,7 @@ export class MonthCalendarView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return "Calendar Month View";
+		return "GCal Month View";
 	}
 
 	getIcon(): string {

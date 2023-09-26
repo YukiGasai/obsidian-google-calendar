@@ -18,7 +18,7 @@ export class ScheduleCalendarView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return "Schedule View";
+		return "GCal Schedule View";
 	}
 
 	getIcon(): string {

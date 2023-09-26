@@ -13,7 +13,7 @@ export class WebCalendarView extends ItemView {
 		return VIEW_TYPE_GOOGLE_CALENDAR_WEB;
 	}
 	getDisplayText(): string {
-		return "Calendar Web View";
+		return "GCal Web View";
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {

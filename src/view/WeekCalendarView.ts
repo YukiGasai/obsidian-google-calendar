@@ -16,7 +16,7 @@ export class WeekCalendarView extends ItemView {
 		return VIEW_TYPE_GOOGLE_CALENDAR_WEEK;
 	}
 	getDisplayText(): string {
-		return "Week View";
+		return "GCal Week View";
 	}
 
 	getIcon(): string {
