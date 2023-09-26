@@ -48,6 +48,9 @@
         if(width < 60) {
             baseList.push("textSmall")
         }
+        if(window.moment(location.event.end.date ?? location.event.end.dateTime).isSameOrBefore(window.moment())) {
+            baseList.push("googleCalendarEvent_Past")
+        }
         return baseList.join(" ");
     }
 
@@ -96,6 +99,10 @@ googleCalendarName_Id_{location.event.parent.id}
         z-index: 1;
 	}
     
+    .googleCalendarEvent_Past {
+        opacity: 0.5;
+    }
+
     .textSmall {
         padding: 0;
     }
