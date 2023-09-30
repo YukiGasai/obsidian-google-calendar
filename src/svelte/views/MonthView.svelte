@@ -81,14 +81,14 @@
                 const eventsOfTheDay = eventsByDay[day.startOf("day").format()]; 
                 if (!eventsOfTheDay){
                     return {
-                    dataAttributes: {"amount": dots.length + ""},
-                    dots: dots,
-                };
+                        dataAttributes: {"amount": dots.length + ""},
+                        dots: dots,
+                    };
                 } 
                 dots = [
                     ...dots,
-                    ...Array(eventsOfTheDay.length).fill(
-                        {isFilled: true, className: "googleCalendarDot", color: "default"}
+                    ...eventsOfTheDay.map((event:GoogleEvent) => 
+                        ({isFilled: true, className: `googleCalendarDot_${event.parent.colorId}`, color: "default"})
                     )
                 ]
 

@@ -40,3 +40,100 @@
 	z-index: 2;
 	pointer-events: all;
 }
+
+/* Styling for month view dots by calendar color */
+.googleCalendarDot_1 {
+	fill: #ac725e !important;
+}
+
+.googleCalendarDot_2 {
+	fill: #d06b64 !important;
+}
+
+.googleCalendarDot_3 {
+	fill: #f83a22 !important;
+}
+
+.googleCalendarDot_4 {
+	fill: #fa573c !important;
+}
+
+.googleCalendarDot_5 {
+	fill: #ff7537 !important;
+}
+
+.googleCalendarDot_6 {
+	fill: #ffad46 !important;
+}
+
+.googleCalendarDot_7 {
+	fill: #42d692 !important;
+}
+
+.googleCalendarDot_8 {
+	fill: #16a765 !important;
+}
+
+.googleCalendarDot_9 {
+	fill: #7bd148 !important;
+}
+
+.googleCalendarDot_10 {
+	fill: #b3dc6c !important;
+}
+
+.googleCalendarDot_11 {
+	fill: #fbe983 !important;
+}
+
+.googleCalendarDot_12 {
+	fill: #fad165 !important;
+}
+
+.googleCalendarDot_13 {
+	fill: #92e1c0 !important;
+}
+
+.googleCalendarDot_14 {
+	fill: #9fe1e7 !important;
+}
+
+.googleCalendarDot_15 {
+	fill: #9fc6e7 !important;
+}
+
+.googleCalendarDot_16 {
+	fill: #4986e7 !important;
+}
+
+.googleCalendarDot_17 {
+	fill: #9a9cff !important;
+}
+
+.googleCalendarDot_18 {
+	fill: #b99aff !important;
+}
+
+.googleCalendarDot_19 {
+	fill: #c2c2c2 !important;
+}
+
+.googleCalendarDot_20 {
+	fill: #cabdbf !important;
+}
+
+.googleCalendarDot_21 {
+	fill: #cca6ac !important;
+}
+
+.googleCalendarDot_22 {
+	fill: #f691b2 !important;
+}
+
+.googleCalendarDot_23 {
+	fill: #cd74e6 !important;
+}
+
+.googleCalendarDot_24 {
+	fill: #a47ae2 !important;
+}
