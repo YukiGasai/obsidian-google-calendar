@@ -25,12 +25,12 @@
     let fullDay:boolean;
 	let isBusy: boolean;
     let selectedCalendarId = "";
-
     let plugin = GoogleCalendarPlugin.getInstance();
 
     let inputStartDateTime:string;
     let inputEndDateTime:string;
     let inputStartDate:string;
+    let inputEndDate:string;
     let recurringText = "";
     let eventNoteQueryResult = findEventNote(event, plugin);
 
@@ -50,7 +50,7 @@
 
         if(fullDay){
             event.start.date = window.moment(inputStartDate).format("YYYY-MM-DD");
-            event.end.date = window.moment(inputStartDate).format("YYYY-MM-DD");
+            event.end.date = window.moment(inputEndDate).add(1, "day").format("YYYY-MM-DD");
             delete event.start.dateTime;
             delete event.end.dateTime;
         }else{
@@ -72,7 +72,6 @@
         if(event.eventType === "multiDay") {
             event = await getEvent(event.id, event.parent.id);
         }
-
         fullDay = event?.start?.dateTime == undefined && event?.start?.date !== undefined;
 
 		if (!event?.transparency) {
@@ -100,11 +99,15 @@
             inputStartDateTime = startTime.format("YYYY-MM-DDTHH:mm");
             inputEndDateTime = startTime.add(1, "hour").format("YYYY-MM-DDTHH:mm");
             inputStartDate = startTime.format("YYYY-MM-DD");
-
+            inputEndDate = startTime.format("YYYY-MM-DD");
 
 
             if(event.start.date){
                 inputStartDate = window.moment(event.start.date).format("YYYY-MM-DD");
+            }
+
+            if(event.end.date){
+                inputEndDate = window.moment(event.end.date).subtract(1, "day").format("YYYY-MM-DD");
             }
 
             if(event.start.dateTime && event.end.dateTime){
@@ -130,11 +133,14 @@
                 inputStartDateTime  = startTime.format("YYYY-MM-DDTHH:mm");
                 inputEndDateTime    = startTime.add(1, "hour").format("YYYY-MM-DDTHH:mm");
                 inputStartDate      = window.moment(event.start.date).format("YYYY-MM-DD")
+                inputEndDate        = window.moment(event.end.date).subtract(1).format("YYYY-MM-DD")
 
             }else{
                 inputStartDateTime  = window.moment(event.start.dateTime).format("YYYY-MM-DDTHH:mm")
                 inputEndDateTime    = window.moment(event.end.dateTime).format("YYYY-MM-DDTHH:mm")
                 inputStartDate      = window.moment().format("YYYY-MM-DD")
+                inputEndDate        = window.moment().format("YYYY-MM-DD")
+
             }
         }
 	});
@@ -276,8 +282,12 @@ $: {
     </div>
 
     {#if fullDay}
-        <label for="eventDate">Date</label>
+        <label for="eventStartDate">Start Date</label>
         <input type="date" name="eventDate" bind:value="{inputStartDate}">
+
+        <label for="eventEndDate">End Date</label>
+        <input type="date" name="eventDate" bind:value="{inputEndDate}" min="{window.moment(inputStartDate).format('YYYY-MM-DD')}">
+
     {:else}
         <label for="eventStartDate">Start Date</label>
         <input type="datetime-local" name="eventStartDate" bind:value="{inputStartDateTime}">
