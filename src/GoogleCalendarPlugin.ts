@@ -33,6 +33,7 @@ import { getEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
 import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
+import { deleteEventFromFrontmatter } from "./helper/FrontMatterDelete";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -608,7 +609,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		*/
 		this.addCommand({
 			id: "create-google-calendar-event-from-frontmatter ",
-			name: "Create gCal Event From Frontmatter",
+			name: "Create gCal Event from Frontmatter",
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor,
@@ -630,8 +631,41 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 				getEventFromFrontMatter(view).then((newEvent) => {
 					if (!newEvent) return;
-					createEvent(newEvent)
+					createEvent(newEvent).then(createdEvent => {
+						let fileContent = editor.getValue();
+						fileContent = fileContent.replace("---", `---\nevent-id: ${createdEvent.id}`);
+						editor.setValue(fileContent);
+					})
 				})
+			},
+		});
+
+
+		
+		/**
+		 * This function will try to create a event from the yaml metadata of a file
+		*/
+		this.addCommand({
+			id: "delete-google-calendar-event-from-frontmatter ",
+			name: "Delete gCal Event from Frontmatter",
+			editorCheckCallback: (
+				checking: boolean,
+				editor: Editor,
+				view: MarkdownView
+			): boolean => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				if (!view.file) {
+					return;
+				}
+				deleteEventFromFrontmatter(editor, view)
 			},
 		});
 

@@ -54,6 +54,11 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         return;
     }
 
+    if(frontmatter["event-id"]){
+        createNotice("Event already created", true);
+        return;
+    }
+
     const frontMatterMapping = getFrontMatterMapping(frontmatter);
     //Use the mapping to resolve the values to the selected event details
     for (const [key, value] of Object.entries(frontMatterMapping)) {

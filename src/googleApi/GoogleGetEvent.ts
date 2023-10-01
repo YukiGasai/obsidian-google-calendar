@@ -10,18 +10,31 @@ import { GoogleApiError } from "./GoogleApiError";
  * @param calendarId The id of the calendar the event is in
  * @returns The found Event
  */
-export async function googleGetEvent(eventId: string, calendarId: string): Promise<GoogleEvent> {
+export async function googleGetEvent(eventId: string, calendarId?: string): Promise<GoogleEvent> {
 
 	if (!settingsAreCompleteAndLoggedIn()){
 		throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
 	};
-
-	const foundEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`, "GET", null)
+	
 	const calendars = await googleListCalendars();
+	if(calendarId){
+		const foundEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`, "GET", null)
+		foundEvent.parent = calendars.find(calendar => calendar.id === calendarId);
+		return foundEvent;
+	}
 
-	foundEvent.parent = calendars.find(calendar => calendar.id === calendarId);
+	for (const calendar of calendars) {
+		try {
+			const foundEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calendar.id}/events/${eventId}`, "GET", null)
+			if(foundEvent && foundEvent.id === eventId){
+				foundEvent.parent = calendar;
+				return foundEvent;
+			}
+		} catch(err) {
+			//Do nothing
+		}
+	}
 
-	return foundEvent;
 }
 
 export async function getEvent(eventId: string, calendarId?: string): Promise<GoogleEvent> {
