@@ -21,20 +21,10 @@ Manage your Google Calendar from inside Obsidian
 
 ### Create a own OAuth client (its easy)
 
-[Here](https://yukigasai.github.io/obsidian-google-calendar/#/Basics/Installation) is a step by step guide describing the process with images.
+Please follow the [Step by Step Guide](https://yukigasai.github.io/obsidian-google-calendar/#/Basics/Installation) that describes the process with images or take a look at this [video](https://youtu.be/TMQ8HZjeauo).
 
-- [Create Google Cloud Project](https://console.cloud.google.com/projectcreate?)
-- [Activate Google Calendar API](https://console.cloud.google.com/marketplace/product/google/calendar-json.googleapis.com)
-- [Configure OAUTH screen](https://console.cloud.google.com/apis/credentials/consent?)
-  - Select Extern
-  - Fill necessary inputs
-  - Add your email as tester if using "@gmail" add gmail and googlemail
-- [Add OAUTH client](https://console.cloud.google.com/apis/credentials/oauthclient)
-  - select Webclient
-  - add `http://127.0.0.1:42813` as Javascript origin
-  - add `https://google-auth-obsidian-redirect.vercel.app` as Javascript origin (only required if you want to use the plugin on mobile)
-  - add `http://127.0.0.1:42813/callback` as redirect URI
-  - add `https://google-auth-obsidian-redirect.vercel.app/callback` as redirect URI (only required if you want to use the plugin on mobile)
+After obtaining the Client ID and Client Secret enter them into the plugin settings.
+
 - Switch on `Use own authentication client` in the settings tab
 - add the keys into the fields under the plugin settings
 - Press Login
