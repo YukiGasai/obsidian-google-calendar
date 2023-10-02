@@ -351,6 +351,20 @@ async function googleListEventsByCalendar(
 	//Get the events because cache was no option
 	let totalEventList: GoogleEvent[] = await requestEventsFromApi(GoogleCalendar, startDate.toISOString(), endDate.toISOString());
 
+	//Filter out events with ignore pattern
+	// Ignore this if no ignore list is set
+	if(plugin.settings.ignorePatternList.length > 0) {
+		totalEventList = totalEventList.filter(event => 
+		!plugin.settings.ignorePatternList.some(ignoreText => {
+			// Check if the ignore text is a regex pattern
+			if(ignoreText.startsWith("/") && ignoreText.endsWith("/")) {
+				const regex = new RegExp(ignoreText.slice(1, -1));
+				return regex.test(event.summary) || regex.test(event.description);
+			}
+			return event.description?.includes(ignoreText) || event.summary?.includes(ignoreText)
+		}))
+	}
+
 	//Turn multi day events into multiple events
 	totalEventList = resolveMultiDayEventsHelper(totalEventList, startDate, endDate);
 

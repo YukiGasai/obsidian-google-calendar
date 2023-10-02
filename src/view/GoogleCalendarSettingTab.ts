@@ -276,44 +276,6 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 			})
 
 		new Setting(containerEl)
-			.setName("Auto create Ignore List")
-			.setDesc("A list of strings, if contained in the event summary or description, the event will not be auto imported")
-			.setClass("SubSettings")
-			.addText(text => {
-				text.setValue(this.ignoreListText);
-				text.onChange(value => {
-					this.ignoreListText = value;
-				});
-			})
-			.addButton(button => {
-				button.setButtonText("Add");
-				button.onClick(async () => {
-					this.plugin.settings.autoCreateEventNotesIgnoreList = [
-						...this.plugin.settings.autoCreateEventNotesIgnoreList,
-						this.ignoreListText
-					];
-					this.ignoreListText = "";
-					await this.plugin.saveSettings();
-					this.display();
-				})
-			})
-
-		for (const ignorePattern of this.plugin.settings.autoCreateEventNotesIgnoreList ) {
-			new Setting(containerEl)
-				.setName(ignorePattern)
-				.setClass("SubSettings")
-				.addButton(button => {
-					button.setButtonText("Remove");
-					button.onClick(async () => {
-						this.plugin.settings.autoCreateEventNotesIgnoreList.remove(ignorePattern);
-						await this.plugin.saveSettings();
-						this.display();
-					})
-				});
-		}
-
-
-		new Setting(containerEl)
 			.setName("Keep auto created Notes open")
 			.setDesc("When creating a new note should it stay open for direct editing")
 			.setClass("SubSettings")
@@ -462,6 +424,43 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					});
 			});
 		}
+
+		new Setting(containerEl)
+			.setName("Pattern ignore list")
+			.setDesc("A list of strings/regex pattern, if contained in the event summary or description, the event will not be used by the plugin")
+			.addText(text => {
+				text.setValue(this.ignoreListText);
+				text.onChange(value => {
+					this.ignoreListText = value;
+				});
+			})
+			.addButton(button => {
+				button.setButtonText("Add");
+				button.onClick(async () => {
+					this.plugin.settings.ignorePatternList = [
+						...this.plugin.settings.ignorePatternList,
+						this.ignoreListText
+					];
+					this.ignoreListText = "";
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			})
+
+		for (const ignorePattern of this.plugin.settings.ignorePatternList ) {
+			new Setting(containerEl)
+				.setName(ignorePattern)
+				.setClass("SubSettings")
+				.addButton(button => {
+					button.setButtonText("Remove");
+					button.onClick(async () => {
+						this.plugin.settings.ignorePatternList.remove(ignorePattern);
+						await this.plugin.saveSettings();
+						this.display();
+					})
+				});
+		}
+
 
 		if (settingsAreCompleteAndLoggedIn()) {
 

@@ -25,7 +25,6 @@ export interface GoogleCalendarPluginSettings {
 	defaultFolder: string;
     autoCreateEventNotes: boolean;
 		autoCreateEventNotesMarker: string;
-		autoCreateEventNotesIgnoreList: string[];
         autoCreateEventKeepOpen: boolean;
         importStartOffset: number;
         importEndOffset: number;
@@ -33,6 +32,7 @@ export interface GoogleCalendarPluginSettings {
     // Calendar settings
     defaultCalendar: string;
     calendarBlackList: [string, string][];
+	ignorePatternList: string[];
     insertTemplates: Template[];
     useDefaultTemplate: boolean;
     

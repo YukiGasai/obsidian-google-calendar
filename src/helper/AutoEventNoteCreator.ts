@@ -42,20 +42,6 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
     // Don't allow multi day events to be created automatically
     events = events.filter(event => event.eventType !== "multiDay")
 
-    // Remove events that contain the ignore marker
-    if(plugin.settings.autoCreateEventNotesIgnoreList.length) {
-        events = events.filter(event =>
-            !plugin.settings.autoCreateEventNotesIgnoreList.some(ignoreText => {
-                    // Check if the ignore text is a regex pattern
-                    if(ignoreText.startsWith("/") && ignoreText.endsWith("/")) {
-                        const regex = new RegExp(ignoreText.slice(1, -1));
-                        return regex.test(event.summary) || regex.test(event.description);
-                    }
-                    return event.description?.includes(ignoreText) || event.summary?.includes(ignoreText)
-                })
-        )
-    }
-
     // check every event from the trigger text :obsidian:
     for (let i = 0; i < events.length; i++) {
         // Create a event note for all events if the trigger text is empty
