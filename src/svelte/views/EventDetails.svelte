@@ -16,6 +16,8 @@
     import { getEvent } from "src/googleApi/GoogleGetEvent";
     import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
 	import EventDescriptionInput from "../components/EventDescriptionInput.svelte";
+	import { switchCalendar } from "../../googleApi/GoogleSwitchCalendar";
+	import { googleClearCachedEvents } from "../../googleApi/GoogleListEvents";
 
     export let event: GoogleEvent;
     export let closeFunction :() => void;
@@ -145,7 +147,7 @@
         }
 	});
 
-    const changeCalendar = (e:Event) => {
+    const changeCalendar = async (e:Event) => {
         const selectElement = e.target;
 
         if(selectElement instanceof HTMLSelectElement){
@@ -153,6 +155,13 @@
             const value = selectElement.value;
             selectedCalendarId = value;
         }
+
+        if(event.id){
+            await switchCalendar(event, selectedCalendarId);
+            event.parent = calendars.find(calendar => calendar.id === selectedCalendarId);
+            googleClearCachedEvents()
+        }
+
     }
 
     const handleCreateEvent = async () => {
@@ -267,7 +276,7 @@ $: {
 
     <label for="calendar">Calendar</label>
     
-    <select name="calendar" class="dropdown" on:change="{changeCalendar}" disabled={event?.id !== undefined}>
+    <select name="calendar" class="dropdown" on:change="{changeCalendar}">
         
         {#each calendars as calendar}
             <option id="{calendar.id}" value="{calendar.id}" selected="{calendar.id === selectedCalendarId}">{calendar.summary}</option>
