@@ -24,16 +24,18 @@ import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEve
 import { TemplateSuggest } from "./suggest/TemplateSuggest";
 import { InsertEventsModal } from "./modal/InsertEventsModal";
 import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
-import { findEventNote, getCurrentTheme } from "./helper/Helper";
+import { findEventNote } from "./helper/Helper";
 import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
 import { checkForNewDailyNotes, checkForNewWeeklyNotes } from "./helper/DailyNoteHelper";
 import { createEvent } from "../src/googleApi/GoogleCreateEvent";
 import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
-import { getEvent } from "src/googleApi/GoogleGetEvent";
+import { getEvent, googleGetEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
 import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
 import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
 import { deleteEventFromFrontmatter } from "./helper/FrontMatterDelete";
+import { updateEvent } from "./googleApi/GoogleUpdateEvent";
+import { createNotice } from "./helper/NoticeHelper";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -628,9 +630,9 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-
 				getEventFromFrontMatter(view).then((newEvent) => {
 					if (!newEvent) return;
+					if (newEvent.id) return;
 					createEvent(newEvent).then(createdEvent => {
 						let fileContent = editor.getValue();
 						fileContent = fileContent.replace("---", `---\nevent-id: ${createdEvent.id}`);
@@ -643,7 +645,42 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		
 		/**
-		 * This function will try to create a event from the yaml metadata of a file
+		 * This function will try to update a event from the yaml metadata of a file
+		*/
+		this.addCommand({
+			id: "update-google-calendar-event-from-frontmatter ",
+			name: "Update gCal Event from Frontmatter",
+			editorCheckCallback: (
+				checking: boolean,
+				editor: Editor,
+				view: MarkdownView
+			): boolean => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				if (!view.file) {
+					return;
+				}
+				getEventFromFrontMatter(view).then(async (newEvent:any) => {
+					if (!newEvent || !newEvent.id) {
+						createNotice("No event id found in note", true);
+						return;						
+					}
+					const foundEvent = await googleGetEvent(newEvent.id);
+					newEvent.parent = foundEvent.parent;
+					updateEvent(newEvent);
+				})
+			},
+		});
+
+		/**
+		 * This function will try to delete a event from the yaml metadata of a file
 		*/
 		this.addCommand({
 			id: "delete-google-calendar-event-from-frontmatter ",
