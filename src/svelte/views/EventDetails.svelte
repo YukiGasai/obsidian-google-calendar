@@ -36,6 +36,9 @@
     let recurringText = "";
     let eventNoteQueryResult = findEventNote(event, plugin);
 
+    let endDateTimeElement:HTMLInputElement = null;
+    let endDateElement:HTMLInputElement = null;
+
     // Make sure the date is always rounded to the next 15 minutes
     function getEmptyDate() {
         const minutes = 15;
@@ -211,8 +214,27 @@
         }
     }
 
-    const updateEvent = async () => {
+    const checkIfEndDateIsValid = () => {
+        if(fullDay) {
+            const isValid = window.moment(inputStartDate).isSameOrBefore(window.moment(inputEndDate))
+            if(!isValid && endDateElement instanceof HTMLInputElement) {
+                endDateElement.setCustomValidity("End date must be after start date");
+                endDateElement.reportValidity();
+            }
+            return isValid;
+        }
+        const isValid = window.moment(inputStartDateTime).isBefore(window.moment(inputEndDateTime))
+        if(!isValid && endDateTimeElement instanceof HTMLInputElement) {
+            endDateTimeElement.setCustomValidity("End date must be after start date");
+            endDateTimeElement.reportValidity();
+        }
+        return isValid;
+    }
 
+    const updateEvent = async () => {
+        if(!checkIfEndDateIsValid()) {
+            return;
+        }
         const cleanEvent = addEventDate(event);
         let updatedEvent;
         if(cleanEvent.recurringEventId){
@@ -226,7 +248,9 @@
     }
 
     const updateAllEvents = async () => {
-        
+        if(!checkIfEndDateIsValid()) {
+            return;
+        }
         const updatedEvent = await googleUpdateEvent(addEventDate(event), true)
         if(updatedEvent.id){
             closeFunction();
@@ -239,6 +263,9 @@
     }
 
     const createNote = async () => {
+        if(!checkIfEndDateIsValid()) {
+            return;
+        }
         if (plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder && plugin.settings.defaultFolder) {
             createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
         } else {
@@ -249,17 +276,39 @@
     const openInBrowser = () => {
         window.open(event.htmlLink);
     }
-
-$: {
-
-    //Update End Date if start date is before End Date
-    const start = window.moment(inputStartDateTime);
-    const end = window.moment(inputEndDateTime);
-
-    if(end.isBefore(start)){
-        inputEndDateTime = start.add(1, 'hour').format("YYYY-MM-DDTHH:mm");
+    
+    const changeStartDateTime = (e) => {
+        if(!e.target.value || !window.moment(e.target.value).isValid()){
+            e.preventDefault();
+            return;
+        }
+        inputStartDateTime = e.target.value
     }
-}
+
+    const changeEndDateTime = (e) => {
+        if(!e.target.value || !window.moment(e.target.value).isValid()){
+            e.preventDefault();
+            return;
+        }
+        inputEndDateTime = e.target.value
+    }
+
+
+    const changeStartDate = (e) => {
+        if(!e.target.value || !window.moment(e.target.value).isValid()){
+            e.preventDefault();
+            return;
+        }
+        inputStartDate = e.target.value
+    }
+
+    const changeEndDate = (e) => {
+        if(!e.target.value || !window.moment(e.target.value).isValid()){
+            e.preventDefault();
+            return;
+        }
+        inputEndDate = e.target.value
+    }
 
 </script>
 
@@ -292,17 +341,17 @@ $: {
 
     {#if fullDay}
         <label for="eventStartDate">Start Date</label>
-        <input type="date" name="eventDate" bind:value="{inputStartDate}">
+        <input type="date" name="eventDate" value={inputStartDate} on:change={changeStartDate}>
 
         <label for="eventEndDate">End Date</label>
-        <input type="date" name="eventDate" bind:value="{inputEndDate}" min="{window.moment(inputStartDate).format('YYYY-MM-DD')}">
+        <input type="date" name="eventDate" value={inputEndDate} on:change={changeEndDate} bind:this={endDateElement}>
 
     {:else}
         <label for="eventStartDate">Start Date</label>
-        <input type="datetime-local" name="eventStartDate" bind:value="{inputStartDateTime}">
+        <input type="datetime-local" name="eventStartDate" value={inputStartDateTime} on:change={changeStartDateTime}>
 
         <label for="eventEndDate">End Date</label>
-        <input type="datetime-local" name="eventEndDate" bind:value="{inputEndDateTime}" min="{window.moment(inputStartDateTime).format('YYYY-MM-DDThh:mm')}">
+        <input type="datetime-local" name="eventEndDate" value={inputEndDateTime} on:change={changeEndDateTime} bind:this={endDateTimeElement}>
     {/if}
 
     <label for="reoccurring">Reoccurring</label>
