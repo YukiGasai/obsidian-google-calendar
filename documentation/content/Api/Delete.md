@@ -8,7 +8,7 @@ The [[ObsidianGoogleCalendarAPI | Obsidian Google Calendar API]] allows you to d
 
 The first argument of the `deleteEvent` function is a GoogleEvent object.
 To define the calendar where the event is created add a field `parent` containing a GoogleCalendar object.
-If no parent field is set the functions uses the default calendar.
+If no parent field is set the functions uses the [[DefaultCalendar]].
 The second argument `deleteAllOccurrences` is a boolean that defaults to `false`.
 If it is `true` and the event is reoccurring, it will delete all occurrences of the event.
 

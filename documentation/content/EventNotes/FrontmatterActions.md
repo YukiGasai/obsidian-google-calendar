@@ -15,8 +15,10 @@ To allow a more flexible naming you can use a [[mapping]].
 ~~~md title="Example"
 ---
 title: My event title
-start.dateTime : 2021-08-01T12:00:00+02:00
-end.dateTime : 2021-08-01T13:00:00+02:00
+start:
+  dateTime: 2023-10-01T12:00:00+02:00
+end:
+  dateTime: 2023-10-01T13:00:00+02:00
 location: My event location
 ---
 ~~~
