@@ -6,11 +6,7 @@ const config: QuartzConfig = {
     pageTitle: "Obsidian Google Calendar",
     enableSPA: true,
     enablePopovers: true,
-    analytics: {
-      provider: 'google',
-      tagId: 'G-85NYDDBG67',
-
-    },
+    analytics: null,
     baseUrl: "yukigasai.github.io/obsidian-google-calendar",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "created",
