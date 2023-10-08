@@ -28,7 +28,7 @@ location: My event location
 To update an existing Google Event from the frontmatter of an active note use the `Update gCal Event from Frontmatter` command.
 This command will only run if an `event-id` is present in the frontmatter, signaling that this note is an [[EventNote]].
 The command will update the event and use the data provided by the frontmatter to fill in the details.
-To allow a more flexible naming you can use a [[mapping]].
+To allow a more flexible naming you can use a [mapping](#mapping).
 
 ## Delete Event from Frontmatter
 
