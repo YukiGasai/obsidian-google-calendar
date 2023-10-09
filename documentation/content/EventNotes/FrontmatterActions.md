@@ -4,6 +4,12 @@ title: Frontmatter Actions
 
 Frontmatter Actions are a set of commands to create, update and delete Google events by using the frontmatter of an active note.
 
+## Open Event from Frontmatter
+
+To get the details of the linked Google Event from the [[EventNote]] use the `Open gCal Event from Frontmatter` command.
+This will open the [[EventDetailsView]] with the details of the event.
+This command will only run if an `event-id` is present in the frontmatter, signaling that this note is an [[EventNote]].
+
 ## Create Event from Frontmatter
 
 To create a new Google Event from the frontmatter of an active note use the `Create gCal Event from Frontmatter` command.

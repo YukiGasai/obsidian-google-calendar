@@ -162,8 +162,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 			.getLeavesOfType(viewId)
 			.first()
 
-		console.log(typeof leaf)
-
 		if (viewId === VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS &&
 			leaf.view instanceof EventView ) {
 			leaf.view.setEvent(event);
@@ -705,6 +703,42 @@ export default class GoogleCalendarPlugin extends Plugin {
 				deleteEventFromFrontmatter(editor, view)
 			},
 		});
+
+		/**
+		 * Open the event of the current event note
+		*/
+		this.addCommand({
+			id: "open-google-calendar-event-from-frontmatter",
+			name: "Open gCal Event from Frontmatter",
+			editorCheckCallback: (
+				checking: boolean,
+				editor: Editor,
+				view: MarkdownView
+			): boolean => {
+				const canRun = settingsAreCompleteAndLoggedIn();
+				if (checking) {
+					return canRun;
+				}
+
+				if (!canRun) {
+					return;
+				}
+
+				if (!view.file) {
+					return;
+				}
+				const eventId = app?.metadataCache?.getFileCache(view.file).frontmatter?.['event-id'];
+				if(!eventId) {
+					createNotice("No event id found in note", true);
+					return;
+				}
+				getEvent(eventId).then(event => {
+					new EventDetailsModal(event, () => { }).open();
+				});
+
+			},
+		});
+
 
 		this.settingsTab = new GoogleCalendarSettingTab(this.app, this);
 

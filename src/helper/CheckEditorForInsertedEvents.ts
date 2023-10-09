@@ -1,11 +1,20 @@
-import type { Editor, EditorPosition } from "obsidian";
+import type { Editor, EditorPosition, TFile } from "obsidian";
 import type { GoogleEvent } from "./types";
 import { getEvent } from "../googleApi/GoogleGetEvent";
 import _ from "lodash";
 
 async function getEventsInFile(fileContent: string): Promise<GoogleEvent[]> {
-    const regexForLinks = /\[.*]\(https:\/\/www\.google\.com\/calendar\/event\?eid=(.*)&cal=(.*)\)/g;
 
+    let events = [];
+
+    const regexForEventId = /^event-id: ([a-z0-9]*)$/gm;
+    const eventId = regexForEventId.exec(fileContent)?.[1];
+    if (eventId) {
+        const event = await getEvent(eventId);
+        events.push(event);
+    }
+
+    const regexForLinks = /\[.*]\(https:\/\/www\.google\.com\/calendar\/event\?eid=(.*)&cal=(.*)\)/g;
     let matchesForLink;
     const outputForLink = [];
 
@@ -16,15 +25,15 @@ async function getEventsInFile(fileContent: string): Promise<GoogleEvent[]> {
         }
     } while (matchesForLink);
 
-    if (!outputForLink.length) return [];
+    if (!outputForLink.length) return events;
 
-    const events = await Promise.all(outputForLink.map(async (match) => {
+    events.push(...(await Promise.all(outputForLink.map(async (match) => {
         if (match) {
             const eventId = atob(match[1]).split(" ")[0];
             const event = await getEvent(eventId, match[2]);
             return event;
         }
-    }));
+    }))));
 
     return events;
 }

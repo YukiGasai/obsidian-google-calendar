@@ -7,14 +7,18 @@ The @Annotation allows you to reference Google Calendar events inside a note by 
 Possible options are:
 
 - `@today`
-- `@tomorrow`
-- `@yesterday`
+- `@nextmonday`
+- `@in2weeks`
 - `@+n` where n is a number
 - `@-n` where n is a number
-- `@<date>` where date is a date in the format `YYYY-MM-DD`
-- `@<date>` where date is a date in the format `MM-DD-YYYY` you can switch to german format with the [[UsDateFormat]] Setting.
+- `@YYYY-MM-DD`
+- `@MM-DD-YYYY`
 
 > Type a space to confirm your input and trigger the selection menu
+
+To detect the date from text the [Chrono](https://github.com/wanasit/chrono) library is used.
+
+To allow the detection of dates in the format of `@DD-MM-YYYY` the [[UsDateFormat]] option must be set to `false`.
 
 ![AtAnnotation example](./AtAnnotation.gif)
 

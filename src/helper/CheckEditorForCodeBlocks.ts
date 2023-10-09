@@ -57,6 +57,7 @@ export async function checkEditorForCodeBlocks(
 	codeBlockOptions.showAllDay = codeBlockOptions.showAllDay ?? true;
 	codeBlockOptions.size = codeBlockOptions.size ?? 10;
 
+	codeBlockOptions.timespan = Math.floor(Math.abs(codeBlockOptions.timespan));
 
 
 	if(codeBlockOptions.dayOffset){

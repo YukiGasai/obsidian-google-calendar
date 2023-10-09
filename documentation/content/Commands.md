@@ -20,6 +20,7 @@ title: Commands
 |Insert gCal Event CodeBlock | Insert a template codeblock to display [[Views]] |
 |Insert gCal Event Template | Insert a string to insert event details in an [[EventNote]] |
 |Insert gCal Events | Insert a list of events into the active note |
+|Open gCal Event from Frontmatter | [[FrontmatterActions \| Open an event from the frontmatter]] of an active note |
 |Create gCal Event from Frontmatter | [[FrontmatterActions \| Create an event from the frontmatter]] of an active note |
 |Update gCal Event from Frontmatter | [[FrontmatterActions \| Update an event from the frontmatter]] of an active note |
 |Delete gCal Event from Frontmatter | [[FrontmatterActions \| Delete an event from the frontmatter]] of an active note |

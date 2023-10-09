@@ -63,8 +63,6 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
         }
     }
     const calendars = await listCalendars();
-    const frontmatterPosition = frontmatter.position;
-    delete frontmatter.position;
     const calendar = calendars.find(calendar => calendar.id == (frontmatter.calendar ?? plugin.settings.defaultCalendar) || calendar.summary == (frontmatter.calendar ?? plugin.settings.defaultCalendar));
 
     if (!calendar) {
@@ -96,7 +94,8 @@ export const getEventFromFrontMatter = async (view: MarkdownView): Promise<Front
 
             if (frontmatter.description?.toLowerCase() == "file") {
                 //Remove frontmatter before html conversion
-                const html = marked.parse(fileContent.substring(frontmatterPosition.end.offset));
+                //@ts-ignore
+                const html = marked.parse(fileContent.substring(app?.metadataCache?.getFileCache(view.file).frontmatterPosition.end.offset));
                 frontmatter.description = html;
             }
         } else if (typeof frontmatter.description == "object") {

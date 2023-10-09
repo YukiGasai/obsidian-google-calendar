@@ -230,15 +230,15 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 
 		if (this.plugin.settings.atAnnotationEnabled) {
 			new Setting(containerEl)
-				.setName("@ Annotation date format")
-				.setDesc("SWitch between mm/dd/yyyy and dd/mm/yyyy")
+				.setName("@ Annotation language")
+				.setDesc("Switch between english and german")
 				.setClass("SubSettings")
 				.addDropdown((dropdown) => {
-					dropdown.addOption("mm/dd/yyyy", "mm/dd/yyyy");
-					dropdown.addOption("dd/mm/yyyy", "dd/mm/yyyy");
-					dropdown.setValue(this.plugin.settings.usDateFormat ? "mm/dd/yyyy" : "dd/mm/yyyy");
+					dropdown.addOption("en", "English");
+					dropdown.addOption("de", "German");
+					dropdown.setValue(this.plugin.settings.usDateFormat ? "en" : "de");
 					dropdown.onChange(async (state) => {
-						if (state == "mm/dd/yyyy") {
+						if (state == "en") {
 							this.plugin.settings.usDateFormat = true;
 						} else {
 							this.plugin.settings.usDateFormat = false;
