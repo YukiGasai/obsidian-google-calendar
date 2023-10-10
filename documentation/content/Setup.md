@@ -30,6 +30,21 @@ The required URLS for the google cloud project are:
 
 A video showing the creation of the google cloud project can be found [here](https://youtu.be/TMQ8HZjeauo)
 
+## Login
+
 - Go into the plugin settings
-- Insert your client id and secret in the input fields
-- Press Login and authenticate with google
+- Enable the [[UseCustomClient]] setting
+- Insert your [[GoogleClientId]] and [[GoogleClientSecret]] in the input fields
+- Press Login
+  - A browser window will open
+- Login / Select your google account
+- Google will display a warning that the app is not verified
+  1. Click on advanced
+  2. Click on go to {project name} (unsafe)
+  - The browser will redirect to the consent screen
+- Click on allow (Make sure to allow all scopes)
+
+![Example Google Warning](./exampleGoogleWarning.png)
+
+> Google does not require verification for internal use.
+> This means you can use your unverified app with your google account, as long as you don't share it with others.

@@ -11,4 +11,4 @@ If it is a regular expression the plugin will check if the title or description 
 
 ## Example
 
-![Pattern ignore list Example](patternIgnoreListExample.png)
+![Pattern ignore list Example](./patternIgnoreListExample.png)

@@ -57,4 +57,4 @@ The buttons in the bottom of the view allow you to:
 
 ## Example
 
-![Event View](detailsViewExample.png)
+![Event View](./detailsViewExample.png)

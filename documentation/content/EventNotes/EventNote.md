@@ -81,8 +81,8 @@ If you need even more complex templates you can use the [[ObsidianGoogleCalendar
 
 Inside the [[PluginOptions | Plugin Options]] you can configure a default template to use for all Eventnotes as well as a default location. If you don't configure defaults, the plugin will ask you for a template and location every time you create an Eventnote.
 
-![setting for the default template](settingSelectTemplate.png)
+![setting for the default template](./settingSelectTemplate.png)
 The setting for the default template.
 
-![The popup to select a template when creating an Eventnote](popUpSelectTemplate.png)
+![The popup to select a template when creating an Eventnote](./popUpSelectTemplate.png)
 The popup to select a template when creating an Eventnote.
