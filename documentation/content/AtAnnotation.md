@@ -14,7 +14,7 @@ Possible options are:
 - `@YYYY-MM-DD`
 - `@MM-DD-YYYY`
 
-> Press space to confirm your input and trigger the selection menu
+> Press space to confirm your input and trigger the selection menu.
 
 To detect the date from text the [Chrono](https://github.com/wanasit/chrono) library is used.
 
@@ -26,7 +26,7 @@ After inserting the event, the plugin will know that every reference made is rel
 
 You can insert information inside a note by writing `{{gEvent.<Any option>}}`
 
-> Press space to confirm your input and trigger the insert
+> Press space to confirm your input and trigger the insert.
 
 ![Detail Insert Example](./detailInsert.gif)
 
