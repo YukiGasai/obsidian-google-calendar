@@ -7,7 +7,7 @@ async function getEventsInFile(fileContent: string): Promise<GoogleEvent[]> {
 
     let events = [];
 
-    const regexForEventId = /^event-id: ([a-z0-9]*)$/gm;
+    const regexForEventId = /^event-id: (.*)$/gm;
     const eventId = regexForEventId.exec(fileContent)?.[1];
     if (eventId) {
         const event = await getEvent(eventId);
