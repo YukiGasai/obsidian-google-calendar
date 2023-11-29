@@ -16,6 +16,9 @@
 	import GoogleCalendarPlugin from '../../GoogleCalendarPlugin';
 	import { VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from '../../view/EventDetailsView';
 
+	import { findEventNote } from "../../helper/Helper";
+	import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
+
 	export let codeBlockOptions: CodeBlockOptions;
 	export let isObsidianView = false;
 	export let showSettings = false;
@@ -62,10 +65,16 @@
 				refreshData(date);
 			})
 		} else {
-			new EventDetailsModal(event, () => {
-				googleClearCachedEvents();
-				refreshData(date);
-			}).open();
+			if (plugin.settings.openNoteOnClick) {
+				let eventNoteQueryResult = findEventNote(event, plugin);
+				createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
+				app.workspace.getLeaf(true).openFile(eventNoteQueryResult.file);
+			} else {
+				new EventDetailsModal(event, () => {
+					googleClearCachedEvents();
+					refreshData(date);
+				}).open();
+			}
 		}
 	};
 
