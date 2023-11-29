@@ -65,7 +65,7 @@
 				refreshData(date);
 			})
 		} else {
-			if (plugin.settings.openNoteOnClick) {
+			if (plugin.settings.openNoteOnClick && plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder) {
 				let eventNoteQueryResult = findEventNote(event, plugin);
 				createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
 				app.workspace.getLeaf(true).openFile(eventNoteQueryResult.file);

@@ -266,7 +266,7 @@
         if(!checkIfEndDateIsValid()) {
             return;
         }
-        if (plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder && plugin.settings.defaultFolder) {
+        if (plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder) {
             createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
         } else {
             new CreateNotePromptModal(event, (newNote:TFile) => eventNoteQueryResult.file = newNote).open();
