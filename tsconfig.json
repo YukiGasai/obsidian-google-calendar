@@ -13,7 +13,7 @@
 		"paths": {
 			"src": ["src/*"]
 		},
-		"lib": ["dom", "es5", "scripthost", "es2015"]
+		"lib": ["dom", "es5", "scripthost", "es2015", "ES2021.String"]
 	},
 	"include": ["**/*.ts"],
 	"exclude": ["node_modules/*"]
