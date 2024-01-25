@@ -401,6 +401,20 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 					// @ts-ignore
 					cb.containerEl.addClass("templater_search");
 				});
+
+			new Setting(containerEl)
+				.setName("Open Note on Event Click")
+				.setDesc("Open the note when clicking on an event from a calendar view, instead of opening the Event Details modal")
+				.setClass("SubSettings")
+				.addToggle(toggle => {
+					toggle.setValue(this.plugin.settings.openNoteOnClick);
+					toggle.onChange(async (state) => {
+					this.plugin.settings.openNoteOnClick = state;
+					await this.plugin.saveSettings();
+					this.hide();
+					this.display();
+				});
+				})
 		}
 
 
