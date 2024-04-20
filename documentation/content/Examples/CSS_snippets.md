@@ -1,12 +1,14 @@
 ---
 title: Css snippets
-Author: [Matyáš Levínský](https://github.com/matyasLevinsky)
 ---
-
+Author: [Matyáš Levínský](https://github.com/matyasLevinsky)
 ## How to use CSS in Obsidian
 
-Obsidian is running in [electron.js](https://www.electronjs.org/) which means for us, as the end user that we can treat is as a web-browser. This means we can use CSS snippets, but what fewer people are aware of is that with `Ctrl+Shift+I` you can open up the Inspect tool, like you would in your browser. This allows you to make targeted changes to certain elements of your Obsidian setup. It is generally recommended to refer to the elements without the svelte runes at the end eg. `'some-element'.svelte-m4uap8` as they are auto generated, and chages by google could break your CSS snippet.\
-In my case I wanted to reduce the vertical height needed for a timeline view in my Sidebar. You will have to tweak the numbers, especially if your hours differ (in my case i have them as from 7 till 23) you have a different theme (I have minimal) or if you're interested in another calendar view. Obsidian seems to take live editing of the CSS quite well, and I recommend just playing around with the values. Please share your final results on [GitHub](https://github.com/YukiGasai/obsidian-google-calendar), and consider adding to this guide or making your own.
+Obsidian is running in [electron.js](https://www.electronjs.org/) which allows us, as the End-users to treat is as a web-browser. This means tools like CSS snippets, but also what fewer people are aware of: With `Ctrl+Shift+I` we can open up the Inspect tool, like we would in our common browser. This allows you to make targeted changes to certain elements of your Obsidian setup. 
+
+> [!tip] It is generally recommended to refer to the elements without the svelte runes at the end eg. `'some-element'.svelte-m4uap8` as they are auto generated, and chages by google could break your CSS snippet.\
+
+In my case I wanted to reduce the vertical height needed for a timeline view in my Sidebar. You will have to tweak the numbers, especially if your hours differ (I have them set from 7 to 23) you have a different theme (I use [Minimal](https://github.com/kepano/obsidian-minimal)) or if you're interested in another calendar view. Obsidian seems to take live editing of the CSS quite well, and I recommend just playing around with the values. Please share your final results on [GitHub](https://github.com/YukiGasai/obsidian-google-calendar), and consider adding to this guide or making your own.
 
 ## Basic appearance changes
 
@@ -76,12 +78,10 @@ While the I like the vertical adjustments everywhere the horizontal button slimm
 ## Before and After
 
 Before:
-
-[[Resources/Pasted image 20240420123202.png]]
+![Before](Resources/CSSsnippetBefore.png)
 
 After:
-
-[[Resources/Pasted image 20240420123325.png]]
+![After](CSSsnippetAfter.png)
 
 
 
