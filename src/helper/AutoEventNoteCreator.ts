@@ -277,7 +277,10 @@ export const createNoteFromEvent = async (event: GoogleEvent, folderName?: strin
         file = await vault.create(filePath, '');
         createNotice(`EventNote ${event.summary} created.`)
     } catch (err) {
-        return null
+        if (err.code !== 'ENOENT') {
+            createNotice(err);
+            return;
+        }
     }
 
     //check if the template plugin is active and a template name is given
