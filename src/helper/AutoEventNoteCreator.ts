@@ -49,7 +49,7 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
             await createNoteFromEvent(events[i], plugin.settings.defaultFolder, plugin.settings.defaultTemplate, true)
         } else {
 
-            const regex = new RegExp(`:([^:]*-)?${plugin.settings.autoCreateEventNotesMarker}-?([^:]*)?:`)
+            const regex = new RegExp(`:([^:]*)?-${plugin.settings.autoCreateEventNotesMarker}-?([^:]*)?:`)
 
             //regex will check for text and extract a template name if it exists
             const match = events[i].description?.match(regex) ?? [];
