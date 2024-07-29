@@ -48,14 +48,14 @@ export const checkForEventNotes = async (plugin: GoogleCalendarPlugin): Promise<
         if (plugin.settings.autoCreateEventNotesMarker === "") {
             await createNoteFromEvent(events[i], plugin.settings.defaultFolder, plugin.settings.defaultTemplate, true)
         } else {
-
-            const regex = new RegExp(`:([^:]*-)?${plugin.settings.autoCreateEventNotesMarker}-?([^:]*)?:`)
+            const regex = new RegExp(`:([^:]*)?-?${plugin.settings.autoCreateEventNotesMarker}-?([^:]*)?:`)
 
             //regex will check for text and extract a template name if it exists
             const match = events[i].description?.match(regex) ?? [];
             if (match.length == 3) {
                 //the trigger text was found and a new note will be created
-                await createNoteFromEvent(events[i], match[1], match[2], true)
+                //the fallback allows for formats :folder-marker-template:, :marker-template:, :folder-marker:, :marker:
+                await createNoteFromEvent(events[i], match[1] ?? plugin.settings.defaultFolder, match[2] ?? plugin.settings.defaultTemplate, true)
             }
         }
     }
