@@ -49,6 +49,7 @@ export interface GoogleCalendarPluginSettings {
     refreshInterval: number;
     atAnnotationEnabled: boolean;
     debugMode: boolean;
+	openNoteOnClick: boolean;
 
 	viewSettings: { [type in string]: CodeBlockOptions };
     }

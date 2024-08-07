@@ -16,6 +16,10 @@
 	import GoogleCalendarPlugin from '../../GoogleCalendarPlugin';
 	import { VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from '../../view/EventDetailsView';
 
+	import { findEventNote } from "../../helper/Helper";
+	import { createNoteFromEvent } from "src/helper/AutoEventNoteCreator";
+    import moment, { Moment } from 'moment';
+
 	export let codeBlockOptions: CodeBlockOptions;
 	export let isObsidianView = false;
 	export let showSettings = false;
@@ -28,6 +32,7 @@
 	let loading = false;
 	let events: GoogleEvent[] = [];
 	let interval;
+	let currentDateInterval;
 	let plugin = GoogleCalendarPlugin.getInstance();
 
 	const getEvents = async (date: moment.Moment) => {
@@ -62,12 +67,28 @@
 				refreshData(date);
 			})
 		} else {
-			new EventDetailsModal(event, () => {
-				googleClearCachedEvents();
-				refreshData(date);
-			}).open();
+			if (plugin.settings.openNoteOnClick && plugin.settings.useDefaultTemplate && plugin.settings.defaultFolder) {
+				let eventNoteQueryResult = findEventNote(event, plugin);
+				createNoteFromEvent(event, plugin.settings.defaultFolder, plugin.settings.defaultTemplate)
+				app.workspace.getLeaf(true).openFile(eventNoteQueryResult.file);
+			} else {
+				new EventDetailsModal(event, () => {
+					googleClearCachedEvents();
+					refreshData(date);
+				}).open();
+			}
 		}
 	};
+
+	const updateDate = () => {
+		let currentDate: moment.Moment = moment()
+		if (currentDate.hour() === 0 && currentDate.minute() === 0 && startDate.dayOfYear() !== currentDate.dayOfYear()) {
+			startDate = currentDate;
+			date = codeBlockOptions.navigation
+				? startDate.clone().local().add(dateOffset, 'days')
+				: startDate;
+		}
+	}
 
 	$: {
 		startDate = codeBlockOptions.date
@@ -78,6 +99,10 @@
 		date = codeBlockOptions.navigation
 			? startDate.clone().local().add(dateOffset, 'days')
 			: startDate;
+
+		if (currentDateInterval) clearInterval(currentDateInterval)
+		currentDateInterval = setInterval(() => updateDate(), 5000);
+		updateDate();
 
 		if (interval) clearInterval(interval);
 		interval = setInterval(() => refreshData(date), 5000);
@@ -96,6 +121,7 @@
 
 	onDestroy(() => {
 		clearInterval(interval);
+		clearInterval(currentDateInterval);
 	});
 </script>
 

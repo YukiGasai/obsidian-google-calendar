@@ -92,17 +92,20 @@ export function nearestMinutes(interval: number, someMoment: moment.Moment): mom
 
 
 export const sanitizeFileName = (name: string): string => {
+	const invalid_regex = /((?![\u{23}-\u1F6F3]([^\u{FE0F}]|$))\p{Emoji}(?:(?!\u{200D})\p{EComp}|(?=\u{200D})\u{200D}\p{Emoji})*)/ug
     if(!name) return "";
 	return name.trim()
-		.replace('<', 'lt')
-		.replace('>', 'gt')
-		.replace('"', '\'\'')
-		.replace('\\', '-')
-		.replace('/', '-')
-		.replace(':', '-')
-		.replace('|', '-')
-		.replace('*', '')
-		.replace('?', '');
+		.replaceAll('<', 'lt')
+		.replaceAll('>', 'gt')
+		.replaceAll('"', '\'\'')
+		.replaceAll('\\', '-')
+		.replaceAll('/', '-')
+		.replaceAll(':', '-')
+		.replaceAll('|', '-')
+		.replaceAll('*', '')
+		.replaceAll('?', '')
+		.replace(invalid_regex, "-")
+		.trim()
 }
 
 const findEventNoteForAllFiles = (event: GoogleEvent): EventNoteQueryResult => {
