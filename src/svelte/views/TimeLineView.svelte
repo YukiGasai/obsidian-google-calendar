@@ -101,7 +101,7 @@
 			: startDate;
 
 		if (currentDateInterval) clearInterval(currentDateInterval)
-		interval = setInterval(() => updateDate(), 5000);
+		currentDateInterval = setInterval(() => updateDate(), 5000);
 		updateDate();
 
 		if (interval) clearInterval(interval);
