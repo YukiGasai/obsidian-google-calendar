@@ -5,6 +5,7 @@ import type { GoogleEvent } from "../helper/types";
 
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { callRequest } from "src/helper/RequestWrapper";
+import { logError } from "../helper/log";
 /**
  * This function will remove the event from the google api
  * If the event is recurrent is will delete all it's instanced except if deleteSingle is set
@@ -65,7 +66,7 @@ export async function deleteEvent(
                 break;
             default:
                 createNotice(`Google Event ${event.summary} could not be deleted.`);
-                console.error('[GoogleCalendar]', error);
+                logError(error);
                 break;
         }
 

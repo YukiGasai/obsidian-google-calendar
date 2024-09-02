@@ -4,6 +4,7 @@ import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { createDailyNote, createWeeklyNote, getAllDailyNotes, getAllWeeklyNotes, getDailyNote, getWeeklyNote, } from "obsidian-daily-notes-interface"
 import _ from "lodash";
 import type { OpenPeriodicNoteOptions } from 'src/helper/types';
+import { log } from './log';
 
 let allDailyNotes: Record<string, TFile> = {};
 let allWeeklyNotes: Record<string, TFile> = {};
@@ -17,7 +18,7 @@ export const checkForNewDailyNotes = async (plugin: GoogleCalendarPlugin): Promi
     try {
         newNotes = getAllDailyNotes();
     } catch (error) {
-        console.log("Daily note folder not set. Deactivated Show Daily notes setting.");
+        log("Daily note folder not set. Deactivated Show Daily notes setting.");
         plugin.settings.activateDailyNoteAddon = false;
         plugin.saveSettings();
     }
@@ -36,7 +37,7 @@ export const checkForNewWeeklyNotes = async (plugin: GoogleCalendarPlugin): Prom
     try {
         newNotes = getAllWeeklyNotes();
     } catch (error) {
-        console.log("Daily note folder not set. Deactivated Show Daily notes setting.");
+        log("Daily note folder not set. Deactivated Show Daily notes setting.");
         plugin.settings.activateDailyNoteAddon = false;
         plugin.saveSettings();
     }

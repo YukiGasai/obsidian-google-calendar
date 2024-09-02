@@ -24,6 +24,7 @@ import {
 } from "../helper/LocalStorage";
 import { Notice, Platform, requestUrl } from "obsidian";
 import { createNotice } from 'src/helper/NoticeHelper';
+import { log } from '../helper/log';
 
 
 const PORT = 42813;
@@ -291,23 +292,23 @@ export async function LoginGoogle(): Promise<void> {
 				setAccessToken(token.access_token);
 				setExpirationTime(+new Date() + token.expires_in * 1000);
 			}
-			console.info("Tokens acquired.");
+			log("Tokens acquired.");
 
 			res.end(
 				"Authentication successful! Please return to obsidian."
 			);
 
 			authSession.server.close(()=>{
-				console.log("Server closed")
+				log("Server closed")
 			});
 
 			plugin.settingsTab.display();
 			
 		} catch (e) {
-			console.log("Auth failed")
+			log("Auth failed")
 
 			authSession.server.close(()=>{
-				console.log("Server closed")
+				log("Server closed")
 			});
 		}
 		authSession = {server: null, verifier: null, challenge: null, state:null};

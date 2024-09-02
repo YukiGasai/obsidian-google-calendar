@@ -5,9 +5,9 @@ import { createNotice } from "src/helper/NoticeHelper";
 import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { GoogleApiError } from "./GoogleApiError";
+import { logError } from "../helper/log";
 
 let cachedCalendars: GoogleCalendar[] = []
-const lock = false;
 
 /**
  * This function is used to filter out all calendars that are on the users blacklist
@@ -94,7 +94,7 @@ export async function listCalendars(): Promise<GoogleCalendar[]> {
 				break;
 			default:
 				createNotice("Could not list Google Calendars.");
-				console.error('[GoogleCalendar]', error);
+				logError(error);
 				break;
 		}
 		return [];

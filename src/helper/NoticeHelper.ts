@@ -1,4 +1,5 @@
 import { Notice } from "obsidian";
+import { log } from "./log";
 
 const noticeMap: Map<string, moment.Moment> = new Map();
 
@@ -23,7 +24,7 @@ export function createNotice(
 		}
 
 	} else {
-		console.log(`[Google Calendar] ${text}`)
+		log(text);
 		new Notice(text);
 		noticeMap.set(text, now.add(0, "minute"))
 	}

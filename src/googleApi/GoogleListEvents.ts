@@ -14,6 +14,7 @@ import _ from "lodash"
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import { allColorNames, getColorNameFromEvent } from "../googleApi/GoogleColors";
 import { GoogleApiError } from "./GoogleApiError";
+import { logError } from "../helper/log";
 
 const cachedEvents = new Map<string, EventCacheValue>();
 
@@ -55,17 +56,13 @@ export async function googleListEvents(
 	//Get all calendars not on the black list
 	let calendarList = await googleListCalendars();
 
-
 	const [includeCalendars, includeColors] = (include ?? []).reduce(([pass, fail], elem) => {
-		  return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
-		}, [[], []]);
+		return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
+	}, [[], []]);
 	
-
 	const [excludeCalendars, excludeColors] = (exclude ?? []).reduce(([pass, fail], elem) => {
 		return !allColorNames.includes(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]];
-	  }, [[], []]);
-  	
-
+	}, [[], []]);
 
 	//Get the list of calendars that should be queried
 	if (includeCalendars.length) {
@@ -115,7 +112,7 @@ export async function listEvents(listOptions = {}): Promise<GoogleEvent[]> {
                 break;
             default:
                 createNotice(`Google Events could not be loaded.`);
-                console.error('[GoogleCalendar]', error);
+                logError(error);
                 break;
         }
 
@@ -159,7 +156,7 @@ async function requestEventsFromApi(
 
 	if (!settingsAreCompleteAndLoggedIn()){
 		throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
-	};
+	}
 
 	let tmpRequestResult: GoogleEventList;
 	const resultSizes = 2500;
@@ -210,7 +207,7 @@ function resolveMultiDayEventsHelper(
 		const isAllDayEvent = currentEvent.start.date && !currentEvent.start.dateTime;
 
 		const endMoment = window.moment(currentEvent.end.dateTime || currentEvent.end.date);
-		let startMoment = window.moment(currentEvent.start.dateTime || currentEvent.start.date);
+		const startMoment = window.moment(currentEvent.start.dateTime || currentEvent.start.date);
 
 		// Ignore non multi day events
 		if (startMoment.isSame(endMoment, "day") || endMoment.isSame(startMoment.clone().add(1, "day").startOf("day"), "minute")) {
@@ -279,7 +276,7 @@ function checkForCachedEvents (
 	endDate: moment.Moment
 ) : GoogleEvent[] | null {
 	
-	let currentDate = startDate.clone();
+	const currentDate = startDate.clone();
 	let cachedEventList: GoogleEvent[] = [];
 
 	// Loop through all days and check if there is a cached result

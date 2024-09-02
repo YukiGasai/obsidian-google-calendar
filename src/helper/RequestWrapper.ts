@@ -2,6 +2,7 @@ import { getGoogleAuthToken } from "../googleApi/GoogleAuth";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { GoogleApiError } from "../googleApi/GoogleApiError";
 import { requestUrl } from "obsidian";
+import { log } from "./log";
 
 export const callRequest = async (url: string, method: string, body: any, noAuth = false): Promise<any> => {
 
@@ -22,13 +23,13 @@ export const callRequest = async (url: string, method: string, body: any, noAuth
 
     //Debugged request
     if (plugin.settings.debugMode) {
-        console.log(`New Request ${method}:${url}`);
+        log(`New Request ${method}:${url}`);
     
         const sanitizeHeader = { ...requestHeaders };
         if (sanitizeHeader['Authorization']) {
             sanitizeHeader['Authorization'] = sanitizeHeader['Authorization'].substring(0, 15) + "...";
         }
-        console.log({ body, headers: sanitizeHeader });
+        log({ body, headers: sanitizeHeader });
         
         let response;
         try {

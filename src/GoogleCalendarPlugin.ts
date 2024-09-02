@@ -31,7 +31,6 @@ import { createEvent } from "../src/googleApi/GoogleCreateEvent";
 import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
 import { getEvent, googleGetEvent } from "src/googleApi/GoogleGetEvent";
 import { createNotification } from "src/helper/NotificationHelper";
-import { getTodaysCustomTasks } from "src/helper/customTask/GetCustomTask";
 import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
 import { deleteEventFromFrontmatter } from "./helper/FrontMatterDelete";
 import { updateEvent } from "./googleApi/GoogleUpdateEvent";
@@ -460,28 +459,6 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 				listEvents().then((events) => {
 					new EventListModal(events, "createNote").open()
-				});
-			},
-		});
-
-
-        this.addCommand({
-			id: "google-calendar-get-todays-tasks",
-			name: "Get Today's gCal Tasks",
-
-			checkCallback: (checking: boolean) => {
-				const canRun = settingsAreCompleteAndLoggedIn();
-
-				if (checking) {
-					return canRun;
-				}
-
-				if (!canRun) {
-					return;
-				}
-
-				getTodaysCustomTasks().then((tasks) => {
-					console.log(tasks)
 				});
 			},
 		});

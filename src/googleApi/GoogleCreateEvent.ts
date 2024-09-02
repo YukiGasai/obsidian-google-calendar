@@ -5,6 +5,7 @@ import { callRequest } from "src/helper/RequestWrapper";
 import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { GoogleApiError } from "./GoogleApiError";
+import { logError } from "../helper/log";
 
 
 function dateToGoogleDate(date: string): string {
@@ -75,7 +76,7 @@ export async function createEvent(event: GoogleEvent | any): Promise<GoogleEvent
                 break;
             default:
                 createNotice(`Google Event ${event.summary} could not be created.`);
-                console.error('[GoogleCalendar]', error);
+                logError(error);
                 break;
         }
 

@@ -6,6 +6,7 @@ import { getEvent } from "src/googleApi/GoogleGetEvent";
 import { GoogleApiError } from "./GoogleApiError";
 import GoogleCalendarPlugin from "../GoogleCalendarPlugin";
 import { googleListCalendars } from "../googleApi/GoogleListCalendars";
+import { logError } from "../helper/log";
 
 /**
  * This function can update simple properties of an event at the api.
@@ -68,8 +69,8 @@ export async function googleUpdateEvent(
         throw new GoogleApiError("Could not create Google Event because no default calendar selected in Settings", null, 999, {error: "No calendar set"})    
     }
 
-	let updatedEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${event.id}`, "PUT", event)
-    let calendars = await googleListCalendars()
+	const updatedEvent = await callRequest(`https://www.googleapis.com/calendar/v3/calendars/${calenderId}/events/${event.id}`, "PUT", event)
+    const calendars = await googleListCalendars()
     updatedEvent.parent = calendars.find(calendar => calendar.id === calenderId);
 
 	return updatedEvent;
@@ -86,7 +87,7 @@ export async function updateEvent(
             updateAllOccurrences
         );
         createNotice(`Google Event ${updatedEvent.summary} updated.`);
-	    return updatedEvent;
+        return updatedEvent;
     }catch(error){
         switch (error.status) {
             case 401: break;
@@ -95,7 +96,7 @@ export async function updateEvent(
                 break;
             default:
                 createNotice(`Google Event ${event.summary} could not be updated.`);
-                console.error('[GoogleCalendar]', error);
+                logError(error);
                 break;
         }
 		return null; 

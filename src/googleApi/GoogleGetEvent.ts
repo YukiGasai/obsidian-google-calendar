@@ -4,6 +4,7 @@ import { settingsAreCompleteAndLoggedIn } from "../view/GoogleCalendarSettingTab
 import { createNotice } from "../helper/NoticeHelper";
 import { googleListCalendars } from "./GoogleListCalendars";
 import { GoogleApiError } from "./GoogleApiError";
+import { logError } from "../helper/log";
 /**
  * Function to get information of a single event by id
  * @param eventId The id of the event
@@ -14,7 +15,7 @@ export async function googleGetEvent(eventId: string, calendarId?: string): Prom
 
 	if (!settingsAreCompleteAndLoggedIn()){
 		throw new GoogleApiError("Not logged in", null, 401, {error: "Not logged in"})
-	};
+	}
 	
 	const calendars = await googleListCalendars();
 	if(calendarId){
@@ -39,7 +40,7 @@ export async function googleGetEvent(eventId: string, calendarId?: string): Prom
 
 export async function getEvent(eventId: string, calendarId?: string): Promise<GoogleEvent> {
 	try {
-		let foundEvent = await googleGetEvent(eventId, calendarId);
+		const foundEvent = await googleGetEvent(eventId, calendarId);
 		return foundEvent;
 	} catch (error) {
         if(!(error instanceof GoogleApiError)){
@@ -53,7 +54,7 @@ export async function getEvent(eventId: string, calendarId?: string): Promise<Go
                 break;
             default:
                 createNotice(`Could not get Google Event.`);
-                console.error('[GoogleCalendar]', error);
+                logError(error);
                 break;
         }
 		return null;

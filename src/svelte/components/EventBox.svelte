@@ -5,6 +5,7 @@
     import MouseControll from "./MouseControll.svelte";
 	import { updateEvent } from "../../googleApi/GoogleUpdateEvent";
 	import { googleClearCachedEvents } from "../../googleApi/GoogleListEvents";
+	import { log } from "../../helper/log";
 
     export let location: Location;
 	export let goToEvent;
@@ -26,7 +27,7 @@
 
 
     let onDrag = (data: MouseControlData) => {
-        console.log("onDrag", data)
+        log("onDrag", data)
         updateEventWithPosition(data)
     };
 
@@ -35,7 +36,7 @@
     };
     
     let onDragLongClick = (data: MouseControlData) => {
-        console.log("onDragLongClick", data);
+        log("onDragLongClick", data);
     };
 
     let getEventClassList = (width): string => {

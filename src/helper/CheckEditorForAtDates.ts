@@ -74,13 +74,12 @@ function checkForPlusMinus(editor: Editor): boolean {
 function checkForChrono(editor: Editor, plugin: GoogleCalendarPlugin): boolean {
 	const endPos = editor.getCursor();
 	let startPos = editor.getCursor();
-	let realLine = editor.getLine(endPos.line);
+	const realLine = editor.getLine(endPos.line);
 	let date = null;
 
 	const regexForChrono = /@([^\s]+)\s$/m
 
 	const chronoMatch = regexForChrono.exec(realLine);
-	console.log(chronoMatch)
 	if(!chronoMatch || !chronoMatch[1]) return false;
 
 	let chronoDate = null;
