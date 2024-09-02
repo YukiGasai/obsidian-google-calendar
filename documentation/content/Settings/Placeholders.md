@@ -24,13 +24,13 @@ Placeholders are used in specific functions of the plugin.
 | `{{event-year}}` | Start year of event in YYYY format |
 | `{{event-month}}` | Start month of event in MM format |
 | `{{event-day}}` | Start day of event in DD format |
-| `{{event-hour}}` | Start hour of event in hh format |
-| `{{event-hour24}}` | Start hour of event in HH format (24h) |
-| `{{event-minute}}` | Start minute of event in mm format |
+| `{{event-start-hour}}` | Start hour of event in hh format |
+| `{{event-start-hour24}}` | Start hour of event in HH format (24h) |
+| `{{event-start-minute}}` | Start minute of event in mm format |
 | `{{event-end-hour}}` | End hour of event in hh format |
 | `{{event-end-hour24}}` | End hour of event in HH format (24h) |
 | `{{event-end-minute}}` | End minute of event in mm format |
 | `{{event-title}}` | Title of event |
 
 The prefix placeholder could become deprecated in the future.
-It better to just use the prefix directly in the string.
+It is better to just use the prefix directly in the string.
