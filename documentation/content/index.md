@@ -27,7 +27,7 @@ When writing an ordinary note you can use the [[AtAnnotation | @Annotation]] to 
 The plugin provides even more functionality that is not described here.
 Maybe take a look a at this familiar looking Graph view to get an idea of what else is possible.
 
-[[Here | UserExamples]] is also a list of user created Examples that show how the plugin can be used.
+[[Examples/UserExamples | UserExamples]] is also a list of user created Examples that show how the plugin can be used.
 
 ## Contribute
 
