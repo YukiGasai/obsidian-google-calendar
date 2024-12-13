@@ -72,7 +72,7 @@ googleCalendarName
 googleCalendarName_Calendar_Color_{location.event.parent.colorId}
 googleCalendarName_Event_Color_{location.event.parent.colorId}
 googleCalendarName_Id_{location.event.parent.id}
-">{@html obsidianLinkToAnchor(location.event.summary)}</span>
+">{@html obsidianLinkToAnchor(location.event.summary) + " " + location.event.location}</span>
 <MouseControll 
         bind:left={location.x}
         bind:top={location.y}
