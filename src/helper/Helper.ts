@@ -94,15 +94,15 @@ export function nearestMinutes(interval: number, someMoment: moment.Moment): mom
 export const sanitizeFileName = (name: string): string => {
     if(!name) return "";
 	return name.trim()
-		.replace('<', 'lt')
-		.replace('>', 'gt')
-		.replace('"', '\'\'')
-		.replace('\\', '-')
-		.replace('/', '-')
-		.replace(':', '-')
-		.replace('|', '-')
-		.replace('*', '')
-		.replace('?', '');
+		.replaceAll('<', 'lt')
+		.replaceAll('>', 'gt')
+		.replaceAll('"', '\'\'')
+		.replaceAll('\\', '-')
+		.replaceAll('/', '-')
+		.replaceAll(':', '-')
+		.replaceAll('|', '-')
+		.replaceAll('*', '')
+		.replaceAll('?', '');
 }
 
 const findEventNoteForAllFiles = (event: GoogleEvent): EventNoteQueryResult => {
