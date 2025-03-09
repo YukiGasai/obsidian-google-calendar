@@ -1,7 +1,7 @@
 {
 	"id": "google-calendar",
 	"name": "Google Calendar",
-	"version": "1.10.15",
+	"version": "1.10.16",
 	"minAppVersion": "0.12.0",
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"author": "YukiGasai",

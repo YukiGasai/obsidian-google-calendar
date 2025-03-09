@@ -2,6 +2,8 @@
 
 Manage your Google Calendar from inside Obsidian.
 
+⚠️ **This plugin is in stale mode and could stop working at any time. I no longer have/had time to maintain it (for now).**
+
 ## Features
 
 - List Events
@@ -26,9 +28,3 @@ This documentation is also available in the documents folder inside this reposit
 [Hotkeys for templates](https://github.com/Vinzent03/obsidian-hotkeys-for-templates)
 
 [obsidian-periodic-notes](https://github.com/liamcain/obsidian-periodic-notes)
-
-## Sponsor
-
-If you like the plugin maybe 👉👈
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q1G07N2)
