@@ -57,6 +57,7 @@ export class DayCalendarView extends ItemView {
 		const plugin = GoogleCalendarPlugin.getInstance();
 		const options = plugin.settings.viewSettings["day"];
 		options.timespan = 1;
+		options.date = this.startDate.format()
 		this.timeline = new TimeLineView({
 			target: this.contentEl,
 			props: { codeBlockOptions: options, isObsidianView: true, showSettings: this.showSettings },
