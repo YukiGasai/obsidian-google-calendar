@@ -37,8 +37,9 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 			this.closeFunction = closeFunction
 		}
 
-		this.inputEl.addEventListener("keydown", async (ev) => {
-			let dateUpdated = false;
+		this.inputEl.addEventListener('keyup', async (ev) => {
+			if (ev.key !== 'Enter') return;
+
 			const list = this.getSuggestions(this.inputEl.value);
 			const newEvent = {
 				summary: this.inputEl.value,
@@ -48,15 +49,19 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 				end: {}
 			}
 			if (!list.length && ev.key == "Enter") {
-				if(ev.shiftKey) {
+				if (ev.shiftKey) {
 					this.plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, newEvent, () => {
 						googleClearCachedEvents();
 					})
 					this.onClose();
-				}else{
+				} else {
 					new EventDetailsModal(newEvent, () => { this.eventsChanged = true; this.close() }).open()
 				}
 			}
+		})
+
+		this.inputEl.addEventListener("keydown", async (ev) => {
+			let dateUpdated = false;
 
 			if (ev.key == "ArrowRight") {
 				if (ev.ctrlKey) {
@@ -127,7 +132,7 @@ export class EventListModal extends FuzzySuggestModal<GoogleEvent> {
 		if (this.modalSelectMode == "details") {
 			this.open();
 
-			if(e.shiftKey) {
+			if (e.shiftKey) {
 				this.plugin.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, item, () => {
 					googleClearCachedEvents();
 				})
