@@ -1,40 +1,40 @@
-import type { GoogleCalendarPluginSettings, GoogleEvent, IGoogleCalendarPluginApi } from "./helper/types";
 import { Editor, EventRef, MarkdownView, Notice, Platform, Plugin, TFile, WorkspaceLeaf } from "obsidian";
+import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
+import { getEvent, googleGetEvent } from "src/googleApi/GoogleGetEvent";
+import { createNotification } from "src/helper/NotificationHelper";
+import { createEvent } from "../src/googleApi/GoogleCreateEvent";
+import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
+import { listCalendars } from "./googleApi/GoogleListCalendars";
+import { googleClearCachedEvents, listEvents } from "./googleApi/GoogleListEvents";
+import { updateEvent } from "./googleApi/GoogleUpdateEvent";
+import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
+import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
+import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
+import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
+import { checkForNewDailyNotes, checkForNewWeeklyNotes } from "./helper/DailyNoteHelper";
+import { deleteEventFromFrontmatter } from "./helper/FrontMatterDelete";
+import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
+import { findEventNote } from "./helper/Helper";
+import { setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
+import { createNotice } from "./helper/NoticeHelper";
+import type { GoogleCalendarPluginSettings, GoogleEvent, IGoogleCalendarPluginApi } from "./helper/types";
+import { CalendarsListModal } from "./modal/CalendarsListModal";
+import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
+import { EventDetailsModal } from "./modal/EventDetailsModal";
+import { EventListModal } from './modal/EventListModal';
+import { InsertEventsModal } from "./modal/InsertEventsModal";
+import { TemplateSuggest } from "./suggest/TemplateSuggest";
+import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
+import { EventView, VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from "./view/EventDetailsView";
 import {
 	GoogleCalendarSettingTab,
 	settingsAreCompleteAndLoggedIn,
 } from "./view/GoogleCalendarSettingTab";
-import { listCalendars } from "./googleApi/GoogleListCalendars";
-import { CalendarsListModal } from "./modal/CalendarsListModal";
-import { googleClearCachedEvents, listEvents } from "./googleApi/GoogleListEvents";
-import { checkEditorForCodeBlocks } from "./helper/CheckEditorForCodeBlocks";
-import { DayCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_DAY } from "./view/DayCalendarView";
-import { WeekCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEEK } from "./view/WeekCalendarView";
 import { MonthCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_MONTH } from "./view/MonthCalendarView";
-import { YearCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_YEAR } from "./view/YearCalendarView";
-import { WebCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_WEB } from "./view/WebCalendarView";
-import { EventView, VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS } from "./view/EventDetailsView";
 import { ScheduleCalendarView, VIEW_TYPE_GOOGLE_CALENDAR_SCHEDULE } from "./view/ScheduleCalendarView";
-import { checkEditorForAtDates } from "./helper/CheckEditorForAtDates";
-import { setAccessToken, setExpirationTime, setRefreshToken } from "./helper/LocalStorage";
-import { EventListModal } from './modal/EventListModal';
-import { checkForEventNotes, createNoteFromEvent } from "./helper/AutoEventNoteCreator";
-import { EventDetailsModal } from "./modal/EventDetailsModal";
-import { checkEditorForInsertedEvents } from "./helper/CheckEditorForInsertedEvents";
-import { TemplateSuggest } from "./suggest/TemplateSuggest";
-import { InsertEventsModal } from "./modal/InsertEventsModal";
-import { GoogleCalendarPluginApi } from "./api/GoogleCalendarPluginApi";
-import { findEventNote } from "./helper/Helper";
-import { CreateNotePromptModal } from "./modal/CreateNotePromptModal";
-import { checkForNewDailyNotes, checkForNewWeeklyNotes } from "./helper/DailyNoteHelper";
-import { createEvent } from "../src/googleApi/GoogleCreateEvent";
-import { getEventFromFrontMatter } from "./helper/FrontMatterParser";
-import { getEvent, googleGetEvent } from "src/googleApi/GoogleGetEvent";
-import { createNotification } from "src/helper/NotificationHelper";
-import { FinishLoginGoogleMobile } from "src/googleApi/GoogleAuth";
-import { deleteEventFromFrontmatter } from "./helper/FrontMatterDelete";
-import { updateEvent } from "./googleApi/GoogleUpdateEvent";
-import { createNotice } from "./helper/NoticeHelper";
+import { VIEW_TYPE_GOOGLE_CALENDAR_WEB, WebCalendarView } from "./view/WebCalendarView";
+import { VIEW_TYPE_GOOGLE_CALENDAR_WEEK, WeekCalendarView } from "./view/WeekCalendarView";
+import { VIEW_TYPE_GOOGLE_CALENDAR_YEAR, YearCalendarView } from "./view/YearCalendarView";
 
 
 const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
@@ -44,6 +44,8 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	useCustomClient: true,
 	googleOAuthServer: "https://obsidian-google-calendar.vercel.app",
 	refreshInterval: 10,
+	timelineHeight: 700,
+	timelineWidth: 300,
 	useNotification: false,
 	showNotice: true,
 	autoCreateEventNotes: true,
@@ -52,8 +54,8 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 	autoCreateEventKeepOpen: false,
 	importStartOffset: 1,
 	importEndOffset: 1,
-    optionalNotePrefix: "",
-    eventNoteNameFormat: "{{prefix}}{{event-title}}",
+	optionalNotePrefix: "",
+	eventNoteNameFormat: "{{prefix}}{{event-title}}",
 	defaultCalendar: "",
 	calendarBlackList: [],
 	insertTemplates: [],
@@ -114,8 +116,8 @@ const DEFAULT_SETTINGS: GoogleCalendarPluginSettings = {
 		web: {
 			type: "web",
 			theme: "auto",
-			view: "day",	
-			offset: 0,		
+			view: "day",
+			offset: 0,
 		}
 	}
 };
@@ -146,11 +148,11 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.app.workspace.getLeavesOfType(viewId)
 				.length === 0
 		) {
-			if(Platform.isMobile || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEB || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEEK) {
+			if (Platform.isMobile || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEB || viewId === VIEW_TYPE_GOOGLE_CALENDAR_WEEK) {
 				await this.app.workspace.getLeaf(true).setViewState({
 					type: viewId
 				});
-			}else{
+			} else {
 				await this.app.workspace.getRightLeaf(false).setViewState({
 					type: viewId,
 				});
@@ -162,14 +164,14 @@ export default class GoogleCalendarPlugin extends Plugin {
 			.first()
 
 		if (viewId === VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS &&
-			leaf.view instanceof EventView ) {
+			leaf.view instanceof EventView) {
 			leaf.view.setEvent(event);
 			leaf.view.setCloseFunction(closeFunction);
 		}
 
 		this.app.workspace.revealLeaf(leaf);
 
-		return leaf 
+		return leaf
 	};
 
 	onLayoutReady = async (): Promise<void> => {
@@ -188,7 +190,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 			this.templaterPlugin = templaterPlugin;
 		}
 
-		
+
 		await checkForEventNotes(this);
 
 	}
@@ -272,7 +274,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		);
 		this.registerView(
 			VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS,
-			(leaf: WorkspaceLeaf) => new EventView(leaf, { start: {}, end: {}}, () => {})
+			(leaf: WorkspaceLeaf) => new EventView(leaf, { start: {}, end: {} }, () => { })
 		);
 
 		this.registerEvent(
@@ -371,7 +373,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 
-				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, ({ start: {}, end: {} }), () => { 
+				this.initView(VIEW_TYPE_GOOGLE_CALENDAR_EVENT_DETAILS, ({ start: {}, end: {} }), () => {
 					googleClearCachedEvents();
 				});
 			},
@@ -618,7 +620,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 		});
 
 
-		
+
 		/**
 		 * This function will try to update a event from the yaml metadata of a file
 		*/
@@ -642,10 +644,10 @@ export default class GoogleCalendarPlugin extends Plugin {
 				if (!view.file) {
 					return;
 				}
-				getEventFromFrontMatter(view).then(async (newEvent:any) => {
+				getEventFromFrontMatter(view).then(async (newEvent: any) => {
 					if (!newEvent || !newEvent.id) {
 						createNotice("No event id found in note", true);
-						return;						
+						return;
 					}
 					const foundEvent = await googleGetEvent(newEvent.id);
 					newEvent.parent = foundEvent.parent;
@@ -705,7 +707,7 @@ export default class GoogleCalendarPlugin extends Plugin {
 					return;
 				}
 				const eventId = app?.metadataCache?.getFileCache(view.file).frontmatter?.['event-id'];
-				if(!eventId) {
+				if (!eventId) {
 					createNotice("No event id found in note", true);
 					return;
 				}
@@ -723,13 +725,13 @@ export default class GoogleCalendarPlugin extends Plugin {
 
 		this.registerObsidianProtocolHandler("googleLogin", async (req) => {
 			// Login for mobile custom client
-			if(!Platform.isDesktop && req.code) {
+			if (!Platform.isDesktop && req.code) {
 				FinishLoginGoogleMobile(req.code, req.state)
 				return
 			}
 
 			// Login for Mobile client with public client
-			if(Platform.isMobile && req.at){
+			if (Platform.isMobile && req.at) {
 				setAccessToken(req['at']);
 				setRefreshToken(req['rt']);
 				setExpirationTime(+new Date() + 3600000);

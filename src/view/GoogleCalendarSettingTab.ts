@@ -1,20 +1,20 @@
-import type { Template } from "../helper/types";
-import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
-import { createNotice } from "src/helper/NoticeHelper";
 import {
-	PluginSettingTab,
 	App,
-	Setting,
 	Notice,
 	Platform,
+	PluginSettingTab,
+	Setting,
 } from "obsidian";
+import GoogleCalendarPlugin from "src/GoogleCalendarPlugin";
+import { createNotice } from "src/helper/NoticeHelper";
 import { LoginGoogle, StartLoginGoogleMobile } from "../googleApi/GoogleAuth";
-import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
 import { listCalendars } from "../googleApi/GoogleListCalendars";
+import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
+import { getRefreshToken, setAccessToken, setExpirationTime, setRefreshToken } from "../helper/LocalStorage";
+import type { Template } from "../helper/types";
+import { OAuthAlertModal } from "../modal/OAuthAlertModal";
 import { FileSuggest } from "../suggest/FileSuggest";
 import { FolderSuggest } from "../suggest/FolderSuggester";
-import { checkForNewWeeklyNotes } from "../helper/DailyNoteHelper";
-import { OAuthAlertModal } from "../modal/OAuthAlertModal";
 
 export class GoogleCalendarSettingTab extends PluginSettingTab {
 	plugin: GoogleCalendarPlugin;
@@ -153,6 +153,37 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				})
 			});
 
+		new Setting(containerEl)
+			.setName("Timeline Height")
+			.setDesc("Set the timeline view height in pixels.")
+			.addText(cb =>
+				cb
+					.setValue(this.plugin.settings.timelineHeight.toString())
+					.onChange(async (value) => {
+						// Convert input string back to number as needed
+						const parsedValue = parseInt(value);
+						if (!isNaN(parsedValue)) {
+							this.plugin.settings.timelineHeight = parsedValue;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Timeline Width")
+			.setDesc("Set the timeline view width in pixels.")
+			.addText(cb =>
+				cb
+					.setValue(this.plugin.settings.timelineWidth.toString())
+					.onChange(async (value) => {
+						// Convert input string back to number as needed
+						const parsedValue = parseInt(value);
+						if (!isNaN(parsedValue)) {
+							this.plugin.settings.timelineWidth = parsedValue;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
 
 		new Setting(containerEl)
 			.setName("Use event Notification")
@@ -447,7 +478,7 @@ export class GoogleCalendarSettingTab extends PluginSettingTab {
 				})
 			})
 
-		for (const ignorePattern of this.plugin.settings.ignorePatternList ) {
+		for (const ignorePattern of this.plugin.settings.ignorePatternList) {
 			new Setting(containerEl)
 				.setName(ignorePattern)
 				.setClass("SubSettings")

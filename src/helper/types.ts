@@ -45,6 +45,10 @@ export interface GoogleCalendarPluginSettings {
     timelineHourFormat: number;
     usDateFormat: boolean;
 
+    // Timeline settings
+    timelineHeight: number;
+    timelineWidth: number;
+
     // General settings
     refreshInterval: number;
     atAnnotationEnabled: boolean;

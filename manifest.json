@@ -6,6 +6,5 @@
 	"description": "Interact with your Google Calendar from Inside Obsidian",
 	"author": "YukiGasai",
 	"authorUrl": "https://github.com/YukiGasai",
-	"isDesktopOnly": false,
-	"fundingUrl": "https://ko-fi.com/YukiGasai"
+	"isDesktopOnly": false
 }
