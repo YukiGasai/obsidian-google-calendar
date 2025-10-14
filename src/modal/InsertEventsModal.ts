@@ -40,10 +40,23 @@ export class InsertEventsModal extends Modal {
         let headerDividerString = ""
         let eventStringList = "";
 
-        if (printType == "bullet") {
+        if (printType == "bullet" || printType == "heading") {
+
+            let prefix = '';
+            let suffix = '';
+            switch (printType) {
+                case 'bullet':
+                    prefix = '\n- ';
+                    break;
+                case 'heading':
+                    prefix = '### ';
+                    suffix = '\n\n\n';
+                    break;
+            }
+
             eventList.forEach((event) => {
                 const nameString = `[${event.summary}](${event.htmlLink}&cal=${event.parent.id})`;
-                eventStringList += `\n- ${nameString}`;
+                eventStringList += `${prefix}${nameString}${suffix}`;
             });
 
             insertEventsModal.editor.replaceRange(
