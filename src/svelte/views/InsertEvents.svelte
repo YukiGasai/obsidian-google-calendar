@@ -30,6 +30,12 @@
 
 	});
 
+    let handleKeyDown = (e) => {
+        if (e.keyCode == 13) { // enter key
+            handleSubmit();
+        }
+    }
+
     let handleSubmit = () => {
         const resultEventList = eventList
             .filter((eventTupel:[GoogleEvent, boolean]) => eventTupel[1])
@@ -133,8 +139,7 @@
 
 
 </script>
-<div class="optionContainer">
-    
+<div class="optionContainer" on:keydown="{handleKeyDown}">
     <div class="header">
         <select bind:value={selectedTemplate} class="dropdown left" on:change="{selectTemplate}">
             <option value="None">None</option>
