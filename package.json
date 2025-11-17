@@ -19,7 +19,7 @@
 		"@typescript-eslint/eslint-plugin": "^4.25.0",
 		"@typescript-eslint/parser": "^4.25.0",
 		"builtin-modules": "^3.2.0",
-		"esbuild": "^0.12.26",
+		"esbuild": "^0.27.0",
 		"esbuild-svelte": "^0.5.4",
 		"eslint": "^7.27.0",
 		"obsidian": "latest",
